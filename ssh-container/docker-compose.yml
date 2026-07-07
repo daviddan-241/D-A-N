@@ -1,7 +1,8 @@
 version: "3.9"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SSH Development Container — Docker Compose
+# D.A.N. — Dynamic Access Node
+# Hardened SSH + Web Terminal + Security Research Container
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
@@ -13,38 +14,45 @@ services:
         DEV_USER: ${DEV_USER:-devuser}
         DEV_UID: ${DEV_UID:-1000}
         DEV_GID: ${DEV_GID:-1000}
-    image: devbox:latest
-    container_name: devbox
+    image: dan-devbox:latest
+    container_name: dan-devbox
+    hostname: dan-devbox
 
     # ── Restart policy ─────────────────────────────────────────────────────────
     restart: unless-stopped
 
     # ── Port mapping ───────────────────────────────────────────────────────────
     ports:
-      - "${SSH_PORT:-2222}:22"
+      - "${SSH_PORT:-2222}:22"          # SSH
+      - "${TTYD_PORT:-7681}:7681"       # ttyd web terminal
 
     # ── Persistent volumes ─────────────────────────────────────────────────────
     volumes:
-      # User home directory — persists projects, dotfiles, git repos
+      # User home — projects, dotfiles, git repos, tool data
       - devbox_home:/home/${DEV_USER:-devuser}
-      # SSH host keys — keep consistent identity across restarts
+      # SSH host keys — consistent server identity across restarts
       - devbox_host_keys:/etc/ssh/host_keys
       # Logs
       - devbox_logs:/var/log/ssh-container
-      # Mount host Docker socket for Docker-in-Docker (optional; comment out if unwanted)
+      # Nuclei templates cache
+      - devbox_nuclei:/root/nuclei-templates
+      # Optional: host Docker socket for DinD (comment out if unwanted)
       # - /var/run/docker.sock:/var/run/docker.sock
 
     # ── Environment ────────────────────────────────────────────────────────────
     environment:
       - TZ=${TZ:-UTC}
       - DEV_USER=${DEV_USER:-devuser}
-      # Set to "yes" on first run to initialise SSH host keys; safe to leave on
       - INIT_HOST_KEYS=yes
+      # Web terminal basic auth (required — do not leave blank in production)
+      - WEB_TERMINAL_USER=${WEB_TERMINAL_USER:-dan}
+      - WEB_TERMINAL_PASS=${WEB_TERMINAL_PASS:-changeme}
+      # Set to "yes" to run Metasploit/Amass/etc install on first boot (slow, optional)
+      - AUTO_INSTALL_EXTRAS=${AUTO_INSTALL_EXTRAS:-no}
 
     # ── Security options ───────────────────────────────────────────────────────
     security_opt:
       - no-new-privileges:true
-    # Drop all capabilities; re-add the minimum set required
     cap_drop:
       - ALL
     cap_add:
@@ -52,14 +60,13 @@ services:
       - SETUID
       - SETGID
       - NET_BIND_SERVICE
-      - SYS_CHROOT       # needed by OpenSSH
-      - AUDIT_WRITE      # needed by PAM/auth logging
-      - DAC_OVERRIDE     # needed by sshd to read authorized_keys
-      # Required for fail2ban / ufw / iptables inside the container:
-      - NET_ADMIN        # iptables rule management
-      - NET_RAW          # raw socket access for iptables
+      - SYS_CHROOT       # OpenSSH
+      - AUDIT_WRITE      # PAM/auth logging
+      - DAC_OVERRIDE     # read authorized_keys
+      - NET_ADMIN        # iptables / fail2ban / ufw
+      - NET_RAW          # raw sockets for iptables
 
-    # ── Limits ─────────────────────────────────────────────────────────────────
+    # ── Resource limits ────────────────────────────────────────────────────────
     ulimits:
       nofile:
         soft: 65536
@@ -71,7 +78,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 20s
 
     # ── Logging ────────────────────────────────────────────────────────────────
     logging:
@@ -85,17 +92,21 @@ volumes:
   devbox_home:
     driver: local
     labels:
-      com.devbox.description: "Developer home directory"
+      com.dan.description: "Developer home directory (projects + dotfiles)"
   devbox_host_keys:
     driver: local
     labels:
-      com.devbox.description: "SSH server host keys"
+      com.dan.description: "SSH server host keys"
   devbox_logs:
     driver: local
     labels:
-      com.devbox.description: "Container log files"
+      com.dan.description: "Container log files"
+  devbox_nuclei:
+    driver: local
+    labels:
+      com.dan.description: "Nuclei vulnerability templates cache"
 
-# ── Networks ───────────────────────────────────────────────────────────────────
+# ── Network ────────────────────────────────────────────────────────────────────
 networks:
   default:
     driver: bridge

@@ -1,76 +1,128 @@
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DevBox — extra shell config appended to .bashrc
+# D.A.N. — Dynamic Access Node  — shell configuration
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Colorful, informative prompt:  user@host:dir (git branch) $
+# ── D.A.N. prompt (shows git branch + status) ────────────────────────────────
 parse_git_branch() {
   git branch 2>/dev/null | grep '^*' | sed 's/* //'
 }
-export PS1='\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[33m\]$( b=$(parse_git_branch); [ -n "$b" ] && echo " ($b)")\[\e[0m\]\$ '
+parse_git_dirty() {
+  [[ -n "$(git status --short 2>/dev/null)" ]] && echo "*"
+}
+export PS1='\[\e[1;36m\][ D·A·N ]\[\e[0m\] \[\e[1;32m\]\u\[\e[0m\]:\[\e[1;34m\]\w\[\e[33m\]$( b=$(parse_git_branch); [ -n "$b" ] && echo " (${b}$(parse_git_dirty))")\[\e[0m\]\$ '
 
-# ── Aliases ───────────────────────────────────────────────────────────────────
-alias ll='ls -alF --color=auto'
+# ── PATH ──────────────────────────────────────────────────────────────────────
+export PATH="${HOME}/.local/bin:${HOME}/bin:${HOME}/go/bin:/usr/local/go/bin:${PATH}"
+export GOPATH="${HOME}/go"
+
+# ── Core aliases ──────────────────────────────────────────────────────────────
+alias ll='ls -alFh --color=auto'
 alias la='ls -A --color=auto'
 alias l='ls -CF --color=auto'
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
-
-# Git shortcuts
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git log --oneline --graph --decorate'
-alias gd='git diff'
-
-# Safety guards
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
-
-# Navigation
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
-# Docker helpers
+# ── Security tool aliases ─────────────────────────────────────────────────────
+# Nmap
+alias nmap-fast='nmap -T4 -F'
+alias nmap-full='nmap -T4 -A -v'
+alias nmap-udp='sudo nmap -sU -T4 --top-ports 200'
+alias nmap-vuln='nmap -T4 --script vuln'
+alias nmap-ping='nmap -sn'
+
+# Gobuster
+alias gb='gobuster dir -w ~/wordlists/SecLists/Discovery/Web-Content/common.txt'
+alias gb-big='gobuster dir -w ~/wordlists/SecLists/Discovery/Web-Content/big.txt'
+
+# ffuf
+alias fuzz='ffuf -w ~/wordlists/SecLists/Discovery/Web-Content/common.txt'
+
+# Nuclei
+alias nuclei-scan='nuclei -t ~/nuclei-templates'
+alias nuclei-fast='nuclei -t ~/nuclei-templates -severity high,critical'
+
+# Hashcat
+alias crack-md5='hashcat -m 0'
+alias crack-ntlm='hashcat -m 1000'
+alias crack-sha256='hashcat -m 1400'
+
+# Hydra shortcuts
+alias hydra-ssh='hydra -P ~/wordlists/rockyou.txt ssh'
+alias hydra-ftp='hydra -P ~/wordlists/rockyou.txt ftp'
+alias hydra-http='hydra -P ~/wordlists/rockyou.txt http-get'
+
+# ── Browser aliases ───────────────────────────────────────────────────────────
+alias browser-headless='chromium --headless --no-sandbox --disable-gpu'
+alias browser-dump='chromium --headless --no-sandbox --dump-dom'
+alias browser-screenshot='chromium --headless --no-sandbox --screenshot'
+alias browse='w3m'
+alias fetch='curl -sL'
+
+# ── Network aliases ───────────────────────────────────────────────────────────
+alias ports='ss -tlnp'
+alias connections='ss -tunp'
+alias myip='curl -s ifconfig.me'
+alias localip='ip addr show | grep "inet " | awk "{print \$2}"'
+alias sniff='sudo tcpdump -i any -n'
+alias sniff-http='sudo tcpdump -i any -A -s 0 "tcp port 80"'
+
+# ── Git shortcuts ─────────────────────────────────────────────────────────────
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline --graph --decorate --all'
+alias gd='git diff'
+alias gco='git checkout'
+
+# ── Docker shortcuts ──────────────────────────────────────────────────────────
 alias d='docker'
 alias dc='docker compose'
 alias dps='docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"'
 alias dlogs='docker logs -f'
+alias dexec='docker exec -it'
 
-# Python
+# ── Python ────────────────────────────────────────────────────────────────────
 alias python='python3'
 alias pip='pip3'
-alias venv='python3 -m venv'
+alias venv='python3 -m venv .venv && source .venv/bin/activate'
 
-# Misc
-alias jf='jq .'                    # pretty-print JSON
-alias ports='ss -tlnp'             # show listening ports
-alias myip='curl -s ifconfig.me'   # external IP
-alias reload='source ~/.bashrc'
+# ── Misc ──────────────────────────────────────────────────────────────────────
+alias jf='jq .'
 alias top='htop'
+alias reload='source ~/.bashrc'
+alias dan-status='cat /var/log/ssh-container/startup.log | tail -30'
+alias dan-tools='ls /usr/local/bin/ | sort'
 
-# ── PATH additions ─────────────────────────────────────────────────────────────
-export PATH="${HOME}/.local/bin:${HOME}/bin:${PATH}"
-
-# ── History settings ───────────────────────────────────────────────────────────
-export HISTSIZE=10000
-export HISTFILESIZE=20000
+# ── History ───────────────────────────────────────────────────────────────────
+export HISTSIZE=50000
+export HISTFILESIZE=100000
 export HISTCONTROL=ignoredups:erasedups
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  "
 shopt -s histappend
 PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND:-}"
 
-# ── Editor ─────────────────────────────────────────────────────────────────────
+# ── Editor & terminal ─────────────────────────────────────────────────────────
 export EDITOR=vim
 export VISUAL=vim
-
-# ── Colors ─────────────────────────────────────────────────────────────────────
 export TERM=xterm-256color
+export PAGER=less
+export LESS='-R'
 
-# ── Welcome message ────────────────────────────────────────────────────────────
+# ── Colors ────────────────────────────────────────────────────────────────────
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# ── Welcome banner ────────────────────────────────────────────────────────────
 echo ""
-echo "  Welcome, $(whoami)! Type 'tmux new -s main' to start a persistent session."
-echo "  $(date)"
+echo "  \033[1;36m[ D · A · N ]\033[0m  Dynamic Access Node"
+echo "  \033[0;32m$(date)\033[0m"
+echo "  Type \033[1;33mtmux new -s main\033[0m to start a persistent session."
+echo "  Type \033[1;33mdan-status\033[0m for startup log."
 echo ""

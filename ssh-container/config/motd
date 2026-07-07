@@ -1,27 +1,41 @@
 
-  ██████╗ ███████╗██╗   ██╗██████╗  ██████╗ ██╗  ██╗
-  ██╔══██╗██╔════╝██║   ██║██╔══██╗██╔═══██╗╚██╗██╔╝
-  ██║  ██║█████╗  ██║   ██║██████╔╝██║   ██║ ╚███╔╝
-  ██║  ██║██╔══╝  ╚██╗ ██╔╝██╔══██╗██║   ██║ ██╔██╗
-  ██████╔╝███████╗ ╚████╔╝ ██████╔╝╚██████╔╝██╔╝ ██╗
-  ╚═════╝ ╚══════╝  ╚═══╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═╝
+  ██████╗      █████╗     ███╗   ██╗
+  ██╔══██╗    ██╔══██╗    ████╗  ██║
+  ██║  ██║    ███████║    ██╔██╗ ██║
+  ██║  ██║    ██╔══██║    ██║╚██╗██║
+  ██████╔╝    ██║  ██║    ██║ ╚████║
+  ╚═════╝     ╚═╝  ╚═╝    ╚═╝  ╚═══╝
 
-  Linux Development Container — secure, persistent, always-on
+         Dynamic  ·  Access  ·  Node
 
-  ┌─────────────────────────────────────────────────────┐
-  │  Auth: SSH public-key only  │  Password: disabled    │
-  │  Root: disabled             │  Sudo: passwordless     │
-  └─────────────────────────────────────────────────────┘
+  ┌──────────────────────────────────────────────────────┐
+  │  Auth:  SSH public-key only  │  Password: disabled   │
+  │  Root:  disabled             │  Sudo: passwordless   │
+  │  Web terminal: :7681         │  Restart: always      │
+  └──────────────────────────────────────────────────────┘
 
-  Installed tools:
-    git  python3  pip  curl  wget  vim  nano  tmux
-    htop  tree  zip  unzip  jq  ripgrep  docker  build-essential
+  Arsenal (50+ tools):
+    Recon:    nmap  masscan  subfinder  httpx  nuclei  amass
+              dnsx  ffuf  gobuster  theharvester  whatweb
+    Web:      sqlmap  nikto  dirb  wfuzz  mitmproxy  nikto
+    Passwords:hashcat  john  hydra  medusa
+    Network:  tcpdump  tshark  proxychains  socat  netcat
+    Forensics:binwalk  foremost  strings  xxd  volatility
+    Browsers: chromium  lynx  w3m  elinks  links2
+    Scripting:python3  ruby  perl  go  nodejs
+
+  Directories:
+    ~/projects    — your code
+    ~/tools       — installed security tools
+    ~/wordlists   — SecLists, rockyou.txt
+    ~/captures    — pcap files
+    ~/reports     — output / findings
 
   Tips:
-    tmux new -s main         — start a persistent session
-    tmux attach -t main      — reconnect after disconnect
-    htop                     — process monitor
-    docker compose up -d     — spin up compose stacks
+    tmux new -s main      — persistent session
+    tmux attach -t main   — reconnect after disconnect
+    nuclei -u <target>    — vulnerability scan
+    nmap -sV <target>     — service detection
 
-  Logs:  /var/log/ssh-container/
+  Logs: /var/log/ssh-container/
 

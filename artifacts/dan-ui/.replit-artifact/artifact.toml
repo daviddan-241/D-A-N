@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "D.A.N. — Dynamic Access Node"
+version = "1.0.0"
+id = "artifacts/dan-ui"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21793
+
+[services.development]
+run = "pnpm --filter @workspace/dan-ui run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/dan-ui", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/dan-ui/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21793"
+BASE_PATH = "/"
