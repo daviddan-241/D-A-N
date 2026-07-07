@@ -1,0 +1,27 @@
+
+  ██████╗ ███████╗██╗   ██╗██████╗  ██████╗ ██╗  ██╗
+  ██╔══██╗██╔════╝██║   ██║██╔══██╗██╔═══██╗╚██╗██╔╝
+  ██║  ██║█████╗  ██║   ██║██████╔╝██║   ██║ ╚███╔╝
+  ██║  ██║██╔══╝  ╚██╗ ██╔╝██╔══██╗██║   ██║ ██╔██╗
+  ██████╔╝███████╗ ╚████╔╝ ██████╔╝╚██████╔╝██╔╝ ██╗
+  ╚═════╝ ╚══════╝  ╚═══╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═╝
+
+  Linux Development Container — secure, persistent, always-on
+
+  ┌─────────────────────────────────────────────────────┐
+  │  Auth: SSH public-key only  │  Password: disabled    │
+  │  Root: disabled             │  Sudo: passwordless     │
+  └─────────────────────────────────────────────────────┘
+
+  Installed tools:
+    git  python3  pip  curl  wget  vim  nano  tmux
+    htop  tree  zip  unzip  jq  ripgrep  docker  build-essential
+
+  Tips:
+    tmux new -s main         — start a persistent session
+    tmux attach -t main      — reconnect after disconnect
+    htop                     — process monitor
+    docker compose up -d     — spin up compose stacks
+
+  Logs:  /var/log/ssh-container/
+

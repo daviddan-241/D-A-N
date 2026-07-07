@@ -1,0 +1,13 @@
+/var/log/ssh-container/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    sharedscripts
+    postrotate
+        # Signal sshd to reopen log files if it writes directly
+        pkill -HUP sshd 2>/dev/null || true
+    endscript
+}

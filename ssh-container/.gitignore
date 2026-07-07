@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .gitignore for DevBox SSH container
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Environment files — contain secrets/ports, never commit
+.env
+
+# SSH host keys — generated at runtime, never commit
+config/host_keys/
+*.pem
+*_key
+*_key.pub
+
+# Docker build cache
+.docker/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
