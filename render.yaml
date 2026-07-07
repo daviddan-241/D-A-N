@@ -1,0 +1,72 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# D.A.N. — Dynamic Access Node  — Render deployment
+# Free tier: api-server (web), dan-ui (static), dan-devbox (web terminal)
+#
+# Deploy: connect this repo in Render dashboard → "New Blueprint"
+#
+# Required secrets to set in Render dashboard:
+#   DATABASE_URL        — Render PostgreSQL external connection string
+#   SESSION_SECRET      — random string (openssl rand -hex 32)
+#   WEB_TERMINAL_USER   — login username for the web terminal
+#   WEB_TERMINAL_PASS   — login password for the web terminal
+#
+# Note on SSH access:
+#   Render free tier only routes HTTP/HTTPS. The devbox exposes a browser-based
+#   terminal (ttyd) at its URL — use that from any browser or a-shell's browser.
+#   For raw SSH access, upgrade to a Render paid plan or self-host the
+#   ssh-container on a VPS that supports TCP port forwarding.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── API Server ───────────────────────────────────────────────────────────────
+  - type: web
+    name: dan-api-server
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: ./artifacts/api-server/Dockerfile
+    plan: free
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: DATABASE_URL
+        sync: false          # set manually in Render dashboard
+      - key: SESSION_SECRET
+        sync: false          # set manually in Render dashboard
+      - key: NODE_ENV
+        value: production
+
+  # ── Frontend (static site — always free on Render) ───────────────────────────
+  - type: web
+    name: dan-ui
+    runtime: static
+    buildCommand: >
+      npm install -g pnpm &&
+      pnpm install &&
+      BASE_PATH=/ PORT=3000 pnpm --filter @workspace/dan-ui run build
+    staticPublishPath: ./artifacts/dan-ui/dist/public
+    plan: free
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ── Devbox (browser-based terminal + AI agents) ───────────────────────────────
+  # Accessible via browser at your Render URL — full terminal with Aider pre-installed
+  - type: web
+    name: dan-devbox
+    runtime: docker
+    dockerContext: ./ssh-container
+    dockerfilePath: ./ssh-container/Dockerfile
+    plan: free
+    envVars:
+      - key: WEB_TERMINAL_USER
+        sync: false          # set manually in Render dashboard
+      - key: WEB_TERMINAL_PASS
+        sync: false          # set manually in Render dashboard
+      - key: DEV_USER
+        value: devuser
+      - key: AUTO_INSTALL_EXTRAS
+        value: "no"          # set to "yes" to install Metasploit etc. on first boot (slow)

@@ -151,9 +151,12 @@ fi
 # 8. Start ttyd (web terminal)
 # ─────────────────────────────────────────────────────────────────────────────
 if command -v ttyd &>/dev/null; then
-  log "Starting ttyd web terminal on :7681 ..."
+  # On Render (and other PaaS), $PORT is injected by the platform.
+  # Fall back to 7681 for local Docker Compose use.
+  TTYD_PORT="${PORT:-7681}"
+  log "Starting ttyd web terminal on :${TTYD_PORT} ..."
   ttyd \
-    --port 7681 \
+    --port "${TTYD_PORT}" \
     --interface 0.0.0.0 \
     --credential "${WEB_TERMINAL_USER}:${WEB_TERMINAL_PASS}" \
     --writable \
@@ -164,12 +167,12 @@ if command -v ttyd &>/dev/null; then
   sleep 1
   if kill -0 "${TTYD_PID}" 2>/dev/null; then
     log "ttyd running (PID ${TTYD_PID})"
-    log "  Web terminal: http://<host>:\${TTYD_PORT:-7681}"
+    log "  Web terminal: http://<host>:${TTYD_PORT}"
     log "  Auth: ${WEB_TERMINAL_USER} / [configured password]"
   else
     warn "ttyd failed to start — check ${LOG_DIR}/ttyd.log"
     # Try simpler invocation
-    ttyd --port 7681 --writable su -l "${DEV_USER}" \
+    ttyd --port "${TTYD_PORT}" --writable su -l "${DEV_USER}" \
       2>>"${LOG_DIR}/ttyd.log" &
     log "Retried ttyd without custom index."
   fi

@@ -238,8 +238,14 @@ RUN pip3 install --no-cache-dir --break-system-packages \
     black \
     httpie \
     pipx \
+    aider-chat \
   || pip3 install --no-cache-dir --break-system-packages \
-    mitmproxy scapy requests beautifulsoup4 paramiko black httpie pipx
+    mitmproxy scapy requests beautifulsoup4 paramiko black httpie pipx aider-chat
+
+# ── Ensure aider is on PATH ───────────────────────────────────────────────────
+RUN pip3 install --no-cache-dir --break-system-packages aider-chat 2>/dev/null || true \
+  && ln -sf "$(python3 -c 'import site; print(site.getsitepackages()[0])')/bin/aider" \
+       /usr/local/bin/aider 2>/dev/null || true
 
 # ── ttyd — web terminal server ────────────────────────────────────────────────
 # Download the latest ttyd binary from GitHub releases
@@ -308,6 +314,11 @@ RUN cat /home/${DEV_USER}/.bashrc_extra >> /home/${DEV_USER}/.bashrc \
 # ── Auto-install script (Metasploit etc. — runs at container first boot) ──────
 COPY scripts/auto-install.sh /auto-install.sh
 RUN chmod +x /auto-install.sh
+
+# ── AI Agent launcher ─────────────────────────────────────────────────────────
+COPY scripts/dan-agents.sh /scripts/dan-agents.sh
+RUN chmod +x /scripts/dan-agents.sh \
+  && ln -s /scripts/dan-agents.sh /usr/local/bin/dan-agents
 
 # ── Entrypoint & helpers ──────────────────────────────────────────────────────
 COPY scripts/entrypoint.sh    /entrypoint.sh

@@ -101,6 +101,20 @@ alias reload='source ~/.bashrc'
 alias dan-status='cat /var/log/ssh-container/startup.log | tail -30'
 alias dan-tools='ls /usr/local/bin/ | sort'
 
+# ── AI Agents (Aider — free coding agent) ─────────────────────────────────────
+# Set one of these API keys for free access:
+#   export OPENROUTER_API_KEY=sk-or-...    # free models: openrouter.ai
+#   export GROQ_API_KEY=gsk_...            # free fast inference: console.groq.com
+#   export GITHUB_TOKEN=ghp_...            # GitHub Models: free with GitHub account
+#
+# Then run one of the shortcuts below:
+alias agent='aider --model openrouter/google/gemma-3-27b-it:free'
+alias agent-deep='aider --model openrouter/deepseek/deepseek-r1:free'
+alias agent-fast='aider --model groq/llama-3.3-70b-versatile'
+alias agent-gh='aider --model github/gpt-4o'
+alias agents='bash /scripts/dan-agents.sh'
+alias aider-help='aider --help | less'
+
 # ── History ───────────────────────────────────────────────────────────────────
 export HISTSIZE=50000
 export HISTFILESIZE=100000
