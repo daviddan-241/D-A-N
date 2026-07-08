@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { execSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import fs from "node:fs";
 
 const router: IRouter = Router();
@@ -8,12 +8,22 @@ const DEV_USER = process.env.DEV_USER || "devuser";
 const HOME_DIR = `/home/${DEV_USER}`;
 const LOG_DIR = "/var/log/ssh-container";
 
+let restartInFlight = false;
+
 function isProcessRunning(name: string): boolean {
   try {
     execSync(`pgrep -x ${name}`, { stdio: "ignore" });
     return true;
   } catch {
     return false;
+  }
+}
+
+function killProcess(name: string): void {
+  try {
+    execSync(`pkill -x ${name}`, { stdio: "ignore" });
+  } catch {
+    // no matching process — nothing to kill
   }
 }
 
@@ -68,6 +78,52 @@ router.get("/status", (_req, res) => {
     },
     timestamp: new Date().toISOString(),
   });
+});
+
+router.post("/status/restart-tunnel", (_req, res) => {
+  if (process.env.BORE_ENABLE !== "yes") {
+    res.status(400).json({ error: "BORE_ENABLE is not set to 'yes' — nothing to restart." });
+    return;
+  }
+  if (restartInFlight) {
+    res.status(409).json({ error: "A tunnel restart is already in progress." });
+    return;
+  }
+
+  restartInFlight = true;
+  killProcess("bore");
+
+  const boreSecret = process.env.BORE_SECRET || "";
+  const args = ["local", "22", "--to", "bore.pub"];
+  if (boreSecret) args.push("--secret", boreSecret);
+
+  const logFd = fs.openSync(`${LOG_DIR}/bore.log`, "a");
+  const child = spawn("bore", args, {
+    detached: true,
+    stdio: ["ignore", logFd, logFd],
+  });
+  child.unref();
+
+  setTimeout(() => {
+    fs.closeSync(logFd);
+    const running = isProcessRunning("bore");
+    if (running) {
+      try {
+        const log = fs.readFileSync(`${LOG_DIR}/bore.log`, "utf8");
+        const match = log.match(/port (\d+)/g);
+        const port = match ? match[match.length - 1].replace("port ", "") : null;
+        if (port) {
+          const cmd = `ssh -p ${port} ${DEV_USER}@bore.pub`;
+          fs.writeFileSync(`${HOME_DIR}/.dan_ssh_connect`, `${cmd}\n`);
+        }
+      } catch {
+        // best-effort — status endpoint will just show "starting" if this fails
+      }
+    }
+    restartInFlight = false;
+  }, 3000);
+
+  res.json({ restarting: true });
 });
 
 export default router;

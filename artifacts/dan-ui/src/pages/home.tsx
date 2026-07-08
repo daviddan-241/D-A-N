@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import {
   Activity, ChevronRight, Clock, Lock, Layers, Terminal,
-  Wrench, Wifi, Zap, CheckCircle2, XCircle, LoaderCircle, Copy, Check,
+  Wrench, Wifi, Zap, CheckCircle2, XCircle, LoaderCircle, Copy, Check, RefreshCw,
 } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
 
@@ -91,9 +91,31 @@ export function Home() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(true);
+  const [restarting, setRestarting] = useState(false);
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+  const fetchStatus = () => {
+    fetch(`${base}/api/status`)
+      .then(r => r.json())
+      .then((d: SystemStatus) => setStatus(d))
+      .catch(() => setStatus(null))
+      .finally(() => setStatusLoading(false));
+  };
+
+  const restartTunnel = async () => {
+    setRestarting(true);
+    try {
+      await fetch(`${base}/api/status/restart-tunnel`, { method: 'POST' });
+    } catch {
+      // ignore — status poll below will reflect the real state
+    }
+    setTimeout(() => {
+      fetchStatus();
+      setRestarting(false);
+    }, 4000);
+  };
 
   useEffect(() => {
-    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     fetch(`${base}/api/stats`)
       .then(r => r.json())
       .then((d) =>
@@ -110,16 +132,10 @@ export function Home() {
       )
       .finally(() => setLoading(false));
 
-    const fetchStatus = () => {
-      fetch(`${base}/api/status`)
-        .then(r => r.json())
-        .then((d: SystemStatus) => setStatus(d))
-        .catch(() => setStatus(null))
-        .finally(() => setStatusLoading(false));
-    };
     fetchStatus();
     const interval = setInterval(fetchStatus, 15000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const statCards = [
@@ -295,6 +311,17 @@ export function Home() {
             }
           />
         </div>
+        {status?.tunnel.bore.enabled ? (
+          <button
+            type="button"
+            disabled={restarting}
+            onClick={restartTunnel}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border/50 bg-card text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-border transition-all press-scale disabled:opacity-60"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${restarting ? 'animate-spin' : ''}`} strokeWidth={2} />
+            {restarting ? 'Restarting tunnel…' : 'Restart SSH tunnel'}
+          </button>
+        ) : null}
       </motion.div>
 
       {/* ── Quick connect ── */}
