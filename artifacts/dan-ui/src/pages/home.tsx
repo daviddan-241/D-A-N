@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import {
   Activity, ChevronRight, Clock, Lock, Layers, Terminal,
-  Wrench, Wifi, Zap,
+  Wrench, Wifi, Zap, CheckCircle2, XCircle, LoaderCircle,
 } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
 
@@ -13,6 +13,33 @@ interface Stats {
   platform: string;
   auth: string;
   toolCount: number;
+}
+
+interface SystemStatus {
+  ssh: { running: boolean; configured: boolean; authorizedKeys: number };
+  tunnel: {
+    bore: { enabled: boolean; running: boolean; connectCommand: string | null };
+    cloudflare: { enabled: boolean; running: boolean };
+  };
+  autoInstall: { enabled: boolean; done: boolean; running: boolean; lastLogLine: string | null };
+}
+
+type Tri = 'ok' | 'warn' | 'bad';
+
+function StatusRow({
+  label, state, sub,
+}: { label: string; state: Tri; sub: string }) {
+  const Icon = state === 'ok' ? CheckCircle2 : state === 'warn' ? LoaderCircle : XCircle;
+  const color = state === 'ok' ? 'text-success' : state === 'warn' ? 'text-amber-500' : 'text-destructive';
+  return (
+    <div className="flex items-center gap-3 py-2.5 px-1">
+      <Icon className={`w-4 h-4 flex-shrink-0 ${color} ${state === 'warn' ? 'animate-spin' : ''}`} strokeWidth={2} />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground truncate">{sub}</p>
+      </div>
+    </div>
+  );
 }
 
 function formatUptime(seconds: number) {
@@ -36,6 +63,8 @@ const item = {
 export function Home() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -54,6 +83,17 @@ export function Home() {
         setStats({ status: 'offline', uptime: 0, platform: 'Ubuntu 24.04', auth: 'Key-only', toolCount: 50 })
       )
       .finally(() => setLoading(false));
+
+    const fetchStatus = () => {
+      fetch(`${base}/api/status`)
+        .then(r => r.json())
+        .then((d: SystemStatus) => setStatus(d))
+        .catch(() => setStatus(null))
+        .finally(() => setStatusLoading(false));
+    };
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const statCards = [
@@ -156,6 +196,78 @@ export function Home() {
             </div>
           </div>
         ))}
+      </motion.div>
+
+      {/* ── System status ── */}
+      <motion.div variants={item} className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
+          System Status
+        </p>
+        <div className="rounded-2xl bg-card card-shadow border border-border/50 divide-y divide-border/40 px-3">
+          <StatusRow
+            label="SSH server"
+            state={statusLoading ? 'warn' : status?.ssh.running ? (status.ssh.configured ? 'ok' : 'warn') : 'bad'}
+            sub={
+              statusLoading
+                ? 'Checking…'
+                : !status
+                ? 'Unable to reach status endpoint'
+                : !status.ssh.running
+                ? 'sshd is not running'
+                : status.ssh.configured
+                ? `Running · ${status.ssh.authorizedKeys} key(s) authorized`
+                : 'Running · no SSH_PUBLIC_KEY set yet'
+            }
+          />
+          <StatusRow
+            label="Real SSH tunnel"
+            state={
+              statusLoading
+                ? 'warn'
+                : status?.tunnel.bore.running || status?.tunnel.cloudflare.running
+                ? 'ok'
+                : status?.tunnel.bore.enabled || status?.tunnel.cloudflare.enabled
+                ? 'warn'
+                : 'bad'
+            }
+            sub={
+              statusLoading
+                ? 'Checking…'
+                : status?.tunnel.bore.running && status.tunnel.bore.connectCommand
+                ? status.tunnel.bore.connectCommand
+                : status?.tunnel.cloudflare.running
+                ? 'Cloudflare Tunnel active'
+                : status?.tunnel.bore.enabled || status?.tunnel.cloudflare.enabled
+                ? 'Enabled, starting…'
+                : 'Set BORE_ENABLE=yes to activate'
+            }
+          />
+          <StatusRow
+            label="Tool auto-install"
+            state={
+              statusLoading
+                ? 'warn'
+                : status?.autoInstall.done
+                ? 'ok'
+                : status?.autoInstall.running
+                ? 'warn'
+                : status?.autoInstall.enabled
+                ? 'warn'
+                : 'bad'
+            }
+            sub={
+              statusLoading
+                ? 'Checking…'
+                : status?.autoInstall.done
+                ? 'All extra tools installed'
+                : status?.autoInstall.running
+                ? (status.autoInstall.lastLogLine ?? 'Installing in background…')
+                : status?.autoInstall.enabled
+                ? 'Queued for first boot'
+                : 'Set AUTO_INSTALL_EXTRAS=yes to enable'
+            }
+          />
+        </div>
       </motion.div>
 
       {/* ── Quick connect ── */}
