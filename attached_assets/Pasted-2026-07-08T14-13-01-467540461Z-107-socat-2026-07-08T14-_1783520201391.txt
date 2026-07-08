@@ -1,0 +1,50 @@
+2026-07-08T14:13:01.467540461Z  107 | >>>     socat \
+2026-07-08T14:13:01.467542331Z  108 | >>>     tcpdump \
+2026-07-08T14:13:01.467544321Z  109 | >>>     tshark \
+2026-07-08T14:13:01.467546321Z  110 | >>>     wireshark-common \
+2026-07-08T14:13:01.467548231Z  111 | >>>     proxychains4 \
+2026-07-08T14:13:01.467550101Z  112 | >>>     whois \
+2026-07-08T14:13:01.467561811Z  113 | >>>     traceroute \
+2026-07-08T14:13:01.467565072Z  114 | >>>     mtr \
+2026-07-08T14:13:01.467568201Z  115 | >>>     ncat \
+2026-07-08T14:13:01.467571382Z  116 | >>>     # Web tools
+2026-07-08T14:13:01.467574612Z  117 | >>>     curl \
+2026-07-08T14:13:01.467577692Z  118 | >>>     wget \
+2026-07-08T14:13:01.467580732Z  119 | >>>     httpie \
+2026-07-08T14:13:01.467583902Z  120 | >>>     # Password & crypto
+2026-07-08T14:13:01.467586972Z  121 | >>>     openssl \
+2026-07-08T14:13:01.467590232Z  122 | >>>     gpg \
+2026-07-08T14:13:01.467592602Z  123 | >>>     # Process utilities
+2026-07-08T14:13:01.467594502Z  124 | >>>     procps \
+2026-07-08T14:13:01.467596382Z  125 | >>>     lsof \
+2026-07-08T14:13:01.467598292Z  126 | >>>     strace \
+2026-07-08T14:13:01.467600252Z  127 | >>>     ltrace \
+2026-07-08T14:13:01.467602122Z  128 | >>>     pstree \
+2026-07-08T14:13:01.467604062Z  129 | >>>     # Forensics base
+2026-07-08T14:13:01.467620823Z  130 | >>>     binwalk \
+2026-07-08T14:13:01.467627273Z  131 | >>>     foremost \
+2026-07-08T14:13:01.467629393Z  132 | >>>     dc3dd \
+2026-07-08T14:13:01.467631263Z  133 | >>>     xxd \
+2026-07-08T14:13:01.467633293Z  134 | >>>     hexdump \
+2026-07-08T14:13:01.467635233Z  135 | >>>     strings \
+2026-07-08T14:13:01.467637113Z  136 | >>>     file \
+2026-07-08T14:13:01.467639023Z  137 | >>>     # Misc system
+2026-07-08T14:13:01.467641003Z  138 | >>>     sudo \
+2026-07-08T14:13:01.467643163Z  139 | >>>     less \
+2026-07-08T14:13:01.467645094Z  140 | >>>     man-db \
+2026-07-08T14:13:01.467646983Z  141 | >>>     locales \
+2026-07-08T14:13:01.467648894Z  142 | >>>     tzdata \
+2026-07-08T14:13:01.467651774Z  143 | >>>     logrotate \
+2026-07-08T14:13:01.467654864Z  144 | >>>     rsyslog \
+2026-07-08T14:13:01.467657954Z  145 | >>>     cron \
+2026-07-08T14:13:01.467661034Z  146 | >>>     at \
+2026-07-08T14:13:01.467664184Z  147 | >>>     # Wordlists base
+2026-07-08T14:13:01.467667084Z  148 | >>>     wordlists \
+2026-07-08T14:13:01.467670164Z  149 | >>>     seclists \
+2026-07-08T14:13:01.467673374Z  150 | >>>   && locale-gen en_US.UTF-8 \
+2026-07-08T14:13:01.467676344Z  151 | >>>   && apt-get clean \
+2026-07-08T14:13:01.467679344Z  152 | >>>   && rm -rf /var/lib/apt/lists/*
+2026-07-08T14:13:01.467682344Z  153 |     
+2026-07-08T14:13:01.467684344Z --------------------
+2026-07-08T14:13:01.467701735Z error: failed to solve: process "/bin/sh -c apt-get update && apt-get install -y --no-install-recommends     openssh-server     ufw     fail2ban     curl     wget     ca-certificates     gnupg     lsb-release     software-properties-common     apt-transport-https     git     python3     python3-pip     python3-venv     python3-dev     python3-setuptools     python3-wheel     build-essential     gcc     g++     make     cmake     pkg-config     vim     nano     tmux     htop     screen     tree     zip     unzip     p7zip-full     tar     gzip     bzip2     xz-utils     jq     ripgrep     sed     awk     perl     ruby     ruby-dev     net-tools     iputils-ping     dnsutils     iproute2     iptables     nmap     netcat-openbsd     socat     tcpdump     tshark     wireshark-common     proxychains4     whois     traceroute     mtr     ncat     curl     wget     httpie     openssl     gpg     procps     lsof     strace     ltrace     pstree     binwalk     foremost     dc3dd     xxd     hexdump     strings     file     sudo     less     man-db     locales     tzdata     logrotate     rsyslog     cron     at     wordlists     seclists   && locale-gen en_US.UTF-8   && apt-get clean   && rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100
+2026-07-08T14:13:01.51636225Z error: exit status 1

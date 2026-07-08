@@ -90,8 +90,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Text & data tools
     jq \
     ripgrep \
-    sed \
-    awk \
+    gawk \
     # Scripting
     perl \
     ruby \
@@ -114,12 +113,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mtr \
     ncat \
     # Web tools
-    curl \
-    wget \
     httpie \
     # Password & crypto
     openssl \
-    gpg \
     # Process utilities
     procps \
     lsof \
@@ -131,8 +127,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     foremost \
     dc3dd \
     xxd \
-    hexdump \
-    strings \
+    bsdextrautils \
+    binutils \
     file \
     # Misc system
     sudo \
@@ -144,9 +140,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rsyslog \
     cron \
     at \
-    # Wordlists base
-    wordlists \
-    seclists \
   && locale-gen en_US.UTF-8 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
