@@ -148,16 +148,18 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 8. Start ttyd (web terminal)
+# 8. Start ttyd (web terminal) — internal only, proxied by the app at /webterm
 # ─────────────────────────────────────────────────────────────────────────────
+# The Node app owns the public $PORT (Render only routes one port per web
+# service), so ttyd always binds to a fixed internal port and the Express
+# server proxies /webterm to it. See TTYD_INTERNAL_PORT below.
+TTYD_INTERNAL_PORT="${TTYD_INTERNAL_PORT:-7681}"
+export TTYD_INTERNAL_PORT
 if command -v ttyd &>/dev/null; then
-  # On Render (and other PaaS), $PORT is injected by the platform.
-  # Fall back to 7681 for local Docker Compose use.
-  TTYD_PORT="${PORT:-7681}"
-  log "Starting ttyd web terminal on :${TTYD_PORT} ..."
+  log "Starting ttyd web terminal on 127.0.0.1:${TTYD_INTERNAL_PORT} (internal) ..."
   ttyd \
-    --port "${TTYD_PORT}" \
-    --interface 0.0.0.0 \
+    --port "${TTYD_INTERNAL_PORT}" \
+    --interface 127.0.0.1 \
     --credential "${WEB_TERMINAL_USER}:${WEB_TERMINAL_PASS}" \
     --writable \
     --max-clients 10 \
@@ -167,12 +169,12 @@ if command -v ttyd &>/dev/null; then
   sleep 1
   if kill -0 "${TTYD_PID}" 2>/dev/null; then
     log "ttyd running (PID ${TTYD_PID})"
-    log "  Web terminal: http://<host>:${TTYD_PORT}"
+    log "  Web terminal: https://<your-render-url>/webterm"
     log "  Auth: ${WEB_TERMINAL_USER} / [configured password]"
   else
     warn "ttyd failed to start — check ${LOG_DIR}/ttyd.log"
     # Try simpler invocation
-    ttyd --port "${TTYD_PORT}" --writable su -l "${DEV_USER}" \
+    ttyd --port "${TTYD_INTERNAL_PORT}" --interface 127.0.0.1 --writable su -l "${DEV_USER}" \
       2>>"${LOG_DIR}/ttyd.log" &
     log "Retried ttyd without custom index."
   fi
@@ -252,13 +254,28 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 12. Print connection info
+# 12. Start sshd in the background
+#     (the Node app below becomes the foreground/PID1-facing process, since
+#     Render's health check and public traffic only ever reach $PORT)
 # ─────────────────────────────────────────────────────────────────────────────
-HOST_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "<container-ip>")
+log "Starting sshd (background) ..."
+/usr/sbin/sshd -e >>"${LOG_DIR}/sshd.log" 2>&1 &
+SSHD_PID=$!
+sleep 1
+if kill -0 "${SSHD_PID}" 2>/dev/null; then
+  log "sshd running (PID ${SSHD_PID})"
+else
+  warn "sshd failed to start — check ${LOG_DIR}/sshd.log"
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 13. Print connection info
+# ─────────────────────────────────────────────────────────────────────────────
 log "======================================================================"
 log " D.A.N. is live"
 log "======================================================================"
-log " Web Terminal: https://<your-render-url>  (auth: ${WEB_TERMINAL_USER} / [WEB_TERMINAL_PASS])"
+log " Web app:          https://<your-render-url>  (dashboard + web terminal)"
+log " Web Terminal:      https://<your-render-url>/webterm  (auth: ${WEB_TERMINAL_USER} / [WEB_TERMINAL_PASS])"
 log " SSH (Cloudflare): ssh -o 'ProxyCommand cloudflared access ssh --hostname %h' ${DEV_USER}@<tunnel-host>"
 log " SSH (bore):       ssh -p <PORT> ${DEV_USER}@bore.pub  (check: cat ~/.dan_ssh_connect)"
 log " GitHub sync:      cat ${LOG_DIR}/dotfiles.log"
@@ -266,7 +283,10 @@ log " Logs dir:         ${LOG_DIR}/"
 log "======================================================================"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 10. Start sshd in foreground (keeps container alive)
+# 14. Start the Node app in the foreground — this is the one process Render
+#     routes traffic to. It serves the dashboard UI, the API, and proxies the
+#     web terminal (ttyd) at /webterm, all on $PORT.
 # ─────────────────────────────────────────────────────────────────────────────
-log "Starting sshd ..."
-exec /usr/sbin/sshd -D -e 2>&1 | tee -a "${LOG_DIR}/sshd.log"
+log "Starting D.A.N. app on :${PORT:-8080} ..."
+cd /app
+exec node --enable-source-maps ./dist/index.mjs 2>&1 | tee -a "${LOG_DIR}/app.log"

@@ -1,4 +1,27 @@
-FROM ubuntu:24.04
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 1: build the web app (dan-ui static frontend + api-server bundle)
+# Build context for this Dockerfile is the repo root (see render.yaml).
+# ─────────────────────────────────────────────────────────────────────────────
+FROM node:24-alpine AS webbuild
+
+RUN corepack enable && corepack prepare pnpm@10 --activate
+WORKDIR /workspace
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY tsconfig.base.json tsconfig.json ./
+COPY lib/ ./lib/
+COPY artifacts/api-server/ ./artifacts/api-server/
+COPY artifacts/dan-ui/ ./artifacts/dan-ui/
+COPY attached_assets/ ./attached_assets/
+
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @workspace/api-server run build
+RUN BASE_PATH=/ PORT=3000 pnpm --filter @workspace/dan-ui run build
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 2: the D.A.N. runtime image — API + UI + web terminal + SSH, one process
+# ─────────────────────────────────────────────────────────────────────────────
+FROM ubuntu:24.04 AS final
 
 LABEL maintainer="daviddan-241"
 LABEL description="D.A.N. — Dynamic Access Node: hardened SSH + security research container"
@@ -276,6 +299,15 @@ RUN curl -fsSL "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION
   && chmod +x /usr/local/bin/ttyd \
   && ttyd --version || true
 
+# ── Node.js runtime (runs the bundled api-server + serves the built dan-ui) ──
+ARG NODE_MAJOR=24
+RUN mkdir -p /etc/apt/keyrings \
+  && curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
+  && apt-get install -y --no-install-recommends nodejs \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && node --version && npm --version
+
 # ── Docker CLI (for DinD workflows) ──────────────────────────────────────────
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -313,49 +345,59 @@ RUN groupadd --gid ${DEV_GID} ${DEV_USER} \
 RUN mkdir -p /var/run/sshd /etc/ssh/host_keys \
   && chmod 700 /var/run/sshd
 
-COPY config/sshd_config /etc/ssh/sshd_config
+COPY ssh-container/config/sshd_config /etc/ssh/sshd_config
 RUN chmod 600 /etc/ssh/sshd_config
 
 # ── fail2ban ───────────────────────────────────────────────────────────────────
-COPY config/fail2ban/jail.local /etc/fail2ban/jail.local
+COPY ssh-container/config/fail2ban/jail.local /etc/fail2ban/jail.local
 
 # ── Logrotate ─────────────────────────────────────────────────────────────────
-COPY config/logrotate.d/ssh-container /etc/logrotate.d/ssh-container
+COPY ssh-container/config/logrotate.d/ssh-container /etc/logrotate.d/ssh-container
 
 # ── MOTD ──────────────────────────────────────────────────────────────────────
-COPY config/motd /etc/motd
+COPY ssh-container/config/motd /etc/motd
 RUN chmod 644 /etc/motd
 
 # ── Shell customization ───────────────────────────────────────────────────────
-COPY config/bashrc_extra /home/${DEV_USER}/.bashrc_extra
+COPY ssh-container/config/bashrc_extra /home/${DEV_USER}/.bashrc_extra
 RUN cat /home/${DEV_USER}/.bashrc_extra >> /home/${DEV_USER}/.bashrc \
   && chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.bashrc \
   && chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.bashrc_extra
 
 # ── Auto-install script (Metasploit etc. — runs at container first boot) ──────
-COPY scripts/auto-install.sh /auto-install.sh
+COPY ssh-container/scripts/auto-install.sh /auto-install.sh
 RUN chmod +x /auto-install.sh
 
 # ── AI Agent launcher + GitHub persistence ────────────────────────────────────
 RUN mkdir -p /scripts
-COPY scripts/dan-agents.sh    /scripts/dan-agents.sh
-COPY scripts/dotfiles-sync.sh /scripts/dotfiles-sync.sh
+COPY ssh-container/scripts/dan-agents.sh    /scripts/dan-agents.sh
+COPY ssh-container/scripts/dotfiles-sync.sh /scripts/dotfiles-sync.sh
 RUN chmod +x /scripts/dan-agents.sh /scripts/dotfiles-sync.sh \
   && ln -sf /scripts/dan-agents.sh    /usr/local/bin/dan-agents \
   && ln -sf /scripts/dotfiles-sync.sh /usr/local/bin/dotfiles-sync
 
 # ── Entrypoint & helpers ──────────────────────────────────────────────────────
-COPY scripts/entrypoint.sh    /entrypoint.sh
-COPY scripts/healthcheck.sh   /healthcheck.sh
-COPY scripts/firewall-init.sh /firewall-init.sh
+COPY ssh-container/scripts/entrypoint.sh    /entrypoint.sh
+COPY ssh-container/scripts/healthcheck.sh   /healthcheck.sh
+COPY ssh-container/scripts/firewall-init.sh /firewall-init.sh
 RUN chmod +x /entrypoint.sh /healthcheck.sh /firewall-init.sh
+
+# ── D.A.N. web app (API + built UI) — the single process Render talks to ─────
+# ttyd is proxied through the API server at /webterm so everything rides on
+# the one $PORT Render exposes for this service.
+WORKDIR /app
+COPY --from=webbuild /workspace/artifacts/api-server/dist    ./dist
+COPY --from=webbuild /workspace/artifacts/dan-ui/dist/public ./public
 
 # ── Persistent volumes ─────────────────────────────────────────────────────────
 VOLUME ["/home/${DEV_USER}", "/etc/ssh/host_keys", "/var/log/ssh-container"]
 
 # ── Expose ports ─────────────────────────────────────────────────────────────
+# Render only routes traffic to $PORT (the Node app). SSH (22) and ttyd (7681,
+# internal only) stay reachable via the tunnels configured in entrypoint.sh.
 EXPOSE 22    # SSH
-EXPOSE 7681  # ttyd web terminal
+EXPOSE 7681  # ttyd web terminal (internal — proxied by the app at /webterm)
+EXPOSE 8080  # Node app — Render injects the real $PORT at runtime
 
 # ── Health check ─────────────────────────────────────────────────────────────
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \

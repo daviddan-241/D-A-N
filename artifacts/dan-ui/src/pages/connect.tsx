@@ -125,7 +125,8 @@ export function Connect() {
       <motion.div variants={item}>
         <h1 className="text-xl font-bold text-foreground">Connect</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          SSH from your iPhone, Mac, or anywhere. Pick an option below.
+          The web terminal already works out of the box — open the Terminal tab.
+          For real SSH from your iPhone, Mac, or anywhere, pick an option below.
         </p>
       </motion.div>
 

@@ -1,83 +1,43 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # D.A.N. — Dynamic Access Node  — Render deployment
-# Free tier: api-server (web), dan-ui (static), dan-devbox (web terminal)
+# Everything runs as ONE free web service: dashboard UI + API + web terminal
+# (ttyd) + SSH devbox, all on the single $PORT Render exposes.
 #
 # Deploy: connect this repo in Render dashboard → "New Blueprint"
 #
-# Required secrets to set in Render dashboard:
+# Required secrets to set in Render dashboard (Environment tab):
 #   DATABASE_URL        — Render PostgreSQL external connection string
 #   SESSION_SECRET      — random string (openssl rand -hex 32)
 #   WEB_TERMINAL_USER   — login username for the web terminal
 #   WEB_TERMINAL_PASS   — login password for the web terminal
 #
+# Everything else below is optional (SSH tunnels, GitHub persistence).
+#
 # Note on SSH access:
-#   Render free tier only routes HTTP/HTTPS. The devbox exposes a browser-based
-#   terminal (ttyd) at its URL — use that from any browser or a-shell's browser.
-#   For raw SSH access, upgrade to a Render paid plan or self-host the
-#   ssh-container on a VPS that supports TCP port forwarding.
+#   Render free tier only routes HTTP/HTTPS to $PORT. The web terminal
+#   (ttyd) is served at /webterm on your app's URL — no extra ports needed.
+#   For raw SSH from a phone/laptop, use the Cloudflare Tunnel or bore.pub
+#   options below (both free, both work on the free plan).
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
-  # ── API Server ───────────────────────────────────────────────────────────────
   - type: web
-    name: dan-api-server
+    name: dan
     runtime: docker
     dockerContext: .
-    dockerfilePath: ./artifacts/api-server/Dockerfile
+    dockerfilePath: ./ssh-container/Dockerfile
     plan: free
     healthCheckPath: /api/healthz
     envVars:
+      # ── Core app ──────────────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
         sync: false          # set manually in Render dashboard
       - key: SESSION_SECRET
         sync: false          # set manually in Render dashboard
-      - key: NODE_ENV
-        value: production
 
-  # ── Frontend (static site — always free on Render) ───────────────────────────
-  - type: web
-    name: dan-ui
-    runtime: static
-    buildCommand: >
-      npm install -g pnpm &&
-      pnpm install &&
-      BASE_PATH=/ PORT=3000 pnpm --filter @workspace/dan-ui run build
-    staticPublishPath: ./artifacts/dan-ui/dist/public
-    plan: free
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: no-cache
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
-  # ── Devbox (terminal + AI agents + SSH via Cloudflare Tunnel) ────────────────
-  # Browser terminal always works at your Render URL.
-  # For real SSH (from a-shell, terminal, anywhere):
-  #   Option A — Cloudflare Tunnel (recommended, permanent hostname, free):
-  #     1. dash.cloudflare.com → Zero Trust → Networks → Tunnels → Create tunnel
-  #     2. Copy the tunnel token and paste it into CLOUDFLARE_TUNNEL_TOKEN below
-  #     3. Add a Public Hostname in the tunnel: hostname=dan.yourdomain.com, service=ssh://localhost:22
-  #     4. SSH: ssh -o "ProxyCommand cloudflared access ssh --hostname %h" devuser@dan.yourdomain.com
-  #
-  #   Option B — bore.pub (zero-config, random port each restart unless BORE_SECRET is set):
-  #     1. Set BORE_ENABLE=yes and BORE_SECRET=any-string-you-choose
-  #     2. After boot, run: cat ~/.dan_ssh_connect  to see your SSH command
-  #     3. SSH: ssh -p <PORT> devuser@bore.pub
-  #
-  # Persistence (Render free tier wipes disk on restart):
-  #   1. Create two private GitHub repos: one for dotfiles, one for projects
-  #   2. Set GITHUB_TOKEN (with repo scope), DOTFILES_REPO, PROJECTS_REPO below
-  #   3. On every boot the container pulls both repos; every 30 min it auto-pushes changes
-  - type: web
-    name: dan-devbox
-    runtime: docker
-    dockerContext: ./ssh-container
-    dockerfilePath: ./ssh-container/Dockerfile
-    plan: free
-    envVars:
+      # ── Web terminal (served at /webterm on this same service) ─────────────
       - key: WEB_TERMINAL_USER
         sync: false          # terminal login username
       - key: WEB_TERMINAL_PASS
@@ -87,11 +47,16 @@ services:
       - key: AUTO_INSTALL_EXTRAS
         value: "no"          # set to "yes" to install Metasploit etc. on first boot
 
-      # ── SSH via Cloudflare Tunnel (Option A — recommended) ──────────────────
+      # ── SSH via Cloudflare Tunnel (recommended — permanent hostname, free) ──
+      #   1. dash.cloudflare.com → Zero Trust → Networks → Tunnels → Create tunnel
+      #   2. Paste the tunnel token below
+      #   3. Add a Public Hostname in the tunnel: hostname=dan.yourdomain.com, service=ssh://localhost:22
+      #   4. SSH: ssh -o "ProxyCommand cloudflared access ssh --hostname %h" devuser@dan.yourdomain.com
       - key: CLOUDFLARE_TUNNEL_TOKEN
         sync: false          # paste your tunnel token from Cloudflare dashboard
 
-      # ── SSH via bore.pub (Option B — zero-config fallback) ──────────────────
+      # ── SSH via bore.pub (zero-config fallback, no account needed) ──────────
+      #   After boot, run in the web terminal: cat ~/.dan_ssh_connect
       - key: BORE_ENABLE
         value: "yes"         # set to "no" to disable bore tunnel
       - key: BORE_SECRET

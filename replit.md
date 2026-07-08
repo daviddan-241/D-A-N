@@ -1,6 +1,6 @@
 # D.A.N. — Dynamic Access Node
 
-A 24/7 hardened SSH dev container with a cyberpunk web dashboard, free AI coding agents (Aider), and Render-ready Docker deployment.
+A 24/7 hardened SSH dev container with a cyberpunk web dashboard, free AI coding agents (Aider), and Render-ready Docker deployment. Ships as **one single free Render web service** — dashboard UI, API, web terminal, and SSH devbox all ride on one URL/port.
 
 ## Run & Operate
 
@@ -12,17 +12,22 @@ A 24/7 hardened SSH dev container with a cyberpunk web dashboard, free AI coding
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string (Render PostgreSQL)
 
-## Deploying to Render
+## Deploying to Render (one free service)
 
 1. Render dashboard → **New → Blueprint** → connect `daviddan-241/D-A-N`.
-2. Render reads `render.yaml` and creates three services:
-   - `dan-api-server` — Express API (Docker)
-   - `dan-ui` — React frontend (static site, always free)
-   - `dan-devbox` — Browser terminal + AI agents + SSH tunnel (Docker)
-3. Set secrets in each service's Environment tab:
-   - `dan-api-server`: `DATABASE_URL`, `SESSION_SECRET`
-   - `dan-devbox`: `WEB_TERMINAL_USER`, `WEB_TERMINAL_PASS`, plus SSH/persistence vars below
-4. For UptimeRobot: ping `https://<your-api>.onrender.com/api/healthz` every 5 min.
+2. Render reads `render.yaml` and creates **one** service, `dan` — a Docker web
+   service built from `ssh-container/Dockerfile` (context: repo root). It:
+   - Builds `dan-ui` (static React app) and `api-server` (Express) in a first
+     build stage, then bakes them into the same Ubuntu image as the SSH devbox.
+   - Serves the dashboard UI + `/api/*` + the web terminal (proxied to ttyd at
+     `/webterm`) all from one Node process bound to Render's `$PORT`.
+   - Runs `sshd` and (optionally) `cloudflared`/`bore` in the background for
+     real SSH access, inside the same container.
+3. Set secrets in the service's Environment tab:
+   - `DATABASE_URL`, `SESSION_SECRET` — API/DB
+   - `WEB_TERMINAL_USER`, `WEB_TERMINAL_PASS` — web terminal login
+   - Optional: `CLOUDFLARE_TUNNEL_TOKEN`, `BORE_SECRET`, `GITHUB_TOKEN` + repo vars (see `render.yaml`)
+4. For UptimeRobot: ping `https://<your-app>.onrender.com/api/healthz` every 5 min.
 
 ## SSH from anywhere (including a-shell mini) — Render workarounds
 
@@ -88,45 +93,48 @@ agents          # or: dan-agents
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5 (artifacts/api-server)
+- API: Express 5 (artifacts/api-server) — also serves the built UI and proxies the web terminal
 - UI: React 19 + Vite + shadcn/ui + Tailwind (artifacts/dan-ui)
 - DB: PostgreSQL (Render free) + Drizzle ORM
 - Validation: Zod (zod/v4), drizzle-zod
 - API codegen: Orval (from OpenAPI spec in lib/api-spec)
 - Build: esbuild (self-contained bundle)
-- SSH container: Ubuntu 24.04 + 50+ security tools + Aider (ssh-container/)
-- Deployment: render.yaml (Blueprint)
+- SSH container: Ubuntu 24.04 + 50+ security tools + Aider (ssh-container/) — also the final Docker stage for the whole app
+- Deployment: render.yaml (single Blueprint service)
 
 ## Where things live
 
-- `artifacts/api-server/src/` — Express routes, middleware, app bootstrap
+- `artifacts/api-server/src/app.ts` — Express app: `/api/*` routes, static UI serving, `/webterm` proxy to ttyd
 - `artifacts/dan-ui/src/` — React pages (home, terminal, tools, connect)
 - `lib/db/src/schema/` — Drizzle table definitions (source of truth for DB)
 - `lib/api-spec/openapi.yaml` — OpenAPI spec (source of truth for API contract)
 - `lib/api-zod/src/generated/` — generated Zod schemas (do not edit manually)
-- `ssh-container/` — Docker SSH + web terminal container
+- `ssh-container/Dockerfile` — unified build: stage 1 builds dan-ui + api-server (node:24-alpine), stage 2 bakes them into the Ubuntu devbox image alongside Node.js, sshd, ttyd, and security tools
+- `ssh-container/scripts/entrypoint.sh` — boots sshd + ttyd (background), then runs the Node app in the foreground on `$PORT`
 - `ssh-container/scripts/dan-agents.sh` — tmux multi-agent launcher
-- `render.yaml` — Render Blueprint deployment config
+- `render.yaml` — Render Blueprint: one `web` service (`dan`), Docker context = repo root
 
 ## Architecture decisions
 
+- Single Render free-tier web service: Render only exposes one $PORT per web service, so the API server is the one foreground process, and it serves the static UI + proxies the web terminal (ttyd, internal-only) at `/webterm`. sshd runs in the background in the same container for real SSH.
+- `/webterm` (not `/terminal`) was chosen for the ttyd proxy path specifically to avoid colliding with the dashboard's own client-side `/terminal` page route.
 - esbuild bundles the API server into a self-contained dist/ — no node_modules needed in production
-- ttyd reads `$PORT` from the environment so it binds to Render's injected port automatically
 - vite.config.ts uses `isBuild` guard so PORT/BASE_PATH don't crash `vite build` in CI
 - Aider is pre-installed in the devbox Docker image — no first-boot install needed
 
 ## User preferences
 
-- Use Render free tier for hosting (PostgreSQL + web services)
-- UptimeRobot keeps the free services alive (ping /api/healthz every 5 min)
+- Use Render free tier for hosting — one single free web service, not multiple
+- UptimeRobot keeps the free service alive (ping /api/healthz every 5 min)
 - Everything must be real — no mocks or hardcoded placeholder data
 - Free AI agents only (Aider with OpenRouter/Groq/GitHub Models)
 
 ## Gotchas
 
-- SSH raw access requires a Render paid plan or a VPS (free tier only routes HTTP). Use the browser terminal (ttyd) for free.
+- SSH raw access requires a Render paid plan or a VPS (free tier only routes HTTP). Use the browser terminal at `/webterm` for free, or the Cloudflare Tunnel / bore.pub options for real SSH.
 - `DATABASE_URL` is managed by Replit's runtime — provide the Render external URL as a secret.
 - Run `pnpm --filter @workspace/db run push` after every schema change to sync Render PostgreSQL.
+- The Docker build context for `ssh-container/Dockerfile` is the repo root (not `ssh-container/`) — it needs `lib/`, `artifacts/api-server/`, and `artifacts/dan-ui/` to build the web app stage.
 
 ## Pointers
 
