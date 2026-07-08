@@ -395,9 +395,14 @@ VOLUME ["/home/${DEV_USER}", "/etc/ssh/host_keys", "/var/log/ssh-container"]
 # ── Expose ports ─────────────────────────────────────────────────────────────
 # Render only routes traffic to $PORT (the Node app). SSH (22) and ttyd (7681,
 # internal only) stay reachable via the tunnels configured in entrypoint.sh.
-EXPOSE 22    # SSH
-EXPOSE 7681  # ttyd web terminal (internal — proxied by the app at /webterm)
-EXPOSE 8080  # Node app — Render injects the real $PORT at runtime
+# SSH
+EXPOSE 22
+
+# ttyd web terminal (internal — proxied by the app at /webterm)
+EXPOSE 7681
+
+# Node app — Render injects the real $PORT at runtime
+EXPOSE 8080
 
 # ── Health check ─────────────────────────────────────────────────────────────
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
