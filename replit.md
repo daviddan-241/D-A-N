@@ -12,22 +12,31 @@ A 24/7 hardened SSH dev container with a cyberpunk web dashboard, free AI coding
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string (Render PostgreSQL)
 
-## Deploying to Render (one free service)
+## Deploying to Render (one free service — manual Web Service, no Blueprint)
 
-1. Render dashboard → **New → Blueprint** → connect `daviddan-241/D-A-N`.
-2. Render reads `render.yaml` and creates **one** service, `dan` — a Docker web
-   service built from `ssh-container/Dockerfile` (context: repo root). It:
-   - Builds `dan-ui` (static React app) and `api-server` (Express) in a first
-     build stage, then bakes them into the same Ubuntu image as the SSH devbox.
-   - Serves the dashboard UI + `/api/*` + the web terminal (proxied to ttyd at
-     `/webterm`) all from one Node process bound to Render's `$PORT`.
-   - Runs `sshd` and (optionally) `cloudflared`/`bore` in the background for
-     real SSH access, inside the same container.
-3. Set secrets in the service's Environment tab:
-   - `DATABASE_URL`, `SESSION_SECRET` — API/DB
-   - `WEB_TERMINAL_USER`, `WEB_TERMINAL_PASS` — web terminal login
-   - Optional: `CLOUDFLARE_TUNNEL_TOKEN`, `BORE_SECRET`, `GITHUB_TOKEN` + repo vars (see `render.yaml`)
-4. For UptimeRobot: ping `https://<your-app>.onrender.com/api/healthz` every 5 min.
+`render.yaml` is kept in the repo only as a reference for what to enter — it is
+**not required**. Create the service by hand in the Render dashboard, no
+Blueprint step, no cost beyond the free plan:
+
+1. Render dashboard → **New → Web Service** → connect `daviddan-241/D-A-N`.
+2. On the create screen:
+   - **Runtime**: `Docker`
+   - **Dockerfile Path**: `ssh-container/Dockerfile`
+   - **Docker Build Context Directory**: `.` (repo root — it needs `lib/`, `artifacts/api-server/`, and `artifacts/dan-ui/` to build)
+   - **Instance Type / Plan**: `Free`
+3. Under **Advanced** → **Health Check Path**: `/api/healthz`
+4. After the service is created, go to **Environment** and add these one at a time (all free, no Blueprint needed):
+   - `NODE_ENV` = `production`
+   - `DATABASE_URL` — your Render PostgreSQL external connection string
+   - `SESSION_SECRET` — any random string (e.g. `openssl rand -hex 32`)
+   - `WEB_TERMINAL_USER` / `WEB_TERMINAL_PASS` — login for the browser terminal at `/webterm`
+   - `DEV_USER` = `devuser`
+   - `AUTO_INSTALL_EXTRAS` = `yes` — auto-installs Metasploit, SecLists, etc. on first boot
+   - `SSH_PUBLIC_KEY` — your SSH public key (required for real SSH — see below)
+   - `BORE_ENABLE` = `yes`, `BORE_SECRET` = any string — real SSH tunnel via bore.pub
+   - Optional: `CLOUDFLARE_TUNNEL_TOKEN`, `GITHUB_TOKEN` + `DOTFILES_REPO`/`PROJECTS_REPO`
+5. Click **Deploy**. Render builds the single Docker image and serves everything on your `*.onrender.com` URL.
+6. For UptimeRobot: ping `https://<your-app>.onrender.com/api/healthz` every 5 min to keep the free service from sleeping.
 
 ## SSH from anywhere (including a-shell mini) — real SSH, not a simulator
 

@@ -1,9 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# D.A.N. — Dynamic Access Node  — Render deployment
+# D.A.N. — Dynamic Access Node  — Render deployment reference
 # Everything runs as ONE free web service: dashboard UI + API + web terminal
 # (ttyd) + SSH devbox, all on the single $PORT Render exposes.
 #
-# Deploy: connect this repo in Render dashboard → "New Blueprint"
+# This file is OPTIONAL — it documents the exact settings/env vars, but you do
+# NOT need Render's Blueprint feature (or any paid plan) to deploy. The normal
+# free path is: Render dashboard → "New → Web Service" → connect this repo →
+# Runtime: Docker, Dockerfile Path: ssh-container/Dockerfile, Build Context: .
+# then add the env vars below by hand. See replit.md → "Deploying to Render".
 #
 # Required secrets to set in Render dashboard (Environment tab):
 #   DATABASE_URL        — Render PostgreSQL external connection string
