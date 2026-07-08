@@ -1,93 +1,222 @@
 import { motion } from 'framer-motion';
-import { Terminal, Activity, Shield, Cpu, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
+import {
+  Activity, ChevronRight, Clock, Lock, Layers, Terminal,
+  Wrench, Wifi, Zap,
+} from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
 
+interface Stats {
+  status: 'online' | 'offline';
+  uptime: number;
+  platform: string;
+  auth: string;
+  toolCount: number;
+}
+
+function formatUptime(seconds: number) {
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 30 } },
+};
+
 export function Home() {
-  const stats = [
-    { icon: Activity, label: 'UPTIME', value: '24/7' },
-    { icon: Shield, label: 'AUTH', value: 'KEY-ONLY' },
-    { icon: Cpu, label: 'OS', value: 'UBUNTU 24.04' },
-    { icon: Terminal, label: 'TOOLS', value: '50+' },
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+    fetch(`${base}/api/stats`)
+      .then(r => r.json())
+      .then((d) =>
+        setStats({
+          status: 'online',
+          uptime: d.uptime ?? 0,
+          platform: d.platform ?? 'Ubuntu 24.04',
+          auth: d.auth ?? 'Key-only',
+          toolCount: d.toolCount ?? 50,
+        })
+      )
+      .catch(() =>
+        setStats({ status: 'offline', uptime: 0, platform: 'Ubuntu 24.04', auth: 'Key-only', toolCount: 50 })
+      )
+      .finally(() => setLoading(false));
+  }, []);
+
+  const statCards = [
+    {
+      icon: Clock,
+      label: 'Uptime',
+      value: loading ? '—' : stats?.status === 'online' ? formatUptime(stats.uptime) : '—',
+    },
+    {
+      icon: Lock,
+      label: 'Auth',
+      value: stats?.auth ?? 'Key-only',
+    },
+    {
+      icon: Layers,
+      label: 'OS',
+      value: stats?.platform ?? 'Ubuntu 24.04',
+    },
+    {
+      icon: Wrench,
+      label: 'Tools',
+      value: stats ? `${stats.toolCount}+` : '50+',
+    },
+  ];
+
+  const quickLinks = [
+    {
+      icon: Terminal,
+      label: 'Open Terminal',
+      sub: 'Browser-based ttyd shell',
+      href: '/terminal',
+      accent: true,
+    },
+    {
+      icon: Wrench,
+      label: 'Tool Arsenal',
+      sub: `${stats?.toolCount ?? 50}+ pre-installed tools`,
+      href: '/tools',
+      accent: false,
+    },
+    {
+      icon: Wifi,
+      label: 'Connect from iOS',
+      sub: 'SSH via Cloudflare or bore',
+      href: '/connect',
+      accent: false,
+    },
   ];
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="flex-1 flex flex-col p-4 md:p-8"
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col gap-5 p-4 pt-8 max-w-lg mx-auto w-full"
     >
-      <div className="md:hidden flex items-center justify-between mb-8">
-        <div className="font-mono text-xl font-bold tracking-[0.2em] text-primary glow-text">
-          D·A·N
+      {/* ── Header ── */}
+      <motion.div variants={item} className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">D·A·N</h1>
+          <p className="text-sm text-muted-foreground font-medium mt-0.5">Dynamic Access Node</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse glow-box"></div>
-          <span className="font-mono text-xs text-primary">ONLINE</span>
-        </div>
-      </div>
+        <motion.div
+          animate={loading ? {} : { scale: [1, 1.05, 1] }}
+          transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${
+            loading
+              ? 'bg-muted/60 text-muted-foreground'
+              : stats?.status === 'online'
+              ? 'bg-success/12 text-success'
+              : 'bg-destructive/12 text-destructive'
+          }`}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              loading
+                ? 'bg-muted-foreground animate-pulse'
+                : stats?.status === 'online'
+                ? 'bg-success animate-pulse'
+                : 'bg-destructive'
+            }`}
+          />
+          {loading ? 'Checking…' : stats?.status === 'online' ? 'Online' : 'Offline'}
+        </motion.div>
+      </motion.div>
 
-      <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full gap-12">
-        <div className="flex flex-col items-center text-center space-y-6">
-          <motion.h1 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.5, type: 'spring' }}
-            className="text-6xl md:text-8xl font-black tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-b from-primary to-primary/40 glow-text mb-4"
+      {/* ── Stat cards ── */}
+      <motion.div variants={item} className="grid grid-cols-2 gap-3">
+        {statCards.map(({ icon: Icon, label, value }) => (
+          <div
+            key={label}
+            className="flex items-center gap-3 p-4 rounded-2xl bg-card card-shadow border border-border/50"
           >
-            D·A·N
-          </motion.h1>
-          <p className="text-lg text-muted-foreground font-mono tracking-widest uppercase text-sm">
-            Dynamic Access Node
-          </p>
-          
-          <div className="hidden md:flex items-center gap-3 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5">
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse glow-box"></div>
-            <span className="font-mono text-xs text-primary uppercase tracking-wider">System Online</span>
+            <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/10 flex-shrink-0">
+              <Icon className="w-4 h-4 text-primary" strokeWidth={2} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
+              <p className="text-sm font-semibold text-foreground truncate">{value}</p>
+            </div>
           </div>
-        </div>
+        ))}
+      </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + (i * 0.1) }}
-              className="flex flex-col items-center justify-center p-4 bg-card border border-border/50 rounded-lg hover:border-primary/50 transition-colors group"
+      {/* ── Quick connect ── */}
+      <motion.div variants={item} className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
+          Quick Connect
+        </p>
+        <CodeBlock
+          label="SSH"
+          code="ssh -i ~/.ssh/dan_ed25519 devuser@dan.local"
+        />
+      </motion.div>
+
+      {/* ── Quick links ── */}
+      <motion.div variants={item} className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
+          Quick Access
+        </p>
+        <div className="flex flex-col gap-2">
+          {quickLinks.map(({ icon: Icon, label, sub, href, accent }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-4 p-4 rounded-2xl border transition-all press-scale ${
+                accent
+                  ? 'bg-primary text-primary-foreground border-primary/40 shadow-[0_4px_24px_-6px_hsl(var(--primary)/0.4)]'
+                  : 'bg-card border-border/50 text-foreground card-shadow hover:border-border'
+              }`}
             >
-              <stat.icon className="w-5 h-5 text-muted-foreground mb-3 group-hover:text-primary transition-colors" />
-              <div className="text-xs font-mono text-muted-foreground mb-1">{stat.label}</div>
-              <div className="font-mono font-bold text-foreground group-hover:text-primary transition-colors">{stat.value}</div>
-            </motion.div>
+              <div
+                className={`w-10 h-10 flex items-center justify-center rounded-xl flex-shrink-0 ${
+                  accent ? 'bg-white/15' : 'bg-primary/10'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${accent ? 'text-white' : 'text-primary'}`} strokeWidth={2} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-semibold ${accent ? 'text-white' : 'text-foreground'}`}>
+                  {label}
+                </p>
+                <p className={`text-xs mt-0.5 ${accent ? 'text-white/70' : 'text-muted-foreground'}`}>
+                  {sub}
+                </p>
+              </div>
+              <ChevronRight
+                className={`w-4 h-4 flex-shrink-0 ${accent ? 'text-white/60' : 'text-muted-foreground'}`}
+              />
+            </Link>
           ))}
         </div>
+      </motion.div>
 
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="space-y-4"
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="font-mono text-sm tracking-widest text-muted-foreground">QUICK CONNECT</h2>
-          </div>
-          
-          <CodeBlock 
-            label="SSH COMMAND"
-            code="ssh -i ~/.ssh/dan_ed25519 root@dan.local" 
-          />
-
-          <Link 
-            href="/terminal"
-            className="flex items-center justify-between w-full p-4 mt-6 bg-primary text-primary-foreground font-mono font-bold tracking-widest rounded-lg hover:bg-primary/90 transition-all glow-box group"
-          >
-            <span>OPEN TERMINAL</span>
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </motion.div>
-      </div>
+      {/* ── Footer ── */}
+      <motion.div variants={item}>
+        <div className="flex items-center gap-2 px-1">
+          <Zap className="w-3 h-3 text-primary" />
+          <p className="text-xs text-muted-foreground">
+            Hardened Ubuntu 24.04 · SSH key-only · fail2ban
+          </p>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }

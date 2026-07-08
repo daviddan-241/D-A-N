@@ -1,130 +1,199 @@
 import { motion } from 'framer-motion';
-import { Terminal, Apple, Wifi, Key, Link2 } from 'lucide-react';
+import { Apple, Key, Link2, Terminal, Zap, Cloud } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
 
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 380, damping: 30 } },
+};
+
+const SECTIONS = [
+  {
+    id: 'bore',
+    icon: Zap,
+    accent: 'bg-amber-500/12 text-amber-400',
+    badge: 'Zero Config',
+    title: 'Quick SSH via bore.pub',
+    sub: 'No accounts needed. Works in 30 seconds.',
+    steps: [
+      {
+        label: '1. Set env vars on Render',
+        code: 'BORE_ENABLE=yes\nBORE_SECRET=pick-any-passphrase',
+      },
+      {
+        label: '2. After deploy, find your port',
+        code: 'cat ~/.dan_ssh_connect\n# → ssh -p 12345 devuser@bore.pub',
+      },
+      {
+        label: '3. Connect from a-Shell',
+        code: 'ssh -p 12345 devuser@bore.pub',
+      },
+    ],
+  },
+  {
+    id: 'cloudflare',
+    icon: Cloud,
+    accent: 'bg-orange-500/12 text-orange-400',
+    badge: 'Permanent URL',
+    title: 'SSH via Cloudflare Tunnel',
+    sub: 'Fixed hostname, free Cloudflare account required.',
+    steps: [
+      {
+        label: '1. Create tunnel in Cloudflare dashboard',
+        note: 'dash.cloudflare.com → Zero Trust → Networks → Tunnels → Create. Add public hostname: dan.yourdomain.com → ssh://localhost:22',
+      },
+      {
+        label: '2. Set CLOUDFLARE_TUNNEL_TOKEN on Render',
+        code: 'CLOUDFLARE_TUNNEL_TOKEN=eyJ...',
+      },
+      {
+        label: '3. Install cloudflared on your phone/Mac',
+        note: 'Download from: developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/',
+      },
+      {
+        label: '4. SSH from anywhere',
+        code: 'ssh -o "ProxyCommand cloudflared access ssh --hostname %h" \\\n  devuser@dan.yourdomain.com',
+      },
+    ],
+  },
+  {
+    id: 'ashell',
+    icon: Apple,
+    accent: 'bg-blue-500/12 text-blue-400',
+    badge: 'iOS Native',
+    title: 'Set up a-Shell Mini',
+    sub: 'Full SSH client on iPhone — free from the App Store.',
+    steps: [
+      {
+        label: '1. Install a-Shell Mini',
+        action: { label: 'Open App Store', url: 'https://apps.apple.com/app/a-shell-mini/id1543537943' },
+      },
+      {
+        label: '2. Generate or import SSH key',
+        code: 'mkdir -p ~/.ssh\n# Paste your private key:\npaste > ~/.ssh/id_ed25519\nchmod 600 ~/.ssh/id_ed25519',
+      },
+      {
+        label: '3. Create SSH config',
+        code: 'cat << EOF > ~/.ssh/config\nHost dan\n  HostName bore.pub\n  Port 12345\n  User devuser\n  IdentityFile ~/.ssh/id_ed25519\n  ServerAliveInterval 60\nEOF',
+      },
+      {
+        label: '4. Connect and attach tmux',
+        code: 'ssh dan -t "tmux attach || tmux new -s main"',
+      },
+    ],
+  },
+  {
+    id: 'persistence',
+    icon: Key,
+    accent: 'bg-violet-500/12 text-violet-400',
+    badge: 'Survival',
+    title: 'Persist across restarts',
+    sub: 'Render free tier wipes disk on restart — use GitHub as your disk.',
+    steps: [
+      {
+        label: 'Create two private repos on GitHub',
+        note: 'One for dotfiles (shell config, SSH keys), one for projects.',
+      },
+      {
+        label: 'Set env vars on Render',
+        code: 'GITHUB_TOKEN=ghp_...\nDOTFILES_REPO=github.com/you/dan-dotfiles\nPROJECTS_REPO=github.com/you/dan-projects',
+      },
+      {
+        label: 'Store authorized_keys in dotfiles',
+        code: '# In dan-dotfiles repo:\nmkdir -p .ssh\ncat ~/.ssh/id_ed25519.pub > .ssh/authorized_keys',
+      },
+      {
+        label: 'Manual sync anytime',
+        code: 'git-sync    # alias for dotfiles-sync.sh',
+      },
+    ],
+  },
+];
+
 export function Connect() {
-  const steps = [
-    {
-      icon: Apple,
-      title: 'INSTALL A-SHELL MINI',
-      desc: 'Get the lightweight iOS terminal emulator from the App Store. It provides a full local environment with SSH capabilities.',
-      action: 'Download on App Store'
-    },
-    {
-      icon: Key,
-      title: 'IMPORT SSH KEY',
-      desc: 'Transfer your private key to your iPhone securely (via iCloud Drive or encrypted note), then move it to a-Shell\'s .ssh directory.',
-      cmd: 'mkdir -p ~/.ssh\ncp ~/Documents/id_ed25519 ~/.ssh/\nchmod 600 ~/.ssh/id_ed25519'
-    },
-    {
-      icon: Link2,
-      title: 'CONFIGURE HOST',
-      desc: 'Set up your SSH config for quick one-word connection to your devbox.',
-      cmd: 'cat << EOF > ~/.ssh/config\nHost dan\n  HostName your-ip-or-domain\n  User root\n  IdentityFile ~/.ssh/id_ed25519\n  Port 22\nEOF'
-    },
-    {
-      icon: Terminal,
-      title: 'CONNECT & ATTACH',
-      desc: 'Connect to the box and immediately attach to your persistent tmux session.',
-      cmd: 'ssh dan -t "tmux attach || tmux new"'
-    }
-  ];
-
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex flex-col p-4 md:p-8 h-full max-w-4xl mx-auto w-full"
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col gap-5 p-4 pt-6 max-w-lg mx-auto w-full pb-6"
     >
-      <div className="mb-8">
-        <h1 className="text-2xl font-mono font-bold tracking-widest text-primary glow-text flex items-center gap-3 mb-2">
-          <Wifi className="w-6 h-6" />
-          iOS CONNECTION
-        </h1>
-        <p className="text-muted-foreground font-mono text-sm">
-          Establish a secure, persistent link from your mobile device to the D.A.N. instance.
+      <motion.div variants={item}>
+        <h1 className="text-xl font-bold text-foreground">Connect</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          SSH from your iPhone, Mac, or anywhere. Pick an option below.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-24">
-        <div className="space-y-8">
-          {steps.map((step, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.15 }}
-              className="relative pl-8 border-l border-border/50"
-            >
-              <div className="absolute left-[-16px] top-0 p-1.5 bg-background border border-primary text-primary rounded-full glow-box">
-                <step.icon className="w-4 h-4" />
+      {SECTIONS.map(section => {
+        const Icon = section.icon;
+        return (
+          <motion.div
+            key={section.id}
+            variants={item}
+            className="rounded-2xl border border-border/50 bg-card card-shadow overflow-hidden"
+          >
+            {/* Section header */}
+            <div className="flex items-center gap-3 p-4 border-b border-border/40">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${section.accent}`}>
+                <Icon className="w-4 h-4" />
               </div>
-              
-              <h3 className="font-mono font-bold text-foreground mb-2 flex items-center gap-2">
-                <span className="text-primary text-xs">0{idx + 1}.</span> {step.title}
-              </h3>
-              
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                {step.desc}
-              </p>
-              
-              {step.cmd && (
-                <div className="mt-2">
-                  <CodeBlock code={step.cmd} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-sm font-semibold text-foreground">{section.title}</h2>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${section.accent}`}>
+                    {section.badge}
+                  </span>
                 </div>
-              )}
-              
-              {step.action && (
-                <button className="mt-2 text-xs font-mono uppercase tracking-wider text-primary border border-primary/30 px-4 py-2 rounded hover:bg-primary/10 transition-colors">
-                  {step.action}
-                </button>
-              )}
-            </motion.div>
-          ))}
-        </div>
-
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-          className="flex flex-col gap-6"
-        >
-          <div className="bg-card border border-border/50 rounded-xl p-6 flex flex-col items-center justify-center min-h-[300px] gap-6 group hover:border-primary/50 transition-colors">
-            <div className="w-48 h-48 border-2 border-dashed border-primary/30 rounded-lg flex items-center justify-center bg-primary/5 relative overflow-hidden group-hover:border-primary/60 transition-colors">
-              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,255,255,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-[gradient_3s_linear_infinite]" />
-              
-              {/* QR Pattern Simulation */}
-              <div className="grid grid-cols-4 gap-1 w-24 h-24 opacity-20">
-                {Array.from({length: 16}).map((_, i) => (
-                  <div key={i} className={`bg-primary ${Math.random() > 0.5 ? 'rounded-sm' : ''} ${Math.random() > 0.7 ? 'opacity-0' : 'opacity-100'}`} />
-                ))}
-              </div>
-              
-              <div className="absolute inset-0 flex items-center justify-center font-mono text-xs text-primary font-bold tracking-widest bg-background/50 backdrop-blur-sm">
-                SCAN FOR URL
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{section.sub}</p>
               </div>
             </div>
-            
-            <p className="text-center font-mono text-xs text-muted-foreground uppercase tracking-widest max-w-[200px]">
-              Point iOS Camera to inject Web Terminal URL directly
-            </p>
-          </div>
 
-          <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-3">
-            <div className="mt-1 w-2 h-2 rounded-full bg-primary animate-pulse glow-box flex-shrink-0" />
-            <p className="text-xs font-mono text-primary/80 leading-relaxed">
-              For best experience, add D.A.N. to your iOS Home Screen. Open in Safari, tap Share, and select "Add to Home Screen" to launch in full-screen standalone mode.
-            </p>
-          </div>
-        </motion.div>
-      </div>
-      
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes gradient {
-          0% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}} />
+            {/* Steps */}
+            <div className="flex flex-col divide-y divide-border/30">
+              {section.steps.map((step, i) => (
+                <div key={i} className="p-4 space-y-2">
+                  <p className="text-xs font-semibold text-foreground/80">{step.label}</p>
+                  {'note' in step && step.note && (
+                    <p className="text-xs text-muted-foreground leading-relaxed">{step.note}</p>
+                  )}
+                  {'code' in step && step.code && (
+                    <CodeBlock code={step.code} />
+                  )}
+                  {'action' in step && step.action && (
+                    <a
+                      href={step.action.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/18 transition-colors press-scale"
+                    >
+                      <Apple className="w-3.5 h-3.5" />
+                      {step.action.label}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        );
+      })}
+
+      {/* Quick tip */}
+      <motion.div variants={item}>
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-muted/40 border border-border/40">
+          <Terminal className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <span className="text-foreground font-medium">Pro tip:</span> Use tmux so your session
+            survives connection drops. Run <code className="font-mono text-primary/80">tmux new -s main</code> on
+            first connect, then <code className="font-mono text-primary/80">tmux attach -t main</code> on
+            subsequent ones.
+          </p>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
