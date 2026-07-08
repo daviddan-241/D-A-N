@@ -2,7 +2,7 @@
 # Stage 1: build the web app (dan-ui static frontend + api-server bundle)
 # Build context for this Dockerfile is the repo root (see render.yaml).
 # ─────────────────────────────────────────────────────────────────────────────
-FROM node:24-alpine AS webbuild
+FROM node:24-slim AS webbuild
 
 RUN corepack enable && corepack prepare pnpm@10 --activate
 WORKDIR /workspace
