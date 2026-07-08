@@ -29,29 +29,33 @@ A 24/7 hardened SSH dev container with a cyberpunk web dashboard, free AI coding
    - Optional: `CLOUDFLARE_TUNNEL_TOKEN`, `BORE_SECRET`, `GITHUB_TOKEN` + repo vars (see `render.yaml`)
 4. For UptimeRobot: ping `https://<your-app>.onrender.com/api/healthz` every 5 min.
 
-## SSH from anywhere (including a-shell mini) — Render workarounds
+## SSH from anywhere (including a-shell mini) — real SSH, not a simulator
 
-Render free tier is HTTP-only with no persistent disk. Two real workarounds are built in:
+Render free tier is HTTP-only with no persistent disk and no `docker exec`, so
+two things had to be solved differently than a normal VPS: **getting a real
+TCP port for SSH**, and **installing your key without shell access**.
 
-### Option A — Cloudflare Tunnel (recommended, permanent hostname, free)
+### Step 1 — add your public key (required, no exec needed)
+The container reads `SSH_PUBLIC_KEY` (or `SSH_PUBLIC_KEYS` for multiple, one
+per line) from the environment on every boot and appends it to
+`~/.ssh/authorized_keys` automatically — no `docker exec` required.
+1. Generate a key **on the device you're connecting from** (so the private key
+   never has to travel): `ssh-keygen -t ed25519 -C "iphone"`
+2. Copy the public key it prints: `cat ~/.ssh/id_ed25519.pub`
+3. Paste it into `SSH_PUBLIC_KEY` in the Render dashboard → Environment tab → Save (redeploys automatically)
+
+### Step 2 — get a real TCP port for SSH
+
+**bore.pub (default, zero-config, works immediately)**
+- `BORE_ENABLE=yes` is on by default; set `BORE_SECRET=pick-any-string` for a stable port across restarts.
+- After boot, open the browser terminal (`/webterm`) or check the logs and run: `cat ~/.dan_ssh_connect` → prints e.g. `ssh -p 12345 devuser@bore.pub`
+- From **a-shell mini**: `ssh -p 12345 devuser@bore.pub` — this is a real SSH session with real `sudo`/`apt`, not a simulation.
+
+**Cloudflare Tunnel (optional, permanent hostname, free Cloudflare account)**
 1. [dash.cloudflare.com](https://dash.cloudflare.com) → Zero Trust → Networks → Tunnels → **Create tunnel**
-2. Copy the tunnel token → paste into `CLOUDFLARE_TUNNEL_TOKEN` in `dan-devbox` env vars on Render
+2. Copy the tunnel token → paste into `CLOUDFLARE_TUNNEL_TOKEN` on Render
 3. In the tunnel dashboard, add a **Public Hostname**: `dan.yourdomain.com` → `ssh://localhost:22`
-4. SSH from anywhere:
-   ```bash
-   # Install cloudflared once on your client (free):  https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/
-   ssh -o "ProxyCommand cloudflared access ssh --hostname %h" devuser@dan.yourdomain.com
-   ```
-5. From **a-shell mini**: install cloudflared via homebrew, then use the same command above.
-
-### Option B — bore.pub (zero-config, works immediately, no account needed)
-1. Set `BORE_ENABLE=yes` and `BORE_SECRET=pick-any-string` in `dan-devbox` env vars on Render
-2. After the container boots, open the browser terminal and run:
-   ```bash
-   dan-connect   # prints your SSH command, e.g.:  ssh -p 12345 devuser@bore.pub
-   ```
-3. From **a-shell mini**: SSH to `bore.pub` on that port — done.
-- `BORE_SECRET` makes the port consistent across restarts (same secret → same port)
+4. SSH from anywhere: `ssh -o "ProxyCommand cloudflared access ssh --hostname %h" devuser@dan.yourdomain.com`
 
 ## Persistence (GitHub auto-sync — survives Render restarts)
 
@@ -68,7 +72,7 @@ Render free tier wipes the container filesystem on every restart. Solution: GitH
 4. Every 30 min, a cron job commits and pushes any changes back.
 5. Manual sync anytime: `git-sync`
 
-**To persist your SSH key across restarts:** put your `authorized_keys` in `dan-dotfiles/.ssh/authorized_keys` — it gets restored on every boot.
+**Note:** `SSH_PUBLIC_KEY` (set once on Render) already survives restarts on its own since it's an env var, not a file — GitHub persistence is only needed for your projects/dotfiles, not the key itself.
 
 ## AI Agents (Aider — free)
 
@@ -131,7 +135,8 @@ agents          # or: dan-agents
 
 ## Gotchas
 
-- SSH raw access requires a Render paid plan or a VPS (free tier only routes HTTP). Use the browser terminal at `/webterm` for free, or the Cloudflare Tunnel / bore.pub options for real SSH.
+- Render free tier only routes HTTP to `$PORT` — real SSH rides out over the bore.pub tunnel (on by default) or Cloudflare Tunnel (optional). `SSH_PUBLIC_KEY` must be set on Render or SSH login will fail (no `docker exec` on Render to add a key after the fact).
+- `AUTO_INSTALL_EXTRAS=yes` (default) installs Metasploit, SecLists, Sherlock, etc. in the background on first boot — check progress with `tail -f /var/log/ssh-container/auto-install.log`.
 - `DATABASE_URL` is managed by Replit's runtime — provide the Render external URL as a secret.
 - Run `pnpm --filter @workspace/db run push` after every schema change to sync Render PostgreSQL.
 - The Docker build context for `ssh-container/Dockerfile` is the repo root (not `ssh-container/`) — it needs `lib/`, `artifacts/api-server/`, and `artifacts/dan-ui/` to build the web app stage.

@@ -21,15 +21,15 @@ const SECTIONS = [
     sub: 'No accounts needed. Works in 30 seconds.',
     steps: [
       {
-        label: '1. Set env vars on Render',
-        code: 'BORE_ENABLE=yes\nBORE_SECRET=pick-any-passphrase',
+        label: '1. Set SSH_PUBLIC_KEY on Render',
+        note: 'Paste your public key (see the a-Shell Mini section below for how to generate one). bore is already enabled by default.',
       },
       {
         label: '2. After deploy, find your port',
         code: 'cat ~/.dan_ssh_connect\n# → ssh -p 12345 devuser@bore.pub',
       },
       {
-        label: '3. Connect from a-Shell',
+        label: '3. Connect from anywhere',
         code: 'ssh -p 12345 devuser@bore.pub',
       },
     ],
@@ -73,15 +73,23 @@ const SECTIONS = [
         action: { label: 'Open App Store', url: 'https://apps.apple.com/app/a-shell-mini/id1543537943' },
       },
       {
-        label: '2. Generate or import SSH key',
-        code: 'mkdir -p ~/.ssh\n# Paste your private key:\npaste > ~/.ssh/id_ed25519\nchmod 600 ~/.ssh/id_ed25519',
+        label: '2. Generate a key ON your phone (private key never leaves it)',
+        code: 'ssh-keygen -t ed25519 -C "iphone"\n# press Enter 3x for defaults',
       },
       {
-        label: '3. Create SSH config',
+        label: '3. Copy the public key it prints',
+        code: 'cat ~/.ssh/id_ed25519.pub',
+      },
+      {
+        label: '4. Paste it into SSH_PUBLIC_KEY on Render, then redeploy',
+        note: 'Render dashboard → your service → Environment → SSH_PUBLIC_KEY → paste → Save (this triggers a redeploy).',
+      },
+      {
+        label: '5. Create SSH config (use the port from ~/.dan_ssh_connect)',
         code: 'cat << EOF > ~/.ssh/config\nHost dan\n  HostName bore.pub\n  Port 12345\n  User devuser\n  IdentityFile ~/.ssh/id_ed25519\n  ServerAliveInterval 60\nEOF',
       },
       {
-        label: '4. Connect and attach tmux',
+        label: '6. Connect and attach tmux',
         code: 'ssh dan -t "tmux attach || tmux new -s main"',
       },
     ],

@@ -70,13 +70,30 @@ mkdir -p "${SSH_DIR}"
 
 if [[ ! -f "${SSH_DIR}/authorized_keys" ]]; then
   touch "${SSH_DIR}/authorized_keys"
-  warn "No SSH public key installed — add one with: make add-key"
 fi
+chmod 600 "${SSH_DIR}/authorized_keys"
+
+# Render has no `docker exec`, so keys are injected via env vars instead.
+# SSH_PUBLIC_KEY   — a single public key (one line)
+# SSH_PUBLIC_KEYS  — multiple keys, one per line (use \n in the Render UI)
+for VAR_KEY in "${SSH_PUBLIC_KEY:-}" "${SSH_PUBLIC_KEYS:-}"; do
+  if [[ -n "${VAR_KEY}" ]]; then
+    while IFS= read -r LINE; do
+      LINE="$(echo "${LINE}" | xargs)" # trim whitespace
+      if [[ -n "${LINE}" ]] && echo "${LINE}" | grep -qE '^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp|sk-)'; then
+        if ! grep -qF "${LINE}" "${SSH_DIR}/authorized_keys" 2>/dev/null; then
+          echo "${LINE}" >> "${SSH_DIR}/authorized_keys"
+          log "Installed SSH public key from env var (fingerprint: $(echo "${LINE}" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}'))"
+        fi
+      fi
+    done <<< "$(echo -e "${VAR_KEY}")"
+  fi
+done
 
 KEY_COUNT=$(grep -c 'ssh-' "${SSH_DIR}/authorized_keys" 2>/dev/null || echo "0")
 if [[ "${KEY_COUNT}" -eq 0 ]]; then
   warn "authorized_keys is empty. SSH login will fail until a key is added."
-  warn "  docker exec dan-devbox bash -c \"echo 'YOUR_PUB_KEY' >> ${SSH_DIR}/authorized_keys\""
+  warn "  Set SSH_PUBLIC_KEY in the Render dashboard to your public key (cat ~/.ssh/id_ed25519.pub)"
 else
   log "Found ${KEY_COUNT} authorized SSH key(s)."
 fi
