@@ -16,6 +16,16 @@ export PS1='\[\e[1;36m\][ D·A·N ]\[\e[0m\] \[\e[1;32m\]\u\[\e[0m\]:\[\e[1;34m\
 export PATH="${HOME}/.local/bin:${HOME}/bin:${HOME}/go/bin:/usr/local/go/bin:${PATH}"
 export GOPATH="${HOME}/go"
 
+# ── Tor proxy — all outbound traffic anonymised ───────────────────────────────
+# torsocks wraps individual commands at libc level (best DNS leak protection).
+# ALL_PROXY covers tools that read standard proxy env vars.
+export ALL_PROXY="socks5h://127.0.0.1:9050"
+export all_proxy="socks5h://127.0.0.1:9050"
+export SOCKS_SERVER="127.0.0.1:9050"
+# Don't proxy loopback / container-internal traffic
+export NO_PROXY="localhost,127.0.0.1,::1,.local"
+export no_proxy="localhost,127.0.0.1,::1,.local"
+
 # ── Core aliases ──────────────────────────────────────────────────────────────
 alias ll='ls -alFh --color=auto'
 alias la='ls -A --color=auto'
@@ -37,12 +47,12 @@ alias nmap-udp='sudo nmap -sU -T4 --top-ports 200'
 alias nmap-vuln='nmap -T4 --script vuln'
 alias nmap-ping='nmap -sn'
 
-# Gobuster
-alias gb='gobuster dir -w ~/wordlists/SecLists/Discovery/Web-Content/common.txt'
-alias gb-big='gobuster dir -w ~/wordlists/SecLists/Discovery/Web-Content/big.txt'
+# Gobuster (via proxychains for anonymity)
+alias gb='proxychains4 gobuster dir -w ~/wordlists/SecLists/Discovery/Web-Content/common.txt'
+alias gb-big='proxychains4 gobuster dir -w ~/wordlists/SecLists/Discovery/Web-Content/big.txt'
 
-# ffuf
-alias fuzz='ffuf -w ~/wordlists/SecLists/Discovery/Web-Content/common.txt'
+# ffuf (via proxychains for anonymity)
+alias fuzz='proxychains4 ffuf -w ~/wordlists/SecLists/Discovery/Web-Content/common.txt'
 
 # Nuclei
 alias nuclei-scan='nuclei -t ~/nuclei-templates'
@@ -53,31 +63,38 @@ alias crack-md5='hashcat -m 0'
 alias crack-ntlm='hashcat -m 1000'
 alias crack-sha256='hashcat -m 1400'
 
-# Hydra shortcuts
-alias hydra-ssh='hydra -P ~/wordlists/rockyou.txt ssh'
-alias hydra-ftp='hydra -P ~/wordlists/rockyou.txt ftp'
-alias hydra-http='hydra -P ~/wordlists/rockyou.txt http-get'
+# Hydra shortcuts (via proxychains)
+alias hydra-ssh='proxychains4 hydra -P ~/wordlists/rockyou.txt ssh'
+alias hydra-ftp='proxychains4 hydra -P ~/wordlists/rockyou.txt ftp'
+alias hydra-http='proxychains4 hydra -P ~/wordlists/rockyou.txt http-get'
 
 # ── Browser aliases ───────────────────────────────────────────────────────────
-alias browser-headless='chromium --headless --no-sandbox --disable-gpu'
-alias browser-dump='chromium --headless --no-sandbox --dump-dom'
-alias browser-screenshot='chromium --headless --no-sandbox --screenshot'
-alias browse='w3m'
-alias fetch='curl -sL'
+alias browser-headless='chromium --headless --no-sandbox --disable-gpu --proxy-server="socks5://127.0.0.1:9050"'
+alias browser-dump='chromium --headless --no-sandbox --dump-dom --proxy-server="socks5://127.0.0.1:9050"'
+alias browser-screenshot='chromium --headless --no-sandbox --screenshot --proxy-server="socks5://127.0.0.1:9050"'
+alias browse='torsocks w3m'
+alias fetch='torsocks curl -sL'
 
 # ── Network aliases ───────────────────────────────────────────────────────────
 alias ports='ss -tlnp'
 alias connections='ss -tunp'
-alias myip='curl -s ifconfig.me'
-alias localip='ip addr show | grep "inet " | awk "{print \$2}"'
+alias myip='torsocks curl -s https://api.ipify.org && echo'
+alias localip='ip addr show | grep "inet " | gawk "{print \$2}"'
 alias sniff='sudo tcpdump -i any -n'
 alias sniff-http='sudo tcpdump -i any -A -s 0 "tcp port 80"'
 
-# ── Git shortcuts ─────────────────────────────────────────────────────────────
+# ── Tor aliases ───────────────────────────────────────────────────────────────
+alias tor-check='echo "Checking Tor..." && torsocks curl -s https://check.torproject.org/api/ip | python3 -m json.tool'
+alias tor-ip='torsocks curl -s https://api.ipify.org && echo'
+alias tor-status='cat /var/log/tor/notices.log 2>/dev/null | tail -20 || tail -20 /var/log/ssh-container/tor.log 2>/dev/null'
+alias tor-newid='kill -HUP $(cat /var/run/tor.pid 2>/dev/null) 2>/dev/null && echo "New Tor circuit requested" || echo "Tor not running"'
+alias tor-logs='tail -f /var/log/ssh-container/tor.log'
+
+# ── Git shortcuts (via Tor) ───────────────────────────────────────────────────
 alias gs='git status'
 alias ga='git add'
 alias gc='git commit'
-alias gp='git push'
+alias gp='torsocks git push'
 alias gl='git log --oneline --graph --decorate --all'
 alias gd='git diff'
 alias gco='git checkout'
@@ -108,17 +125,18 @@ alias dan-bore='tail -20 /var/log/ssh-container/bore.log 2>/dev/null || echo "bo
 alias git-sync='bash /scripts/dotfiles-sync.sh'
 alias dan-autopush='cat /var/log/ssh-container/autopush.log 2>/dev/null | tail -20'
 
-# ── AI Agents (Aider — free coding agent) ─────────────────────────────────────
-# Set one of these API keys for free access:
-#   export OPENROUTER_API_KEY=sk-or-...    # free models: openrouter.ai
-#   export GROQ_API_KEY=gsk_...            # free fast inference: console.groq.com
-#   export GITHUB_TOKEN=ghp_...            # GitHub Models: free with GitHub account
+# ── AI Agents (Aider — free, anonymous via Tor) ───────────────────────────────
+# All agent aliases route through Tor via torsocks.
+# Free models — no credit card required:
+#   openrouter.ai  → export OPENROUTER_API_KEY=sk-or-...
+#   console.groq.com → export GROQ_API_KEY=gsk_...
+#   github.com/marketplace/models → export GITHUB_TOKEN=ghp_...
 #
-# Then run one of the shortcuts below:
-alias agent='aider --model openrouter/google/gemma-3-27b-it:free'
-alias agent-deep='aider --model openrouter/deepseek/deepseek-r1:free'
-alias agent-fast='aider --model groq/llama-3.3-70b-versatile'
-alias agent-gh='aider --model github/gpt-4o'
+alias agent='torsocks aider --model openrouter/google/gemma-3-27b-it:free'
+alias agent-deep='torsocks aider --model openrouter/deepseek/deepseek-r1:free'
+alias agent-fast='torsocks aider --model groq/llama-3.3-70b-versatile'
+alias agent-gh='torsocks aider --model github/gpt-4o'
+alias agent-r1='torsocks aider --model openrouter/deepseek/deepseek-r1:free'
 alias agents='bash /scripts/dan-agents.sh'
 alias aider-help='aider --help | less'
 
@@ -144,6 +162,8 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 echo ""
 echo "  \033[1;36m[ D · A · N ]\033[0m  Dynamic Access Node"
 echo "  \033[0;32m$(date)\033[0m"
+TOR_STATUS=$( (kill -0 "$(cat /var/run/tor.pid 2>/dev/null)" 2>/dev/null && echo "\033[1;32mTor: ACTIVE\033[0m") || echo "\033[1;31mTor: inactive\033[0m" )
+echo "  ${TOR_STATUS}  |  Type \033[1;33mtor-check\033[0m to verify anonymity"
 echo "  Type \033[1;33mtmux new -s main\033[0m to start a persistent session."
 echo "  Type \033[1;33mdan-status\033[0m for startup log."
 echo ""

@@ -114,6 +114,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ncat \
     # Web tools
     httpie \
+    # Anonymity / Tor
+    tor \
+    torsocks \
     # Password & crypto
     openssl \
     # Process utilities
@@ -340,6 +343,14 @@ RUN mkdir -p /var/run/sshd /etc/ssh/host_keys \
 
 COPY ssh-container/config/sshd_config /etc/ssh/sshd_config
 RUN chmod 600 /etc/ssh/sshd_config
+
+# ── Tor configuration ─────────────────────────────────────────────────────────
+COPY ssh-container/config/torrc /etc/tor/torrc
+RUN mkdir -p /var/log/tor /var/lib/tor \
+  && chown -R debian-tor:debian-tor /var/log/tor /var/lib/tor 2>/dev/null || true
+
+# ── proxychains4 configuration ────────────────────────────────────────────────
+COPY ssh-container/config/proxychains4.conf /etc/proxychains4.conf
 
 # ── fail2ban ───────────────────────────────────────────────────────────────────
 COPY ssh-container/config/fail2ban/jail.local /etc/fail2ban/jail.local

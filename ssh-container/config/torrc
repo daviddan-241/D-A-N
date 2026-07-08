@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# D.A.N. — Tor Configuration
+# SOCKS5 proxy on 9050 for all tools that support it.
+# torsocks / proxychains4 use this automatically.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# SOCKS proxy — all tools talk to this
+SocksPort 127.0.0.1:9050 IsolateDestAddr IsolateDestPort
+SocksPolicy accept 127.0.0.1
+SocksPolicy reject *
+
+# Control port — lets tor-resolve / stem check bootstrap status
+ControlPort 127.0.0.1:9051
+CookieAuthentication 1
+
+# DNS resolver through Tor — prevents DNS leaks
+DNSPort 127.0.0.1:5353
+AutomapHostsOnResolve 1
+AutomapHostsSuffixes .onion,.exit
+
+# Transparent-proxy port (used only if iptables rules are set)
+TransPort 127.0.0.1:9040
+
+# Logging
+Log notice file /var/log/tor/notices.log
+DataDirectory /var/lib/tor
+
+# Performance / reliability
+NewCircuitPeriod 30
+MaxCircuitDirtiness 600
+NumEntryGuards 3

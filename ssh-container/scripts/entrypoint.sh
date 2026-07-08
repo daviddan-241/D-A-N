@@ -124,14 +124,70 @@ if ! grep -q "^AllowUsers " /etc/ssh/sshd_config; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. Firewall
+# 4. Tor — start before all outbound services so tunnels and tools are anonymous
+# ─────────────────────────────────────────────────────────────────────────────
+log "Starting Tor anonymization layer ..."
+mkdir -p /var/log/tor /var/lib/tor
+chown -R debian-tor:debian-tor /var/log/tor /var/lib/tor 2>/dev/null || true
+
+# Truncate logs BEFORE starting Tor so bootstrap detection has no stale entries
+> /var/log/tor/notices.log 2>/dev/null || true
+> "${LOG_DIR}/tor.log"
+
+# Run Tor as daemon (no systemd in Docker)
+tor --RunAsDaemon 1 \
+    --PidFile /var/run/tor.pid \
+    >>"${LOG_DIR}/tor.log" 2>&1 || warn "Tor failed to start — check ${LOG_DIR}/tor.log"
+
+# Wait up to 60 s for Tor to bootstrap — check freshly-truncated log only
+TOR_READY=0
+for i in $(seq 1 30); do
+  if grep -q "Bootstrapped 100%" /var/log/tor/notices.log 2>/dev/null || \
+     grep -q "Bootstrapped 100%" "${LOG_DIR}/tor.log" 2>/dev/null; then
+    TOR_READY=1
+    break
+  fi
+  sleep 2
+done
+
+if [[ "${TOR_READY}" -eq 1 ]]; then
+  log "Tor bootstrapped — verifying with live connection ..."
+  TOR_EXIT_IP=$(curl --socks5-hostname 127.0.0.1:9050 --max-time 15 -s \
+    https://api.ipify.org 2>/dev/null || echo "unknown")
+  log "  Tor exit IP: ${TOR_EXIT_IP}"
+
+  # ── Try transparent-proxy iptables rules (requires NET_ADMIN cap) ──────────
+  # On Render free tier NET_ADMIN is not available; we fall back to env-var
+  # proxying (ALL_PROXY set in bashrc_extra and dan-agents.sh).
+  if iptables -t nat -N DAN_TOR 2>/dev/null; then
+    # Allow Tor process itself to bypass redirect
+    iptables -t nat -A DAN_TOR -m owner --uid-owner debian-tor -j RETURN
+    # Allow loopback
+    iptables -t nat -A DAN_TOR -o lo -j RETURN
+    # Redirect DNS (UDP 53) → Tor DNSPort 5353
+    iptables -t nat -A DAN_TOR -p udp --dport 53 -j REDIRECT --to-ports 5353
+    # Redirect all TCP → Tor TransPort 9040
+    iptables -t nat -A DAN_TOR -p tcp --syn -j REDIRECT --to-ports 9040
+    iptables -t nat -A OUTPUT -j DAN_TOR
+    log "  Transparent proxy active — all egress TCP/DNS forced through Tor"
+  else
+    warn "  NET_ADMIN not available — using env-var proxy (opt-in via ALL_PROXY)"
+    warn "  Run 'tor-check' after login to confirm your exit IP"
+  fi
+else
+  warn "Tor did not fully bootstrap within 60 s — continuing anyway"
+  warn "  Check: tail -f ${LOG_DIR}/tor.log"
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. Firewall
 # ─────────────────────────────────────────────────────────────────────────────
 log "Configuring firewall ..."
 /firewall-init.sh 2>&1 | tee -a "${LOG_FILE}" || \
   warn "Firewall init failed (may be normal without NET_ADMIN)"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. fail2ban
+# 6. fail2ban
 # ─────────────────────────────────────────────────────────────────────────────
 if command -v fail2ban-server &>/dev/null; then
   log "Starting fail2ban ..."
@@ -143,7 +199,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6. Validate sshd config
+# 7. Validate sshd config
 # ─────────────────────────────────────────────────────────────────────────────
 log "Validating sshd configuration ..."
 if ! /usr/sbin/sshd -t 2>>"${LOG_FILE}"; then
@@ -153,7 +209,7 @@ fi
 log "sshd configuration OK."
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 7. Auto-install extras (Metasploit, Amass, etc.) — first boot only
+# 8. Auto-install extras (Metasploit, Amass, etc.) — first boot only
 # ─────────────────────────────────────────────────────────────────────────────
 INSTALL_FLAG="${HOME_DIR}/.dan_extras_installed"
 if [[ "${AUTO_INSTALL_EXTRAS}" == "yes" && ! -f "${INSTALL_FLAG}" ]]; then
@@ -165,7 +221,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 8. Start ttyd (web terminal) — internal only, proxied by the app at /webterm
+# 9. Start ttyd (web terminal) — internal only, proxied by the app at /webterm
 # ─────────────────────────────────────────────────────────────────────────────
 # The Node app owns the public $PORT (Render only routes one port per web
 # service), so ttyd always binds to a fixed internal port and the Express
