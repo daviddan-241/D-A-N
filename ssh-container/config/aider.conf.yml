@@ -1,0 +1,39 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# D.A.N. Aider Configuration — unrestricted, anonymous, memory-enabled
+# Placed at ~/.aider.conf.yml by entrypoint.sh
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Default model — DeepSeek R1 via OpenRouter (free, strong reasoning, less filtered)
+# Override per-session: aider --model openrouter/nousresearch/nous-hermes-3-llama-3.1-405b:free
+model: openrouter/deepseek/deepseek-r1:free
+
+# Repo map — give the agent a full picture of the codebase
+map-tokens: 8192
+map-refresh: auto
+
+# Let the agent suggest and execute shell commands (full autonomy)
+suggest-shell-commands: true
+auto-accept-architect: true
+
+# Don't commit automatically — let the agent decide
+auto-commits: false
+dirty-commits: true
+
+# Streaming output (see what the agent is thinking)
+stream: true
+
+# Don't nag about updates
+check-update: false
+show-release-notes: false
+
+# Editor
+editor: vim
+
+# Encoding
+encoding: utf-8
+
+# No token limits on responses
+max-tokens: 8096
+
+# Show cost/token info
+show-model-warnings: false

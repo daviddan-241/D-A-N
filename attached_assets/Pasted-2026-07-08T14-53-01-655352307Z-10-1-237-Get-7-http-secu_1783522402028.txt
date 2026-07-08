@@ -1,0 +1,150 @@
+2026-07-08T14:53:01.655352307Z #10 1.237 Get:7 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1417 kB]
+2026-07-08T14:53:01.655357037Z #10 1.313 Get:8 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+2026-07-08T14:53:01.807135812Z #10 1.314 Get:9 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+2026-07-08T14:53:02.218665459Z #10 1.876 Get:10 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1490 kB]
+2026-07-08T14:53:02.359216523Z #10 1.945 Get:11 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+2026-07-08T14:53:02.359239093Z #10 1.946 Get:12 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2111 kB]
+2026-07-08T14:53:02.359243213Z #10 2.016 Get:13 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1022 kB]
+2026-07-08T14:53:02.462644421Z #10 2.042 Get:14 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1490 kB]
+2026-07-08T14:53:02.462659931Z #10 2.059 Get:15 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [49.5 kB]
+2026-07-08T14:53:02.462663542Z #10 2.059 Get:16 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1342 kB]
+2026-07-08T14:53:02.462666211Z #10 2.120 Get:17 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [671 B]
+2026-07-08T14:53:02.613589572Z #10 2.120 Get:18 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [48.9 kB]
+2026-07-08T14:53:02.613612263Z #10 2.121 Get:19 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [35.9 kB]
+2026-07-08T14:53:02.836597216Z #10 ...
+2026-07-08T14:53:02.836624546Z 
+2026-07-08T14:53:02.836630056Z #11 [webbuild  2/12] RUN corepack enable && corepack prepare pnpm@10 --activate
+2026-07-08T14:53:02.836634756Z #11 0.481 Preparing pnpm@10 for immediate activation...
+2026-07-08T14:53:02.836639226Z #11 DONE 1.3s
+2026-07-08T14:53:02.959243043Z 
+2026-07-08T14:53:02.959260423Z #12 [webbuild  3/12] WORKDIR /workspace
+2026-07-08T14:53:02.959264463Z #12 DONE 0.0s
+2026-07-08T14:53:02.959267683Z 
+2026-07-08T14:53:02.959271123Z #13 [webbuild  4/12] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+2026-07-08T14:53:02.959274253Z #13 DONE 0.0s
+2026-07-08T14:53:02.959277163Z 
+2026-07-08T14:53:02.959280923Z #14 [webbuild  5/12] COPY tsconfig.base.json tsconfig.json ./
+2026-07-08T14:53:02.959283963Z #14 DONE 0.0s
+2026-07-08T14:53:02.959286843Z 
+2026-07-08T14:53:02.959292634Z #10 [final  2/50] RUN apt-get update && apt-get install -y --no-install-recommends     openssh-server     ufw     fail2ban     curl     wget     ca-certificates     gnupg     lsb-release     software-properties-common     apt-transport-https     git     python3     python3-pip     python3-venv     python3-dev     python3-setuptools     python3-wheel     build-essential     gcc     g++     make     cmake     pkg-config     vim     nano     tmux     htop     screen     tree     zip     unzip     p7zip-full     tar     gzip     bzip2     xz-utils     jq     ripgrep     gawk     perl     ruby     ruby-dev     net-tools     iputils-ping     dnsutils     iproute2     iptables     nmap     netcat-openbsd     socat     tcpdump     tshark     wireshark-common     proxychains4     whois     traceroute     mtr     ncat     httpie     tor     torsocks     openssl     procps     lsof     strace     ltrace     pstree     binwalk     foremost     dc3dd     xxd     bsdextrautils     binutils     file     sudo     less     man-db     locales     tzdata     logrotate     rsyslog     cron     at   && locale-gen en_US.UTF-8   && apt-get clean   && rm -rf /var/lib/apt/lists/*
+2026-07-08T14:53:03.069190153Z #10 ...
+2026-07-08T14:53:03.069203533Z 
+2026-07-08T14:53:03.069208253Z #15 [webbuild  6/12] COPY lib/ ./lib/
+2026-07-08T14:53:03.069211593Z #15 DONE 0.0s
+2026-07-08T14:53:03.069214623Z 
+2026-07-08T14:53:03.069218363Z #16 [webbuild  7/12] COPY artifacts/api-server/ ./artifacts/api-server/
+2026-07-08T14:53:03.069222143Z #16 DONE 0.0s
+2026-07-08T14:53:03.069225113Z 
+2026-07-08T14:53:03.069228903Z #17 [webbuild  8/12] COPY artifacts/dan-ui/ ./artifacts/dan-ui/
+2026-07-08T14:53:03.069232143Z #17 DONE 0.0s
+2026-07-08T14:53:03.188858179Z 
+2026-07-08T14:53:03.188886489Z #18 [webbuild  9/12] COPY attached_assets/ ./attached_assets/
+2026-07-08T14:53:03.18891096Z #18 DONE 0.0s
+2026-07-08T14:53:03.18891405Z 
+2026-07-08T14:53:03.18891772Z #10 [final  2/50] RUN apt-get update && apt-get install -y --no-install-recommends     openssh-server     ufw     fail2ban     curl     wget     ca-certificates     gnupg     lsb-release     software-properties-common     apt-transport-https     git     python3     python3-pip     python3-venv     python3-dev     python3-setuptools     python3-wheel     build-essential     gcc     g++     make     cmake     pkg-config     vim     nano     tmux     htop     screen     tree     zip     unzip     p7zip-full     tar     gzip     bzip2     xz-utils     jq     ripgrep     gawk     perl     ruby     ruby-dev     net-tools     iputils-ping     dnsutils     iproute2     iptables     nmap     netcat-openbsd     socat     tcpdump     tshark     wireshark-common     proxychains4     whois     traceroute     mtr     ncat     httpie     tor     torsocks     openssl     procps     lsof     strace     ltrace     pstree     binwalk     foremost     dc3dd     xxd     bsdextrautils     binutils     file     sudo     less     man-db     locales     tzdata     logrotate     rsyslog     cron     at   && locale-gen en_US.UTF-8   && apt-get clean   && rm -rf /var/lib/apt/lists/*
+2026-07-08T14:53:03.18892113Z #10 2.846 Fetched 31.3 MB in 3s (11.4 MB/s)
+2026-07-08T14:53:04.168704103Z #10 2.846 Reading package lists...
+2026-07-08T14:53:06.194400431Z #10 3.649 Reading package lists...
+2026-07-08T14:53:07.475491276Z #10 5.941 Building dependency tree...
+2026-07-08T14:53:07.475526757Z #10 7.133 Reading state information...
+2026-07-08T14:53:07.670014932Z #10 7.327 E: Unable to locate package pstree
+2026-07-08T14:53:10.89880885Z   52 | >>>     # Core utilities
+2026-07-08T14:53:10.89881172Z   53 | >>>     curl \
+2026-07-08T14:53:10.89881497Z   54 | >>>     wget \
+2026-07-08T14:53:10.89881805Z   55 | >>>     ca-certificates \
+2026-07-08T14:53:10.898830911Z   56 | >>>     gnupg \
+2026-07-08T14:53:10.898833951Z   57 | >>>     lsb-release \
+2026-07-08T14:53:10.898837261Z   58 | >>>     software-properties-common \
+2026-07-08T14:53:10.898840271Z   59 | >>>     apt-transport-https \
+2026-07-08T14:53:10.898843521Z   60 | >>>     # Developer tools
+2026-07-08T14:53:10.898846251Z   61 | >>>     git \
+2026-07-08T14:53:10.898849111Z   62 | >>>     python3 \
+2026-07-08T14:53:10.898852051Z   63 | >>>     python3-pip \
+2026-07-08T14:53:10.898854951Z   64 | >>>     python3-venv \
+2026-07-08T14:53:10.898857681Z   65 | >>>     python3-dev \
+2026-07-08T14:53:10.898860521Z   66 | >>>     python3-setuptools \
+2026-07-08T14:53:10.898863431Z   67 | >>>     python3-wheel \
+2026-07-08T14:53:10.898866241Z   68 | >>>     build-essential \
+2026-07-08T14:53:10.898869071Z   69 | >>>     gcc \
+2026-07-08T14:53:10.898872001Z   70 | >>>     g++ \
+2026-07-08T14:53:10.898875081Z   71 | >>>     make \
+2026-07-08T14:53:10.898878021Z   72 | >>>     cmake \
+2026-07-08T14:53:10.898880881Z   73 | >>>     pkg-config \
+2026-07-08T14:53:10.898883612Z   74 | >>>     # Editors
+2026-07-08T14:53:10.898886512Z   75 | >>>     vim \
+2026-07-08T14:53:10.898889542Z   76 | >>>     nano \
+2026-07-08T14:53:10.898892492Z   77 | >>>     # Terminal multiplexer & monitoring
+2026-07-08T14:53:10.898895392Z   78 | >>>     tmux \
+2026-07-08T14:53:10.898898352Z   79 | >>>     htop \
+2026-07-08T14:53:10.898901242Z   80 | >>>     screen \
+2026-07-08T14:53:10.898904052Z   81 | >>>     # File utilities
+2026-07-08T14:53:10.898907022Z   82 | >>>     tree \
+2026-07-08T14:53:10.898909922Z   83 | >>>     zip \
+2026-07-08T14:53:10.898919302Z   84 | >>>     unzip \
+2026-07-08T14:53:10.898922102Z   85 | >>>     p7zip-full \
+2026-07-08T14:53:10.898924922Z   86 | >>>     tar \
+2026-07-08T14:53:10.898927742Z   87 | >>>     gzip \
+2026-07-08T14:53:10.898930432Z   88 | >>>     bzip2 \
+2026-07-08T14:53:10.898933132Z   89 | >>>     xz-utils \
+2026-07-08T14:53:10.898935862Z   90 | >>>     # Text & data tools
+2026-07-08T14:53:10.898949013Z   91 | >>>     jq \
+2026-07-08T14:53:10.898952203Z   92 | >>>     ripgrep \
+2026-07-08T14:53:10.898955183Z   93 | >>>     gawk \
+2026-07-08T14:53:10.898962103Z   94 | >>>     # Scripting
+2026-07-08T14:53:10.898965263Z   95 | >>>     perl \
+2026-07-08T14:53:10.898968273Z   96 | >>>     ruby \
+2026-07-08T14:53:10.898972203Z   97 | >>>     ruby-dev \
+2026-07-08T14:53:10.898975463Z   98 | >>>     # Network utilities
+2026-07-08T14:53:10.898978973Z   99 | >>>     net-tools \
+2026-07-08T14:53:10.898982283Z  100 | >>>     iputils-ping \
+2026-07-08T14:53:10.898984663Z  101 | >>>     dnsutils \
+2026-07-08T14:53:10.898986613Z  102 | >>>     iproute2 \
+2026-07-08T14:53:10.898989643Z  103 | >>>     iptables \
+2026-07-08T14:53:10.898991603Z  104 | >>>     nmap \
+2026-07-08T14:53:10.898993543Z  105 | >>>     netcat-openbsd \
+2026-07-08T14:53:10.898995554Z  106 | >>>     socat \
+2026-07-08T14:53:10.898997414Z  107 | >>>     tcpdump \
+2026-07-08T14:53:10.898999263Z  108 | >>>     tshark \
+2026-07-08T14:53:10.899001214Z  109 | >>>     wireshark-common \
+2026-07-08T14:53:10.899003074Z  110 | >>>     proxychains4 \
+2026-07-08T14:53:10.899004954Z  111 | >>>     whois \
+2026-07-08T14:53:10.899006814Z  112 | >>>     traceroute \
+2026-07-08T14:53:10.899008744Z  113 | >>>     mtr \
+2026-07-08T14:53:10.899010754Z  114 | >>>     ncat \
+2026-07-08T14:53:10.899012604Z  115 | >>>     # Web tools
+2026-07-08T14:53:10.899014474Z  116 | >>>     httpie \
+2026-07-08T14:53:10.899016474Z  117 | >>>     # Anonymity / Tor
+2026-07-08T14:53:10.899018374Z  118 | >>>     tor \
+2026-07-08T14:53:10.899020244Z  119 | >>>     torsocks \
+2026-07-08T14:53:10.899022104Z  120 | >>>     # Password & crypto
+2026-07-08T14:53:10.899024084Z  121 | >>>     openssl \
+2026-07-08T14:53:10.899026084Z  122 | >>>     # Process utilities
+2026-07-08T14:53:10.899027974Z  123 | >>>     procps \
+2026-07-08T14:53:10.899029844Z  124 | >>>     lsof \
+2026-07-08T14:53:10.899031754Z  125 | >>>     strace \
+2026-07-08T14:53:10.899033614Z  126 | >>>     ltrace \
+2026-07-08T14:53:10.899035484Z  127 | >>>     pstree \
+2026-07-08T14:53:10.899037434Z  128 | >>>     # Forensics base
+2026-07-08T14:53:10.899039314Z  129 | >>>     binwalk \
+2026-07-08T14:53:10.899041174Z  130 | >>>     foremost \
+2026-07-08T14:53:10.899043014Z  131 | >>>     dc3dd \
+2026-07-08T14:53:10.899044944Z  132 | >>>     xxd \
+2026-07-08T14:53:10.899046894Z  133 | >>>     bsdextrautils \
+2026-07-08T14:53:10.899048774Z  134 | >>>     binutils \
+2026-07-08T14:53:10.899050634Z  135 | >>>     file \
+2026-07-08T14:53:10.899052964Z  136 | >>>     # Misc system
+2026-07-08T14:53:10.899054895Z  137 | >>>     sudo \
+2026-07-08T14:53:10.899056835Z  138 | >>>     less \
+2026-07-08T14:53:10.899066175Z  139 | >>>     man-db \
+2026-07-08T14:53:10.899068235Z  140 | >>>     locales \
+2026-07-08T14:53:10.899070175Z  141 | >>>     tzdata \
+2026-07-08T14:53:10.899072045Z  142 | >>>     logrotate \
+2026-07-08T14:53:10.899073895Z  143 | >>>     rsyslog \
+2026-07-08T14:53:10.899075745Z  144 | >>>     cron \
+2026-07-08T14:53:10.899077645Z  145 | >>>     at \
+2026-07-08T14:53:10.899079535Z  146 | >>>   && locale-gen en_US.UTF-8 \
+2026-07-08T14:53:10.899081455Z  147 | >>>   && apt-get clean \
+2026-07-08T14:53:10.899083365Z  148 | >>>   && rm -rf /var/lib/apt/lists/*
+2026-07-08T14:53:10.899085275Z  149 |     
+2026-07-08T14:53:10.899088375Z --------------------
+2026-07-08T14:53:10.899090705Z error: failed to solve: process "/bin/sh -c apt-get update && apt-get install -y --no-install-recommends     openssh-server     ufw     fail2ban     curl     wget     ca-certificates     gnupg     lsb-release     software-properties-common     apt-transport-https     git     python3     python3-pip     python3-venv     python3-dev     python3-setuptools     python3-wheel     build-essential     gcc     g++     make     cmake     pkg-config     vim     nano     tmux     htop     screen     tree     zip     unzip     p7zip-full     tar     gzip     bzip2     xz-utils     jq     ripgrep     gawk     perl     ruby     ruby-dev     net-tools     iputils-ping     dnsutils     iproute2     iptables     nmap     netcat-openbsd     socat     tcpdump     tshark     wireshark-common     proxychains4     whois     traceroute     mtr     ncat     httpie     tor     torsocks     openssl     procps     lsof     strace     ltrace     pstree     binwalk     foremost     dc3dd     xxd     bsdextrautils     binutils     file     sudo     less     man-db     locales     tzdata     logrotate     rsyslog     cron     at   && locale-gen en_US.UTF-8   && apt-get clean   && rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100

@@ -124,7 +124,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lsof \
     strace \
     ltrace \
-    pstree \
+    psmisc \
     # Forensics base
     binwalk \
     foremost \
@@ -363,10 +363,12 @@ COPY ssh-container/config/motd /etc/motd
 RUN chmod 644 /etc/motd
 
 # ── Shell customization ───────────────────────────────────────────────────────
-COPY ssh-container/config/bashrc_extra /home/${DEV_USER}/.bashrc_extra
+COPY ssh-container/config/bashrc_extra   /home/${DEV_USER}/.bashrc_extra
+COPY ssh-container/config/aider.conf.yml /home/${DEV_USER}/.aider.conf.yml
 RUN cat /home/${DEV_USER}/.bashrc_extra >> /home/${DEV_USER}/.bashrc \
   && chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.bashrc \
-  && chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.bashrc_extra
+  && chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.bashrc_extra \
+  && chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.aider.conf.yml
 
 # ── Auto-install script (Metasploit etc. — runs at container first boot) ──────
 COPY ssh-container/scripts/auto-install.sh /auto-install.sh
@@ -376,9 +378,11 @@ RUN chmod +x /auto-install.sh
 RUN mkdir -p /scripts
 COPY ssh-container/scripts/dan-agents.sh    /scripts/dan-agents.sh
 COPY ssh-container/scripts/dotfiles-sync.sh /scripts/dotfiles-sync.sh
-RUN chmod +x /scripts/dan-agents.sh /scripts/dotfiles-sync.sh \
+COPY ssh-container/scripts/agent-memory.sh  /scripts/agent-memory.sh
+RUN chmod +x /scripts/dan-agents.sh /scripts/dotfiles-sync.sh /scripts/agent-memory.sh \
   && ln -sf /scripts/dan-agents.sh    /usr/local/bin/dan-agents \
-  && ln -sf /scripts/dotfiles-sync.sh /usr/local/bin/dotfiles-sync
+  && ln -sf /scripts/dotfiles-sync.sh /usr/local/bin/dotfiles-sync \
+  && ln -sf /scripts/agent-memory.sh  /usr/local/bin/dan-memory
 
 # ── Entrypoint & helpers ──────────────────────────────────────────────────────
 COPY ssh-container/scripts/entrypoint.sh    /entrypoint.sh

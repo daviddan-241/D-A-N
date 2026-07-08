@@ -107,6 +107,21 @@ cp /usr/local/bin/gobuster /usr/local/bin/ffuf /usr/local/bin/subfinder \
 
 # Create useful directories in home
 mkdir -p "${HOME_DIR}/"{tools,projects,wordlists,captures,reports,.config}
+mkdir -p "${HOME_DIR}/agent-memory/"{context,scratch}
+
+# Initialise MEMORY.md if it doesn't exist
+if [[ ! -f "${HOME_DIR}/agent-memory/MEMORY.md" ]]; then
+  cat > "${HOME_DIR}/agent-memory/MEMORY.md" << 'MEMEOF'
+# D.A.N. Agent Memory
+
+Auto-loaded into every aider session via --read.
+Use `remember "note"` to append, `recall keyword` to search.
+
+## Persistent Notes
+<!-- Agent appends below this line -->
+
+MEMEOF
+fi
 
 # Ensure correct ownership & permissions
 chmod 755 "${HOME_DIR}"
