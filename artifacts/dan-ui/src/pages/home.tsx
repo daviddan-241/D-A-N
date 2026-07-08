@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import {
   Activity, ChevronRight, Clock, Lock, Layers, Terminal,
-  Wrench, Wifi, Zap, CheckCircle2, XCircle, LoaderCircle,
+  Wrench, Wifi, Zap, CheckCircle2, XCircle, LoaderCircle, Copy, Check,
 } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
 
@@ -26,9 +26,34 @@ interface SystemStatus {
 
 type Tri = 'ok' | 'warn' | 'bad';
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async (e) => {
+        e.preventDefault();
+        try {
+          await navigator.clipboard.writeText(text);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1800);
+        } catch {
+          // clipboard unavailable — ignore
+        }
+      }}
+      className={`flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0 transition-colors ${
+        copied ? 'bg-success/15 text-success' : 'bg-muted/60 text-muted-foreground hover:text-foreground'
+      }`}
+      aria-label="Copy SSH command"
+    >
+      {copied ? <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> : <Copy className="w-3.5 h-3.5" strokeWidth={2} />}
+    </button>
+  );
+}
+
 function StatusRow({
-  label, state, sub,
-}: { label: string; state: Tri; sub: string }) {
+  label, state, sub, copyText,
+}: { label: string; state: Tri; sub: string; copyText?: string | null }) {
   const Icon = state === 'ok' ? CheckCircle2 : state === 'warn' ? LoaderCircle : XCircle;
   const color = state === 'ok' ? 'text-success' : state === 'warn' ? 'text-amber-500' : 'text-destructive';
   return (
@@ -36,8 +61,9 @@ function StatusRow({
       <Icon className={`w-4 h-4 flex-shrink-0 ${color} ${state === 'warn' ? 'animate-spin' : ''}`} strokeWidth={2} />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-foreground">{label}</p>
-        <p className="text-xs text-muted-foreground truncate">{sub}</p>
+        <p className="text-xs text-muted-foreground truncate font-mono">{sub}</p>
       </div>
+      {copyText ? <CopyButton text={copyText} /> : null}
     </div>
   );
 }
@@ -241,6 +267,7 @@ export function Home() {
                 ? 'Enabled, starting…'
                 : 'Set BORE_ENABLE=yes to activate'
             }
+            copyText={status?.tunnel.bore.running ? status.tunnel.bore.connectCommand : null}
           />
           <StatusRow
             label="Tool auto-install"
