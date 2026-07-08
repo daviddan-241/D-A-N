@@ -247,6 +247,27 @@ RUN pip3 install --no-cache-dir --break-system-packages aider-chat 2>/dev/null |
   && ln -sf "$(python3 -c 'import site; print(site.getsitepackages()[0])')/bin/aider" \
        /usr/local/bin/aider 2>/dev/null || true
 
+# ── cloudflared (Cloudflare Tunnel — free SSH through HTTPS) ─────────────────
+# Lets you SSH into this container from anywhere without open ports.
+# Usage: set CLOUDFLARE_TUNNEL_TOKEN env var in Render dashboard.
+RUN curl -fsSL \
+      "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64" \
+      -o /usr/local/bin/cloudflared \
+  && chmod +x /usr/local/bin/cloudflared \
+  && cloudflared --version 2>/dev/null || true
+
+# ── bore (instant TCP tunnel — zero-config SSH fallback) ─────────────────────
+# bore local 22 --to bore.pub  →  ssh -p <PORT> devuser@bore.pub
+# Use BORE_SECRET env var for a consistent port across restarts.
+ARG BORE_VERSION=0.5.0
+RUN curl -fsSL \
+      "https://github.com/ekzhang/bore/releases/download/v${BORE_VERSION}/bore-v${BORE_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+      -o /tmp/bore.tar.gz \
+  && tar xzf /tmp/bore.tar.gz -C /usr/local/bin/ \
+  && chmod +x /usr/local/bin/bore \
+  && rm /tmp/bore.tar.gz \
+  && bore --version 2>/dev/null || true
+
 # ── ttyd — web terminal server ────────────────────────────────────────────────
 # Download the latest ttyd binary from GitHub releases
 ARG TTYD_VERSION=1.7.7
@@ -315,10 +336,13 @@ RUN cat /home/${DEV_USER}/.bashrc_extra >> /home/${DEV_USER}/.bashrc \
 COPY scripts/auto-install.sh /auto-install.sh
 RUN chmod +x /auto-install.sh
 
-# ── AI Agent launcher ─────────────────────────────────────────────────────────
-COPY scripts/dan-agents.sh /scripts/dan-agents.sh
-RUN chmod +x /scripts/dan-agents.sh \
-  && ln -s /scripts/dan-agents.sh /usr/local/bin/dan-agents
+# ── AI Agent launcher + GitHub persistence ────────────────────────────────────
+RUN mkdir -p /scripts
+COPY scripts/dan-agents.sh    /scripts/dan-agents.sh
+COPY scripts/dotfiles-sync.sh /scripts/dotfiles-sync.sh
+RUN chmod +x /scripts/dan-agents.sh /scripts/dotfiles-sync.sh \
+  && ln -sf /scripts/dan-agents.sh    /usr/local/bin/dan-agents \
+  && ln -sf /scripts/dotfiles-sync.sh /usr/local/bin/dotfiles-sync
 
 # ── Entrypoint & helpers ──────────────────────────────────────────────────────
 COPY scripts/entrypoint.sh    /entrypoint.sh

@@ -14,16 +14,56 @@ A 24/7 hardened SSH dev container with a cyberpunk web dashboard, free AI coding
 
 ## Deploying to Render
 
-1. Push this repo to GitHub (already done).
-2. In Render dashboard → **New** → **Blueprint** → connect the repo.
-3. Render reads `render.yaml` and creates three services automatically:
+1. Render dashboard → **New → Blueprint** → connect `daviddan-241/D-A-N`.
+2. Render reads `render.yaml` and creates three services:
    - `dan-api-server` — Express API (Docker)
    - `dan-ui` — React frontend (static site, always free)
-   - `dan-devbox` — Browser terminal + AI agents (Docker)
-4. Set these secrets in each service's Environment settings:
+   - `dan-devbox` — Browser terminal + AI agents + SSH tunnel (Docker)
+3. Set secrets in each service's Environment tab:
    - `dan-api-server`: `DATABASE_URL`, `SESSION_SECRET`
-   - `dan-devbox`: `WEB_TERMINAL_USER`, `WEB_TERMINAL_PASS`
-5. For UptimeRobot: ping `https://<your-dan-api-server>.onrender.com/api/healthz` every 5 min.
+   - `dan-devbox`: `WEB_TERMINAL_USER`, `WEB_TERMINAL_PASS`, plus SSH/persistence vars below
+4. For UptimeRobot: ping `https://<your-api>.onrender.com/api/healthz` every 5 min.
+
+## SSH from anywhere (including a-shell mini) — Render workarounds
+
+Render free tier is HTTP-only with no persistent disk. Two real workarounds are built in:
+
+### Option A — Cloudflare Tunnel (recommended, permanent hostname, free)
+1. [dash.cloudflare.com](https://dash.cloudflare.com) → Zero Trust → Networks → Tunnels → **Create tunnel**
+2. Copy the tunnel token → paste into `CLOUDFLARE_TUNNEL_TOKEN` in `dan-devbox` env vars on Render
+3. In the tunnel dashboard, add a **Public Hostname**: `dan.yourdomain.com` → `ssh://localhost:22`
+4. SSH from anywhere:
+   ```bash
+   # Install cloudflared once on your client (free):  https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/
+   ssh -o "ProxyCommand cloudflared access ssh --hostname %h" devuser@dan.yourdomain.com
+   ```
+5. From **a-shell mini**: install cloudflared via homebrew, then use the same command above.
+
+### Option B — bore.pub (zero-config, works immediately, no account needed)
+1. Set `BORE_ENABLE=yes` and `BORE_SECRET=pick-any-string` in `dan-devbox` env vars on Render
+2. After the container boots, open the browser terminal and run:
+   ```bash
+   dan-connect   # prints your SSH command, e.g.:  ssh -p 12345 devuser@bore.pub
+   ```
+3. From **a-shell mini**: SSH to `bore.pub` on that port — done.
+- `BORE_SECRET` makes the port consistent across restarts (same secret → same port)
+
+## Persistence (GitHub auto-sync — survives Render restarts)
+
+Render free tier wipes the container filesystem on every restart. Solution: GitHub as the disk.
+
+1. Create two private GitHub repos:
+   - `dan-dotfiles` — shell config, `.ssh/authorized_keys`, vim/tmux config
+   - `dan-projects` — your code
+2. Set in `dan-devbox` env vars on Render:
+   - `GITHUB_TOKEN` — GitHub PAT with `repo` scope ([create one](https://github.com/settings/tokens))
+   - `DOTFILES_REPO` — `github.com/daviddan-241/dan-dotfiles`
+   - `PROJECTS_REPO` — `github.com/daviddan-241/dan-projects` (optional)
+3. On every container boot, dotfiles and projects are pulled automatically.
+4. Every 30 min, a cron job commits and pushes any changes back.
+5. Manual sync anytime: `git-sync`
+
+**To persist your SSH key across restarts:** put your `authorized_keys` in `dan-dotfiles/.ssh/authorized_keys` — it gets restored on every boot.
 
 ## AI Agents (Aider — free)
 

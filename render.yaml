@@ -53,8 +53,24 @@ services:
         source: /*
         destination: /index.html
 
-  # ── Devbox (browser-based terminal + AI agents) ───────────────────────────────
-  # Accessible via browser at your Render URL — full terminal with Aider pre-installed
+  # ── Devbox (terminal + AI agents + SSH via Cloudflare Tunnel) ────────────────
+  # Browser terminal always works at your Render URL.
+  # For real SSH (from a-shell, terminal, anywhere):
+  #   Option A — Cloudflare Tunnel (recommended, permanent hostname, free):
+  #     1. dash.cloudflare.com → Zero Trust → Networks → Tunnels → Create tunnel
+  #     2. Copy the tunnel token and paste it into CLOUDFLARE_TUNNEL_TOKEN below
+  #     3. Add a Public Hostname in the tunnel: hostname=dan.yourdomain.com, service=ssh://localhost:22
+  #     4. SSH: ssh -o "ProxyCommand cloudflared access ssh --hostname %h" devuser@dan.yourdomain.com
+  #
+  #   Option B — bore.pub (zero-config, random port each restart unless BORE_SECRET is set):
+  #     1. Set BORE_ENABLE=yes and BORE_SECRET=any-string-you-choose
+  #     2. After boot, run: cat ~/.dan_ssh_connect  to see your SSH command
+  #     3. SSH: ssh -p <PORT> devuser@bore.pub
+  #
+  # Persistence (Render free tier wipes disk on restart):
+  #   1. Create two private GitHub repos: one for dotfiles, one for projects
+  #   2. Set GITHUB_TOKEN (with repo scope), DOTFILES_REPO, PROJECTS_REPO below
+  #   3. On every boot the container pulls both repos; every 30 min it auto-pushes changes
   - type: web
     name: dan-devbox
     runtime: docker
@@ -63,10 +79,28 @@ services:
     plan: free
     envVars:
       - key: WEB_TERMINAL_USER
-        sync: false          # set manually in Render dashboard
+        sync: false          # terminal login username
       - key: WEB_TERMINAL_PASS
-        sync: false          # set manually in Render dashboard
+        sync: false          # terminal login password
       - key: DEV_USER
         value: devuser
       - key: AUTO_INSTALL_EXTRAS
-        value: "no"          # set to "yes" to install Metasploit etc. on first boot (slow)
+        value: "no"          # set to "yes" to install Metasploit etc. on first boot
+
+      # ── SSH via Cloudflare Tunnel (Option A — recommended) ──────────────────
+      - key: CLOUDFLARE_TUNNEL_TOKEN
+        sync: false          # paste your tunnel token from Cloudflare dashboard
+
+      # ── SSH via bore.pub (Option B — zero-config fallback) ──────────────────
+      - key: BORE_ENABLE
+        value: "yes"         # set to "no" to disable bore tunnel
+      - key: BORE_SECRET
+        sync: false          # set any string for a consistent port across restarts
+
+      # ── GitHub persistence (survives Render free-tier disk wipes) ───────────
+      - key: GITHUB_TOKEN
+        sync: false          # GitHub PAT with repo scope
+      - key: DOTFILES_REPO
+        sync: false          # e.g. github.com/daviddan-241/dan-dotfiles
+      - key: PROJECTS_REPO
+        sync: false          # e.g. github.com/daviddan-241/dan-projects (optional)

@@ -101,6 +101,13 @@ alias reload='source ~/.bashrc'
 alias dan-status='cat /var/log/ssh-container/startup.log | tail -30'
 alias dan-tools='ls /usr/local/bin/ | sort'
 
+# ── SSH tunnel status ─────────────────────────────────────────────────────────
+alias dan-connect='cat ~/.dan_ssh_connect 2>/dev/null || echo "bore tunnel not active — check /var/log/ssh-container/bore.log"'
+alias dan-tunnel='tail -20 /var/log/ssh-container/cloudflared.log 2>/dev/null || echo "Cloudflare tunnel log not found"'
+alias dan-bore='tail -20 /var/log/ssh-container/bore.log 2>/dev/null || echo "bore log not found"'
+alias git-sync='bash /scripts/dotfiles-sync.sh'
+alias dan-autopush='cat /var/log/ssh-container/autopush.log 2>/dev/null | tail -20'
+
 # ── AI Agents (Aider — free coding agent) ─────────────────────────────────────
 # Set one of these API keys for free access:
 #   export OPENROUTER_API_KEY=sk-or-...    # free models: openrouter.ai

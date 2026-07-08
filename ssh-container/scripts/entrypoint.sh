@@ -181,17 +181,88 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 9. Print connection info
+# 9. Cloudflare Tunnel  — real SSH from anywhere via HTTPS (free)
+#    Set CLOUDFLARE_TUNNEL_TOKEN in Render dashboard to activate.
+#    Setup: dash.cloudflare.com → Zero Trust → Networks → Tunnels → Create
+# ─────────────────────────────────────────────────────────────────────────────
+CLOUDFLARE_TUNNEL_TOKEN="${CLOUDFLARE_TUNNEL_TOKEN:-}"
+if [[ -n "${CLOUDFLARE_TUNNEL_TOKEN}" ]] && command -v cloudflared &>/dev/null; then
+  log "Starting Cloudflare Tunnel ..."
+  cloudflared tunnel --no-autoupdate run --token "${CLOUDFLARE_TUNNEL_TOKEN}" \
+    >>"${LOG_DIR}/cloudflared.log" 2>&1 &
+  CF_PID=$!
+  sleep 2
+  if kill -0 "${CF_PID}" 2>/dev/null; then
+    log "Cloudflare Tunnel running (PID ${CF_PID})"
+    log "  SSH client cmd: ssh -o 'ProxyCommand cloudflared access ssh --hostname %h' ${DEV_USER}@<your-tunnel-hostname>"
+    log "  a-shell:        install cloudflared, then use the ProxyCommand above"
+    log "  Logs: tail -f ${LOG_DIR}/cloudflared.log"
+  else
+    warn "Cloudflare Tunnel failed to start — check ${LOG_DIR}/cloudflared.log"
+  fi
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 10. bore TCP tunnel — zero-config SSH fallback (no Cloudflare account needed)
+#     Set BORE_ENABLE=yes in Render dashboard to activate.
+#     Set BORE_SECRET=<any-string> for a consistent port across restarts.
+# ─────────────────────────────────────────────────────────────────────────────
+if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
+  BORE_SECRET="${BORE_SECRET:-}"
+  BORE_CMD="bore local 22 --to bore.pub"
+  [[ -n "${BORE_SECRET}" ]] && BORE_CMD="${BORE_CMD} --secret ${BORE_SECRET}"
+  log "Starting bore TCP tunnel (SSH on bore.pub) ..."
+  eval "${BORE_CMD}" >>"${LOG_DIR}/bore.log" 2>&1 &
+  BORE_PID=$!
+  sleep 3
+  if kill -0 "${BORE_PID}" 2>/dev/null; then
+    BORE_PORT=$(grep -oP 'port \K[0-9]+' "${LOG_DIR}/bore.log" 2>/dev/null | tail -1 || echo "see log")
+    log "bore tunnel running (PID ${BORE_PID}) — port: ${BORE_PORT}"
+    log "  SSH: ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub"
+    log "  a-shell: SSH to bore.pub port ${BORE_PORT}"
+    log "  Logs: tail -f ${LOG_DIR}/bore.log"
+    # Write connection info to a file the user can cat at any time
+    echo "ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub" > "/home/${DEV_USER}/.dan_ssh_connect"
+    chown "${DEV_USER}:${DEV_USER}" "/home/${DEV_USER}/.dan_ssh_connect" 2>/dev/null || true
+  else
+    warn "bore tunnel failed — check ${LOG_DIR}/bore.log"
+  fi
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 11. GitHub persistence — pull on boot, auto-push every 30 min
+#     Solves Render's zero-disk-persistence on free tier.
+#     Set GITHUB_TOKEN + DOTFILES_REPO (and optionally PROJECTS_REPO) in Render.
+# ─────────────────────────────────────────────────────────────────────────────
+GITHUB_TOKEN="${GITHUB_TOKEN:-}"
+DOTFILES_REPO="${DOTFILES_REPO:-}"
+PROJECTS_REPO="${PROJECTS_REPO:-}"
+if [[ -n "${GITHUB_TOKEN}" ]] && [[ -n "${DOTFILES_REPO}" || -n "${PROJECTS_REPO}" ]]; then
+  log "Starting GitHub persistence sync ..."
+  sudo -u "${DEV_USER}" env \
+    GITHUB_TOKEN="${GITHUB_TOKEN}" \
+    DOTFILES_REPO="${DOTFILES_REPO}" \
+    PROJECTS_REPO="${PROJECTS_REPO}" \
+    DEV_USER="${DEV_USER}" \
+    bash /scripts/dotfiles-sync.sh \
+    >>"${LOG_DIR}/dotfiles.log" 2>&1 &
+  log "GitHub sync running — logs: tail -f ${LOG_DIR}/dotfiles.log"
+else
+  log "GitHub persistence not configured (set GITHUB_TOKEN + DOTFILES_REPO in Render dashboard)"
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 12. Print connection info
 # ─────────────────────────────────────────────────────────────────────────────
 HOST_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "<container-ip>")
 log "======================================================================"
 log " D.A.N. is live"
 log "======================================================================"
-log " SSH:          ssh -p \${SSH_PORT:-2222} ${DEV_USER}@<host>"
-log " Web Terminal: http://<host>:\${TTYD_PORT:-7681}"
-log "               (auth: ${WEB_TERMINAL_USER} / [WEB_TERMINAL_PASS])"
-log " Key required: add with 'make add-key' on the host"
-log " Logs:         /var/log/ssh-container/"
+log " Web Terminal: https://<your-render-url>  (auth: ${WEB_TERMINAL_USER} / [WEB_TERMINAL_PASS])"
+log " SSH (Cloudflare): ssh -o 'ProxyCommand cloudflared access ssh --hostname %h' ${DEV_USER}@<tunnel-host>"
+log " SSH (bore):       ssh -p <PORT> ${DEV_USER}@bore.pub  (check: cat ~/.dan_ssh_connect)"
+log " GitHub sync:      cat ${LOG_DIR}/dotfiles.log"
+log " Logs dir:         ${LOG_DIR}/"
 log "======================================================================"
 
 # ─────────────────────────────────────────────────────────────────────────────
