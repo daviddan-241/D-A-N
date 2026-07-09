@@ -1,12 +1,160 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
-import { RefreshCw, Settings2, Terminal as TermIcon, ArrowRight, WifiOff, Loader } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { RefreshCw, Settings2, Terminal as TermIcon, ArrowRight, WifiOff, Loader, Keyboard } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 const SAME_ORIGIN_TERMINAL = '/webterm/';
 
 type Availability = 'checking' | 'available' | 'unavailable';
+type StickyMod = 'ctrl' | 'alt' | null;
 
+// ── Key injection ─────────────────────────────────────────────────────────────
+// xterm.js listens for keyboard events on its hidden helper textarea.
+// Since /webterm is same-origin we can access the iframe's document directly.
+function sendToXterm(
+  iframe: HTMLIFrameElement | null,
+  key: string,
+  opts: { ctrlKey?: boolean; altKey?: boolean; shiftKey?: boolean } = {}
+): boolean {
+  if (!iframe?.contentDocument) return false;
+  const doc = iframe.contentDocument;
+  // xterm.js renders a hidden textarea it uses for input capture
+  const el = doc.querySelector<HTMLTextAreaElement>('.xterm-helper-textarea');
+  if (!el) return false;
+
+  el.focus();
+  const code =
+    key.length === 1
+      ? `Key${key.toUpperCase()}`
+      : key; // 'Escape', 'Tab', 'ArrowUp', etc.
+
+  const init: KeyboardEventInit = {
+    key,
+    code,
+    bubbles: true,
+    cancelable: true,
+    ctrlKey: opts.ctrlKey ?? false,
+    altKey: opts.altKey ?? false,
+    shiftKey: opts.shiftKey ?? false,
+  };
+  el.dispatchEvent(new KeyboardEvent('keydown', init));
+  el.dispatchEvent(new KeyboardEvent('keyup', init));
+  return true;
+}
+
+// ── Key bar button ────────────────────────────────────────────────────────────
+interface KBtnProps {
+  label: string;
+  sublabel?: string;
+  active?: boolean;
+  wide?: boolean;
+  onPress: () => void;
+}
+function KBtn({ label, sublabel, active, wide, onPress }: KBtnProps) {
+  return (
+    <button
+      type="button"
+      onPointerDown={(e) => { e.preventDefault(); onPress(); }}
+      className={[
+        'flex-shrink-0 flex flex-col items-center justify-center select-none rounded-lg',
+        'text-[11px] font-mono font-semibold leading-none transition-colors active:scale-95',
+        wide ? 'px-3 min-w-[52px] h-9' : 'min-w-[36px] w-9 h-9',
+        active
+          ? 'bg-primary text-primary-foreground shadow-sm'
+          : 'bg-[#2a2a2e] text-[#c8c8d0] hover:bg-[#38383f]',
+      ].join(' ')}
+    >
+      <span>{label}</span>
+      {sublabel && <span className="text-[8px] opacity-60 mt-0.5">{sublabel}</span>}
+    </button>
+  );
+}
+
+// ── iOS key bar ───────────────────────────────────────────────────────────────
+interface KeyBarProps {
+  iframeRef: React.RefObject<HTMLIFrameElement | null>;
+}
+function KeyBar({ iframeRef }: KeyBarProps) {
+  const [sticky, setSticky] = useState<StickyMod>(null);
+
+  const fire = useCallback(
+    (key: string, opts: { ctrlKey?: boolean; altKey?: boolean; shiftKey?: boolean } = {}) => {
+      sendToXterm(iframeRef.current, key, opts);
+      setSticky(null); // consume sticky after one key
+    },
+    [iframeRef]
+  );
+
+  const combo = (letter: string, mod: StickyMod) =>
+    fire(letter, { ctrlKey: mod === 'ctrl', altKey: mod === 'alt' });
+
+  const toggleSticky = (mod: StickyMod) =>
+    setSticky(prev => (prev === mod ? null : mod));
+
+  // When Ctrl/Alt is sticky, show contextual combo keys; otherwise show nav keys
+  const showCombos = sticky !== null;
+
+  return (
+    <div className="flex-shrink-0 bg-[#1a1a1e] border-b border-[#333338] overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-1.5 px-2 py-1.5 w-max">
+        {/* Always-visible: modifiers */}
+        <KBtn label="Esc" onPress={() => fire('Escape')} />
+        <KBtn label="Tab" onPress={() => fire('Tab')} />
+        <div className="w-px h-5 bg-[#444] flex-shrink-0" />
+        <KBtn
+          label="Ctrl"
+          active={sticky === 'ctrl'}
+          onPress={() => toggleSticky('ctrl')}
+        />
+        <KBtn
+          label="Alt"
+          active={sticky === 'alt'}
+          onPress={() => toggleSticky('alt')}
+        />
+        <div className="w-px h-5 bg-[#444] flex-shrink-0" />
+
+        {showCombos ? (
+          // Ctrl/Alt combo strip — most useful sequences
+          <>
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}C`} sublabel="break" onPress={() => combo('c', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}D`} sublabel="EOF" onPress={() => combo('d', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}Z`} sublabel="bg" onPress={() => combo('z', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}X`} sublabel={sticky === 'ctrl' ? 'cut/exit' : ''} onPress={() => combo('x', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}O`} sublabel={sticky === 'ctrl' ? 'save' : ''} onPress={() => combo('o', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}A`} sublabel="home" onPress={() => combo('a', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}E`} sublabel="end" onPress={() => combo('e', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}L`} sublabel="clear" onPress={() => combo('l', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}W`} sublabel={sticky === 'ctrl' ? 'del wrd' : ''} onPress={() => combo('w', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}K`} sublabel={sticky === 'ctrl' ? 'kill' : ''} onPress={() => combo('k', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}U`} sublabel={sticky === 'ctrl' ? 'del line' : ''} onPress={() => combo('u', sticky)} />
+            <KBtn label={`${sticky === 'ctrl' ? '^' : 'M-'}R`} sublabel={sticky === 'ctrl' ? 'hist' : ''} onPress={() => combo('r', sticky)} />
+            {sticky === 'ctrl' && (
+              <KBtn label="^\\" sublabel="quit" onPress={() => fire('\\', { ctrlKey: true })} />
+            )}
+          </>
+        ) : (
+          // Navigation + common utility strip
+          <>
+            <KBtn label="↑" onPress={() => fire('ArrowUp')} />
+            <KBtn label="↓" onPress={() => fire('ArrowDown')} />
+            <KBtn label="←" onPress={() => fire('ArrowLeft')} />
+            <KBtn label="→" onPress={() => fire('ArrowRight')} />
+            <div className="w-px h-5 bg-[#444] flex-shrink-0" />
+            <KBtn label="^C" sublabel="break" active={false} onPress={() => fire('c', { ctrlKey: true })} />
+            <KBtn label="^D" sublabel="EOF" onPress={() => fire('d', { ctrlKey: true })} />
+            <KBtn label="^Z" sublabel="bg" onPress={() => fire('z', { ctrlKey: true })} />
+            <KBtn label="^X" sublabel="nano" onPress={() => fire('x', { ctrlKey: true })} />
+            <KBtn label="^O" sublabel="save" onPress={() => fire('o', { ctrlKey: true })} />
+            <KBtn label="^L" sublabel="clear" onPress={() => fire('l', { ctrlKey: true })} />
+            <KBtn label="^R" sublabel="hist" onPress={() => fire('r', { ctrlKey: true })} />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export function Terminal() {
   const [devboxUrl, setDevboxUrl] = useLocalStorage('dan_devbox_url', SAME_ORIGIN_TERMINAL);
   const [inputUrl, setInputUrl] = useState(devboxUrl === SAME_ORIGIN_TERMINAL ? '' : devboxUrl);
@@ -15,13 +163,12 @@ export function Terminal() {
   const [availability, setAvailability] = useState<Availability>('checking');
   const [unavailableReason, setUnavailableReason] = useState('');
   const [connected, setConnected] = useState(false);
+  const [showKeyBar, setShowKeyBar] = useLocalStorage('dan_keybar', true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-  // Probe whether ttyd is reachable before showing the iframe
   useEffect(() => {
     if (devboxUrl !== SAME_ORIGIN_TERMINAL) {
-      // Custom URL — always show it (user configured it themselves)
       setAvailability('available');
       return;
     }
@@ -48,16 +195,8 @@ export function Terminal() {
     setIsConfiguring(false);
   };
 
-  const useDefault = () => {
-    setInputUrl('');
-    setDevboxUrl(SAME_ORIGIN_TERMINAL);
-    setIsConfiguring(false);
-  };
-
-  const reconnect = () => {
-    setConnected(false);
-    setFrameKey(k => k + 1);
-  };
+  const useDefault = () => { setInputUrl(''); setDevboxUrl(SAME_ORIGIN_TERMINAL); setIsConfiguring(false); };
+  const reconnect = () => { setConnected(false); setFrameKey(k => k + 1); };
 
   return (
     <AnimatePresence mode="wait">
@@ -97,9 +236,6 @@ export function Terminal() {
                 autoCorrect="off"
                 spellCheck={false}
               />
-              <p className="text-xs text-muted-foreground pl-1">
-                Leave blank to use this app's own /webterm terminal.
-              </p>
             </div>
             <button
               type="submit"
@@ -142,6 +278,14 @@ export function Terminal() {
               {devboxUrl === SAME_ORIGIN_TERMINAL ? 'built-in terminal' : devboxUrl}
             </span>
             <div className="flex items-center gap-1">
+              {/* Toggle key bar */}
+              <button
+                onClick={() => setShowKeyBar(v => !v)}
+                className={`p-2 rounded-lg transition-colors press-scale ${showKeyBar ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-border/60'}`}
+                title="Toggle key bar"
+              >
+                <Keyboard className="w-4 h-4" />
+              </button>
               <button onClick={reconnect} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-border/60 transition-colors press-scale" title="Reconnect">
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -150,6 +294,11 @@ export function Terminal() {
               </button>
             </div>
           </div>
+
+          {/* iOS key bar — shown when available and toggled on */}
+          {availability === 'available' && showKeyBar && (
+            <KeyBar iframeRef={iframeRef} />
+          )}
 
           {/* Body */}
           <div className="flex-1 bg-[#0a0b0f] overflow-hidden relative">
@@ -173,7 +322,7 @@ export function Terminal() {
                   <p className="text-sm font-semibold text-foreground">Terminal not available</p>
                   <p className="text-xs text-muted-foreground leading-relaxed max-w-[260px]">
                     {unavailableReason.includes('TTYD_INTERNAL_PORT')
-                      ? 'ttyd only runs in the live Render container. SSH from your iPhone using the Connect tab, or open the web terminal on your Render URL.'
+                      ? 'The web terminal only runs in the live Render container. Use SSH from the Connect tab, or visit your Render URL directly.'
                       : unavailableReason}
                   </p>
                 </div>
@@ -194,8 +343,6 @@ export function Terminal() {
                 src={devboxUrl}
                 className="w-full h-full border-none"
                 allow="fullscreen; clipboard-read; clipboard-write"
-                // Minimal sandbox — allow-same-origin is required for WebSocket
-                // connections back to the same host; allow-popups for ttyd's UI
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
                 title="Web Terminal"
                 onLoad={() => setConnected(true)}

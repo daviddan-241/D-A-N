@@ -12,6 +12,24 @@ export PS1='\[\e[1;36m\][ D·A·N ]\[\e[0m\] \[\e[1;32m\]\u\[\e[0m\]:\[\e[1;34m\
 export PATH="${HOME}/.local/bin:${HOME}/bin:${HOME}/go/bin:/usr/local/go/bin:/usr/local/bin:${PATH}"
 export GOPATH="${HOME}/go"
 
+# ── Auto-sudo wrappers ────────────────────────────────────────────────────────
+# Common commands that need root — works transparently with NOPASSWD sudo.
+# Typing 'apt install foo' just works without having to remember sudo.
+alias apt='sudo apt'
+alias apt-get='sudo apt-get'
+alias dpkg='sudo dpkg'
+alias systemctl='sudo systemctl'
+alias service='sudo service'
+alias ufw='sudo ufw'
+alias iptables='sudo iptables'
+alias ip6tables='sudo ip6tables'
+alias tcpdump='sudo tcpdump'
+alias nmap='sudo nmap'          # raw sockets need root for SYN scans
+alias masscan='sudo masscan'
+alias aircrack-ng='sudo aircrack-ng'
+alias airodump-ng='sudo airodump-ng'
+alias aireplay-ng='sudo aireplay-ng'
+
 # ── Tor proxy — all outbound traffic anonymised ───────────────────────────────
 export ALL_PROXY="socks5h://127.0.0.1:9050"
 export all_proxy="socks5h://127.0.0.1:9050"

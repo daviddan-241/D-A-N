@@ -251,6 +251,10 @@ if command -v ttyd &>/dev/null; then
     --credential "${WEB_TERMINAL_USER}:${WEB_TERMINAL_PASS}" \
     --writable \
     --max-clients 10 \
+    --check-origin=false \
+    --client-option cursorBlink=true \
+    --client-option fontSize=14 \
+    --client-option fontFamily="'Menlo','Monaco','Cascadia Mono',monospace" \
     su -l "${DEV_USER}" \
     2>>"${LOG_DIR}/ttyd.log" &
   TTYD_PID=$!
