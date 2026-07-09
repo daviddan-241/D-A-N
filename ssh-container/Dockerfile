@@ -366,7 +366,10 @@ RUN if getent group ${DEV_GID} > /dev/null; then \
   # Give devuser access to Go tools
   && mkdir -p /home/${DEV_USER}/go/bin \
   && cp /root/go/bin/* /home/${DEV_USER}/go/bin/ 2>/dev/null || true \
-  && chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}
+  # Use numeric uid:gid (not names) — the reused group from an existing base-image
+  # GID may not be named "${DEV_USER}" (e.g. "node" or "ubuntu"), which made a
+  # name-based chown fail with "invalid group". Numeric IDs always resolve.
+  && chown -R ${DEV_UID}:${DEV_GID} /home/${DEV_USER}
 
 # ── SSH server setup ──────────────────────────────────────────────────────────
 RUN mkdir -p /var/run/sshd /etc/ssh/host_keys \
