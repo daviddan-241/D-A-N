@@ -239,27 +239,45 @@ RUN /usr/local/go/bin/go install github.com/lc/gau/v2/cmd/gau@latest    2>/dev/n
 # Copy Go binaries from root to /usr/local/bin so devuser can access them
 RUN cp /root/go/bin/* /usr/local/bin/ 2>/dev/null || true
 
+# ── Build deps for python packages that compile from source (yara-python, etc.) ─
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl-dev \
+    libffi-dev \
+    automake \
+    libtool \
+    bison \
+    flex \
+    autoconf \
+    libjansson-dev \
+    libmagic-dev \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
 # ── Python security tools ─────────────────────────────────────────────────────
-RUN pip3 install --no-cache-dir --break-system-packages \
-    mitmproxy \
-    impacket \
-    scapy \
-    shodan \
-    requests \
-    beautifulsoup4 \
-    paramiko \
-    pwntools \
-    pycryptodome \
-    pefile \
-    oletools \
-    yara-python \
-    volatility3 \
-    black \
-    httpie \
-    pipx \
-    aider-chat \
-  || pip3 install --no-cache-dir --break-system-packages \
-    mitmproxy scapy requests beautifulsoup4 paramiko black httpie pipx aider-chat
+# Installed one-by-one so a single package failing to build (e.g. yara-python
+# needing extra native deps) doesn't abort the whole image build.
+RUN for pkg in \
+      mitmproxy \
+      impacket \
+      scapy \
+      shodan \
+      requests \
+      beautifulsoup4 \
+      paramiko \
+      pwntools \
+      pycryptodome \
+      pefile \
+      oletools \
+      yara-python \
+      volatility3 \
+      black \
+      httpie \
+      pipx \
+      aider-chat \
+    ; do \
+      pip3 install --no-cache-dir --break-system-packages "$pkg" \
+        || echo "WARN: pip package '$pkg' failed to install, skipping"; \
+    done
 
 # ── Ensure aider is on PATH ───────────────────────────────────────────────────
 RUN pip3 install --no-cache-dir --break-system-packages aider-chat 2>/dev/null || true \
