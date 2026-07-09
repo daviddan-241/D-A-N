@@ -35,6 +35,15 @@ function readTrimmed(path: string): string | null {
   }
 }
 
+function readWatchdogStats(): { restartCount: number; lastRestartAt: string | null; status: string } | null {
+  try {
+    const raw = fs.readFileSync(`${LOG_DIR}/bore-watchdog-stats.json`, "utf8");
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 function countAuthorizedKeys(): number {
   const content = readTrimmed(`${HOME_DIR}/.ssh/authorized_keys`);
   if (!content) return 0;
@@ -64,6 +73,7 @@ router.get("/status", (_req, res) => {
         enabled: process.env.BORE_ENABLE === "yes",
         running: boreRunning,
         connectCommand: boreConnectCommand,
+        watchdog: readWatchdogStats(),
       },
       cloudflare: {
         enabled: Boolean(process.env.CLOUDFLARE_TUNNEL_TOKEN),
