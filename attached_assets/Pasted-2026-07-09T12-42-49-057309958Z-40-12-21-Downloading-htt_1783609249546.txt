@@ -1,0 +1,400 @@
+2026-07-09T12:42:49.057309958Z #40 12.21 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+2026-07-09T12:42:49.057312278Z #40 12.21    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.8/78.8 kB 277.6 MB/s eta 0:00:00
+2026-07-09T12:42:49.057314369Z #40 12.21 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+2026-07-09T12:42:49.217108659Z #40 12.22    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 73.5/73.5 kB 238.1 MB/s eta 0:00:00
+2026-07-09T12:42:49.217127699Z #40 12.23 Downloading huggingface_hub-1.4.1-py3-none-any.whl (553 kB)
+2026-07-09T12:42:49.21713037Z #40 12.23    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 553.3/553.3 kB 287.4 MB/s eta 0:00:00
+2026-07-09T12:42:49.21713313Z #40 12.24 Downloading idna-3.11-py3-none-any.whl (71 kB)
+2026-07-09T12:42:49.21713574Z #40 12.24    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 71.0/71.0 kB 262.1 MB/s eta 0:00:00
+2026-07-09T12:42:49.2171378Z #40 12.25 Downloading importlib_metadata-7.2.1-py3-none-any.whl (25 kB)
+2026-07-09T12:42:49.21713988Z #40 12.26 Downloading importlib_resources-6.5.2-py3-none-any.whl (37 kB)
+2026-07-09T12:42:49.21714289Z #40 12.26 Downloading jiter-0.13.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (360 kB)
+2026-07-09T12:42:49.21714483Z #40 12.27    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 360.7/360.7 kB 233.6 MB/s eta 0:00:00
+2026-07-09T12:42:49.21714677Z #40 12.28 Downloading json5-0.13.0-py3-none-any.whl (36 kB)
+2026-07-09T12:42:49.21714875Z #40 12.28 Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+2026-07-09T12:42:49.21715068Z #40 12.28    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 90.6/90.6 kB 246.6 MB/s eta 0:00:00
+2026-07-09T12:42:49.21715301Z #40 12.29 Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+2026-07-09T12:42:49.21715493Z #40 12.30 Downloading litellm-1.81.10-py3-none-any.whl (14.5 MB)
+2026-07-09T12:42:49.381889092Z #40 12.37    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.5/14.5 MB 213.7 MB/s eta 0:00:00
+2026-07-09T12:42:49.381930483Z #40 12.38 Downloading markdown_it_py-4.0.0-py3-none-any.whl (87 kB)
+2026-07-09T12:42:49.381934183Z #40 12.38    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 87.3/87.3 kB 272.3 MB/s eta 0:00:00
+2026-07-09T12:42:49.381937693Z #40 12.39 Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-07-09T12:42:49.381940073Z #40 12.40 Downloading mixpanel-5.0.0-py3-none-any.whl (23 kB)
+2026-07-09T12:42:49.381942623Z #40 12.41 Downloading mslex-1.3.0-py3-none-any.whl (7.8 kB)
+2026-07-09T12:42:49.381945853Z #40 12.42 Downloading multidict-6.7.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (256 kB)
+2026-07-09T12:42:49.381948313Z #40 12.42    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 256.3/256.3 kB 319.3 MB/s eta 0:00:00
+2026-07-09T12:42:49.381951013Z #40 12.43 Downloading networkx-3.4.2-py3-none-any.whl (1.7 MB)
+2026-07-09T12:42:49.381968163Z #40 12.44    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 234.6 MB/s eta 0:00:00
+2026-07-09T12:42:49.381971863Z #40 12.45 Downloading numpy-1.26.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.0 MB)
+2026-07-09T12:42:49.381974384Z #40 12.54    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.0/18.0 MB 207.4 MB/s eta 0:00:00
+2026-07-09T12:42:49.524585581Z #40 12.55 Downloading openai-2.20.0-py3-none-any.whl (1.1 MB)
+2026-07-09T12:42:49.524610212Z #40 12.56    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 223.3 MB/s eta 0:00:00
+2026-07-09T12:42:49.524615622Z #40 12.57 Downloading orjson-3.11.7-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (133 kB)
+2026-07-09T12:42:49.524619772Z #40 12.57    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 133.4/133.4 kB 195.3 MB/s eta 0:00:00
+2026-07-09T12:42:49.524623932Z #40 12.58 Downloading oslex-0.1.3-py3-none-any.whl (3.5 kB)
+2026-07-09T12:42:49.524627142Z #40 12.59 Downloading packaging-26.0-py3-none-any.whl (74 kB)
+2026-07-09T12:42:49.524629972Z #40 12.59    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.4/74.4 kB 131.8 MB/s eta 0:00:00
+2026-07-09T12:42:49.524632432Z #40 12.60 Downloading pathspec-1.0.4-py3-none-any.whl (55 kB)
+2026-07-09T12:42:49.524634782Z #40 12.61    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 55.2/55.2 kB 231.4 MB/s eta 0:00:00
+2026-07-09T12:42:49.524637363Z #40 12.62 Downloading pexpect-4.9.0-py2.py3-none-any.whl (63 kB)
+2026-07-09T12:42:49.524661763Z #40 12.62    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 63.8/63.8 kB 127.8 MB/s eta 0:00:00
+2026-07-09T12:42:49.524670783Z #40 12.63 Downloading pillow-12.1.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.0 MB)
+2026-07-09T12:42:49.633371595Z #40 12.68    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.0/7.0 MB 153.2 MB/s eta 0:00:00
+2026-07-09T12:42:49.633393765Z #40 12.69 Downloading posthog-7.8.6-py3-none-any.whl (194 kB)
+2026-07-09T12:42:49.633398745Z #40 12.70    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 194.8/194.8 kB 307.0 MB/s eta 0:00:00
+2026-07-09T12:42:49.633403375Z #40 12.70 Downloading prompt_toolkit-3.0.52-py3-none-any.whl (391 kB)
+2026-07-09T12:42:49.633407525Z #40 12.71    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 391.4/391.4 kB 186.5 MB/s eta 0:00:00
+2026-07-09T12:42:49.633412425Z #40 12.72 Downloading propcache-0.4.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (221 kB)
+2026-07-09T12:42:49.633416225Z #40 12.72    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 221.6/221.6 kB 178.4 MB/s eta 0:00:00
+2026-07-09T12:42:49.633419976Z #40 12.73 Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2026-07-09T12:42:49.633424156Z #40 12.74 Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+2026-07-09T12:42:49.633428436Z #40 12.74    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 463.6/463.6 kB 162.1 MB/s eta 0:00:00
+2026-07-09T12:42:49.633432136Z #40 12.75 Downloading pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2026-07-09T12:42:49.633445576Z #40 12.76    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 231.2 MB/s eta 0:00:00
+2026-07-09T12:42:49.633448996Z #40 12.77 Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2026-07-09T12:42:49.633453196Z #40 12.77    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 63.6/63.6 kB 285.7 MB/s eta 0:00:00
+2026-07-09T12:42:49.633457217Z #40 12.78 Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-07-09T12:42:49.744847993Z #40 12.79    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 168.2 MB/s eta 0:00:00
+2026-07-09T12:42:49.744872934Z #40 12.80 Downloading pypandoc-1.16.2-py3-none-any.whl (19 kB)
+2026-07-09T12:42:49.744877024Z #40 12.81 Downloading python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+2026-07-09T12:42:49.744880684Z #40 12.82 Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+2026-07-09T12:42:49.744883624Z #40 12.82    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 314.1 MB/s eta 0:00:00
+2026-07-09T12:42:49.744897114Z #40 12.83 Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+2026-07-09T12:42:49.744900804Z #40 12.84 Downloading regex-2026.1.15-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (803 kB)
+2026-07-09T12:42:49.744903924Z #40 12.85    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 803.6/803.6 kB 151.3 MB/s eta 0:00:00
+2026-07-09T12:42:49.744906685Z #40 12.86 Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+2026-07-09T12:42:49.744909794Z #40 12.86    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.7/64.7 kB 172.2 MB/s eta 0:00:00
+2026-07-09T12:42:49.744912805Z #40 12.87 Downloading rich-14.3.2-py3-none-any.whl (309 kB)
+2026-07-09T12:42:49.744915775Z #40 12.88    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 310.0/310.0 kB 219.5 MB/s eta 0:00:00
+2026-07-09T12:42:49.744919565Z #40 12.89 Downloading rpds_py-0.30.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (394 kB)
+2026-07-09T12:42:49.744922435Z #40 12.89    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 394.1/394.1 kB 219.5 MB/s eta 0:00:00
+2026-07-09T12:42:49.744925675Z #40 12.90 Downloading scipy-1.15.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (37.3 MB)
+2026-07-09T12:42:50.034053921Z #40 13.09    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 37.3/37.3 MB 208.1 MB/s eta 0:00:00
+2026-07-09T12:42:50.034086611Z #40 13.09 Downloading shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+2026-07-09T12:42:50.034090731Z #40 13.10 Downloading shtab-1.8.0-py3-none-any.whl (14 kB)
+2026-07-09T12:42:50.034093551Z #40 13.11 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-07-09T12:42:50.034096291Z #40 13.12 Downloading smmap-5.0.2-py3-none-any.whl (24 kB)
+2026-07-09T12:42:50.034098891Z #40 13.13 Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+2026-07-09T12:42:50.034101651Z #40 13.14 Downloading socksio-1.0.0-py3-none-any.whl (12 kB)
+2026-07-09T12:42:50.034104262Z #40 13.14 Downloading sounddevice-0.5.5-py3-none-any.whl (32 kB)
+2026-07-09T12:42:50.034107391Z #40 13.15 Downloading soundfile-0.13.1-py2.py3-none-manylinux_2_28_x86_64.whl (1.3 MB)
+2026-07-09T12:42:50.034128542Z #40 13.16    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 205.2 MB/s eta 0:00:00
+2026-07-09T12:42:50.034131332Z #40 13.17 Downloading soupsieve-2.8.3-py3-none-any.whl (37 kB)
+2026-07-09T12:42:50.034133892Z #40 13.18 Downloading starlette-0.52.1-py3-none-any.whl (74 kB)
+2026-07-09T12:42:50.034136562Z #40 13.18    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.3/74.3 kB 211.5 MB/s eta 0:00:00
+2026-07-09T12:42:50.034139252Z #40 13.19 Downloading tiktoken-0.12.0-cp312-cp312-manylinux_2_28_x86_64.whl (1.2 MB)
+2026-07-09T12:42:50.223795266Z #40 13.20    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 187.2 MB/s eta 0:00:00
+2026-07-09T12:42:50.223820176Z #40 13.21 Downloading tokenizers-0.22.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+2026-07-09T12:42:50.223823726Z #40 13.23    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 218.2 MB/s eta 0:00:00
+2026-07-09T12:42:50.223827806Z #40 13.23 Downloading tqdm-4.67.3-py3-none-any.whl (78 kB)
+2026-07-09T12:42:50.223835837Z #40 13.24    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.4/78.4 kB 229.5 MB/s eta 0:00:00
+2026-07-09T12:42:50.223839917Z #40 13.24 Downloading tree_sitter-0.25.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (635 kB)
+2026-07-09T12:42:50.223843057Z #40 13.25    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 635.4/635.4 kB 198.6 MB/s eta 0:00:00
+2026-07-09T12:42:50.223846317Z #40 13.26 Downloading tree_sitter_c_sharp-0.23.1-cp310-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (358 kB)
+2026-07-09T12:42:50.223849067Z #40 13.26    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 358.3/358.3 kB 208.4 MB/s eta 0:00:00
+2026-07-09T12:42:50.223851877Z #40 13.27 Downloading tree_sitter_embedded_template-0.25.0-cp310-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (18 kB)
+2026-07-09T12:42:50.223854847Z #40 13.28 Downloading tree_sitter_language_pack-0.13.0-cp310-abi3-manylinux2014_x86_64.whl (20.0 MB)
+2026-07-09T12:42:50.223857837Z #40 13.38    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 20.0/20.0 MB 217.0 MB/s eta 0:00:00
+2026-07-09T12:42:50.455409241Z #40 13.39 Downloading tree_sitter_yaml-0.7.2-cp310-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (91 kB)
+2026-07-09T12:42:50.455430061Z #40 13.39    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 91.4/91.4 kB 275.6 MB/s eta 0:00:00
+2026-07-09T12:42:50.455435041Z #40 13.40 Downloading typer-0.23.0-py3-none-any.whl (56 kB)
+2026-07-09T12:42:50.455439381Z #40 13.40    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 56.7/56.7 kB 196.0 MB/s eta 0:00:00
+2026-07-09T12:42:50.455443971Z #40 13.41 Downloading typer_slim-0.23.0-py3-none-any.whl (3.4 kB)
+2026-07-09T12:42:50.455447721Z #40 13.42 Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-07-09T12:42:50.455451381Z #40 13.42    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.6/44.6 kB 182.0 MB/s eta 0:00:00
+2026-07-09T12:42:50.455469542Z #40 13.43 Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+2026-07-09T12:42:50.455472282Z #40 13.44 Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+2026-07-09T12:42:50.455475392Z #40 13.44    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.6/131.6 kB 297.8 MB/s eta 0:00:00
+2026-07-09T12:42:50.455478582Z #40 13.45 Downloading watchfiles-1.1.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+2026-07-09T12:42:50.455481052Z #40 13.45    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 456.8/456.8 kB 303.9 MB/s eta 0:00:00
+2026-07-09T12:42:50.455497733Z #40 13.46 Downloading yarl-1.22.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (377 kB)
+2026-07-09T12:42:50.455502042Z #40 13.46    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 377.3/377.3 kB 269.2 MB/s eta 0:00:00
+2026-07-09T12:42:51.471517631Z #40 14.63 Installing collected packages: urllib3, typing-extensions, tree-sitter-yaml, tree-sitter-embedded-template, tree-sitter-c-sharp, tree-sitter, tqdm, soupsieve, socksio, sniffio, smmap, six, shtab, shellingham, rpds-py, regex, pyyaml, python-dotenv, pypandoc, pygments, pyflakes, pycodestyle, propcache, prompt-toolkit, pillow, pexpect, pathspec, packaging, orjson, numpy, networkx, multidict, mslex, mccabe, markdown-it-py, json5, jiter, importlib-resources, importlib-metadata, idna, hf-xet, fsspec, frozenlist, filelock, fastuuid, diskcache, diff-match-patch, configargparse, click, charset-normalizer, cffi, certifi, backoff, attrs, asgiref, annotated-types, annotated-doc, aiohappyeyeballs, yarl, typing-inspection, tree-sitter-language-pack, soundfile, sounddevice, scipy, rich, requests, referencing, pydantic-core, oslex, httpcore, gitdb, flake8, beautifulsoup4, anyio, aiosignal, watchfiles, typer, tiktoken, starlette, pydantic, posthog, jsonschema-specifications, httpx, grep-ast, gitpython, aiohttp, typer-slim, openai, mixpanel, jsonschema, fastapi, huggingface-hub, tokenizers, litellm, aider-chat
+2026-07-09T12:42:51.651400874Z #40 14.63   Attempting uninstall: urllib3
+2026-07-09T12:42:51.651428824Z #40 14.66     Found existing installation: urllib3 2.0.7
+2026-07-09T12:42:55.547048669Z #40 DONE 18.7s
+2026-07-09T12:42:55.70003813Z 
+2026-07-09T12:42:55.700065111Z #41 [final 21/54] RUN curl -fsSL       "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"       -o /usr/local/bin/cloudflared   && chmod +x /usr/local/bin/cloudflared   && cloudflared --version 2>/dev/null || true
+2026-07-09T12:42:56.498741997Z #41 0.949 cloudflared version 2026.7.0 (built 2026-07-08-13:04 UTC)
+2026-07-09T12:42:56.723944431Z #41 DONE 1.0s
+2026-07-09T12:42:56.723970181Z 
+2026-07-09T12:42:56.723978331Z #42 [final 22/54] RUN curl -fsSL       "https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz"       -o /tmp/bore.tar.gz   && tar xzf /tmp/bore.tar.gz -C /usr/local/bin/   && chmod +x /usr/local/bin/bore   && rm /tmp/bore.tar.gz   && bore --version 2>/dev/null || true
+2026-07-09T12:42:57.084875051Z #42 0.511 bore-cli 0.5.0
+2026-07-09T12:42:57.300084729Z #42 DONE 0.6s
+2026-07-09T12:42:57.300105689Z 
+2026-07-09T12:42:57.300111119Z #43 [final 23/54] RUN curl -fsSL "https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64"       -o /usr/local/bin/ttyd   && chmod +x /usr/local/bin/ttyd   && ttyd --version || true
+2026-07-09T12:42:57.629262337Z #43 0.479 ttyd version 1.7.7-40e79c7
+2026-07-09T12:42:57.895468542Z #43 DONE 0.7s
+2026-07-09T12:42:58.025336008Z 
+2026-07-09T12:42:58.025363728Z #44 [final 24/54] RUN mkdir -p /etc/apt/keyrings   && curl -fsSL "https://deb.nodesource.com/setup_24.x" | bash -   && apt-get install -y --no-install-recommends nodejs   && apt-get clean   && rm -rf /var/lib/apt/lists/*   && node --version && npm --version
+2026-07-09T12:42:58.025377229Z #44 0.129 2026-07-09 12:42:58 - Installing pre-requisites
+2026-07-09T12:42:58.181170217Z #44 0.134 
+2026-07-09T12:42:58.181189258Z #44 0.134 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+2026-07-09T12:42:58.181193408Z #44 0.134 
+2026-07-09T12:42:58.223113498Z #44 0.326 Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+2026-07-09T12:42:58.379377787Z #44 0.483 Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-07-09T12:42:58.686835918Z #44 0.790 Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-07-09T12:42:58.804117256Z #44 0.907 Get:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-07-09T12:42:58.922036917Z #44 1.025 Get:5 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+2026-07-09T12:42:59.030075415Z #44 1.133 Get:6 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+2026-07-09T12:42:59.137298776Z #44 1.160 Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1,808 kB]
+2026-07-09T12:42:59.137312416Z #44 1.241 Get:8 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,022 kB]
+2026-07-09T12:42:59.374626838Z #44 1.328 Get:9 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+2026-07-09T12:42:59.630354938Z #44 1.734 Get:10 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [49.5 kB]
+2026-07-09T12:42:59.866245881Z #44 1.735 Get:11 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2,112 kB]
+2026-07-09T12:42:59.866262721Z #44 1.757 Get:12 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1,490 kB]
+2026-07-09T12:42:59.866266412Z #44 1.783 Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,343 kB]
+2026-07-09T12:42:59.866268981Z #44 1.819 Get:14 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [671 B]
+2026-07-09T12:42:59.866272001Z #44 1.819 Get:15 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [48.9 kB]
+2026-07-09T12:42:59.866276492Z #44 1.819 Get:16 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [35.9 kB]
+2026-07-09T12:42:59.981371515Z #44 2.085 Get:17 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [43.8 kB]
+2026-07-09T12:43:00.1360416Z #44 2.089 Get:18 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1,417 kB]
+2026-07-09T12:43:00.180194286Z #44 2.284 Get:19 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1,491 kB]
+2026-07-09T12:43:00.51596315Z #44 2.619 Fetched 31.3 MB in 2s (12.7 MB/s)
+2026-07-09T12:43:01.231842977Z #44 2.619 Reading package lists...
+2026-07-09T12:43:01.424547943Z #44 3.350 Building dependency tree...
+2026-07-09T12:43:01.605665541Z #44 3.528 Reading state information...
+2026-07-09T12:43:01.605696882Z #44 3.542 All packages are up to date.
+2026-07-09T12:43:01.605700632Z #44 3.553 
+2026-07-09T12:43:01.605703992Z #44 3.553 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+2026-07-09T12:43:01.605706582Z #44 3.553 
+2026-07-09T12:43:02.166974185Z #44 3.559 Reading package lists...
+2026-07-09T12:43:02.379141501Z #44 4.284 Building dependency tree...
+2026-07-09T12:43:02.530353945Z #44 4.482 Reading state information...
+2026-07-09T12:43:02.566467107Z #44 4.670 apt-transport-https is already the newest version (2.8.3).
+2026-07-09T12:43:02.566491347Z #44 4.670 ca-certificates is already the newest version (20260601~24.04.1).
+2026-07-09T12:43:02.566516837Z #44 4.670 curl is already the newest version (8.5.0-2ubuntu10.10).
+2026-07-09T12:43:02.566519648Z #44 4.670 gnupg is already the newest version (2.4.4-2ubuntu17.4).
+2026-07-09T12:43:02.809038047Z #44 4.912 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+2026-07-09T12:43:02.980765022Z #44 5.084 
+2026-07-09T12:43:02.980782822Z #44 5.084 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+2026-07-09T12:43:02.980786082Z #44 5.084 
+2026-07-09T12:43:03.102351168Z #44 5.206 Get:1 https://deb.nodesource.com/node_24.x nodistro InRelease [12.1 kB]
+2026-07-09T12:43:03.251134463Z #44 5.274 Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+2026-07-09T12:43:03.251154943Z #44 5.278 Get:3 https://deb.nodesource.com/node_24.x nodistro/main amd64 Packages [7,526 B]
+2026-07-09T12:43:03.251159333Z #44 5.354 Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+2026-07-09T12:43:03.460678505Z #44 5.432 Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+2026-07-09T12:43:03.460699005Z #44 5.435 Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+2026-07-09T12:43:03.460705685Z #44 5.564 Fetched 19.7 kB in 0s (43.2 kB/s)
+2026-07-09T12:43:04.220708318Z #44 5.564 Reading package lists...
+2026-07-09T12:43:04.447669638Z #44 6.343 Building dependency tree...
+2026-07-09T12:43:04.631800838Z #44 6.551 Reading state information...
+2026-07-09T12:43:04.631828119Z #44 6.565 All packages are up to date.
+2026-07-09T12:43:04.631832529Z #44 6.574 2026-07-09 12:43:04 - Repository configured successfully.
+2026-07-09T12:43:04.631836379Z #44 6.575 2026-07-09 12:43:04 - To install Node.js, run: apt install nodejs -y
+2026-07-09T12:43:04.631840639Z #44 6.577 2026-07-09 12:43:04 - You can use N|solid Runtime as a node.js alternative
+2026-07-09T12:43:04.631844249Z #44 6.578 2026-07-09 12:43:04 - To install N|solid Runtime, run: apt install nsolid -y 
+2026-07-09T12:43:04.631847269Z #44 6.578 
+2026-07-09T12:43:05.330907831Z #44 6.585 Reading package lists...
+2026-07-09T12:43:05.752588428Z #44 7.456 Building dependency tree...
+2026-07-09T12:43:05.903754102Z #44 7.856 Reading state information...
+2026-07-09T12:43:06.402198325Z #44 8.505 The following NEW packages will be installed:
+2026-07-09T12:43:06.514028431Z #44 8.506   nodejs
+2026-07-09T12:43:06.514058861Z #44 8.617 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+2026-07-09T12:43:06.514065901Z #44 8.617 Need to get 38.7 MB of archives.
+2026-07-09T12:43:06.514072292Z #44 8.617 After this operation, 238 MB of additional disk space will be used.
+2026-07-09T12:43:06.514092892Z #44 8.617 Get:1 https://deb.nodesource.com/node_24.x nodistro/main amd64 nodejs amd64 24.18.0-1nodesource1 [38.7 MB]
+2026-07-09T12:43:07.065682536Z #44 9.169 debconf: delaying package configuration, since apt-utils is not installed
+2026-07-09T12:43:07.167816983Z #44 9.210 Fetched 38.7 MB in 0s (81.6 MB/s)
+2026-07-09T12:43:07.167841694Z #44 9.241 Selecting previously unselected package nodejs.
+2026-07-09T12:43:07.328862289Z #44 9.241 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 56872 files and directories currently installed.)
+2026-07-09T12:43:07.32889882Z #44 9.277 Preparing to unpack .../nodejs_24.18.0-1nodesource1_amd64.deb ...
+2026-07-09T12:43:07.32890381Z #44 9.282 Unpacking nodejs (24.18.0-1nodesource1) ...
+2026-07-09T12:43:09.196266468Z #44 11.30 Setting up nodejs (24.18.0-1nodesource1) ...
+2026-07-09T12:43:09.357233132Z #44 11.31 Processing triggers for man-db (2.12.0-4build2) ...
+2026-07-09T12:43:09.357248833Z #44 11.46 v24.18.0
+2026-07-09T12:43:09.591753587Z #44 11.54 11.16.0
+2026-07-09T12:43:09.935414902Z #44 DONE 12.0s
+2026-07-09T12:43:10.087067926Z 
+2026-07-09T12:43:10.087094276Z #45 [final 25/54] RUN install -m 0755 -d /etc/apt/keyrings   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg        | gpg --dearmor -o /etc/apt/keyrings/docker.gpg   && chmod a+r /etc/apt/keyrings/docker.gpg   && echo "deb [arch=$(dpkg --print-architecture)        signed-by=/etc/apt/keyrings/docker.gpg]        https://download.docker.com/linux/ubuntu        $(lsb_release -cs) stable"        > /etc/apt/sources.list.d/docker.list   && apt-get update   && apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin   && apt-get clean   && rm -rf /var/lib/apt/lists/*
+2026-07-09T12:43:10.187975308Z #45 0.251 Get:1 https://download.docker.com/linux/ubuntu noble InRelease [48.5 kB]
+2026-07-09T12:43:10.291980803Z #45 0.299 Get:2 https://deb.nodesource.com/node_24.x nodistro InRelease [12.1 kB]
+2026-07-09T12:43:10.292004133Z #45 0.328 Get:3 https://download.docker.com/linux/ubuntu noble/stable amd64 Packages [71.7 kB]
+2026-07-09T12:43:10.292009894Z #45 0.355 Get:4 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+2026-07-09T12:43:10.47207461Z #45 0.385 Get:5 https://deb.nodesource.com/node_24.x nodistro/main amd64 Packages [7,526 B]
+2026-07-09T12:43:10.496181075Z #45 0.560 Get:6 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-07-09T12:43:10.735160932Z #45 0.799 Get:7 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-07-09T12:43:10.84710353Z #45 0.911 Get:8 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-07-09T12:43:10.958692891Z #45 1.022 Get:9 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+2026-07-09T12:43:11.201739581Z #45 1.115 Get:10 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1,808 kB]
+2026-07-09T12:43:11.246766675Z #45 1.310 Get:11 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+2026-07-09T12:43:11.442386311Z #45 1.315 Get:12 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+2026-07-09T12:43:11.442404272Z #45 1.355 Get:13 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,022 kB]
+2026-07-09T12:43:11.675971617Z #45 1.739 Get:14 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1,490 kB]
+2026-07-09T12:43:11.912805489Z #45 1.757 Get:15 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,343 kB]
+2026-07-09T12:43:11.91282465Z #45 1.777 Get:16 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2,112 kB]
+2026-07-09T12:43:11.91282843Z #45 1.825 Get:17 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [49.5 kB]
+2026-07-09T12:43:11.91283183Z #45 1.825 Get:18 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [48.9 kB]
+2026-07-09T12:43:11.91283678Z #45 1.826 Get:19 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [35.9 kB]
+2026-07-09T12:43:11.91283995Z #45 1.826 Get:20 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [671 B]
+2026-07-09T12:43:12.171550471Z #45 2.235 Get:21 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [43.8 kB]
+2026-07-09T12:43:12.326274408Z #45 2.239 Get:22 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1,491 kB]
+2026-07-09T12:43:12.388168139Z #45 2.452 Get:23 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1,417 kB]
+2026-07-09T12:43:12.588606064Z #45 2.652 Fetched 31.4 MB in 2s (12.9 MB/s)
+2026-07-09T12:43:13.327703378Z #45 2.652 Reading package lists...
+2026-07-09T12:43:14.09738587Z #45 3.414 Reading package lists...
+2026-07-09T12:43:14.328173238Z #45 4.175 Building dependency tree...
+2026-07-09T12:43:14.479039416Z #45 4.392 Reading state information...
+2026-07-09T12:43:14.492602054Z #45 4.556 Suggested packages:
+2026-07-09T12:43:14.493011192Z #45 4.556   docker-model-plugin
+2026-07-09T12:43:14.493019613Z #45 4.556 Recommended packages:
+2026-07-09T12:43:14.493024983Z #45 4.556   docker-buildx-plugin
+2026-07-09T12:43:14.727297053Z #45 4.600 The following NEW packages will be installed:
+2026-07-09T12:43:14.727317503Z #45 4.601   docker-ce-cli docker-compose-plugin
+2026-07-09T12:43:14.727323063Z #45 4.652 0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.
+2026-07-09T12:43:14.727327463Z #45 4.652 Need to get 25.0 MB of archives.
+2026-07-09T12:43:14.727331943Z #45 4.652 After this operation, 78.3 MB of additional disk space will be used.
+2026-07-09T12:43:14.727336873Z #45 4.652 Get:1 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce-cli amd64 5:29.6.1-1~ubuntu.24.04~noble [16.9 MB]
+2026-07-09T12:43:14.727342003Z #45 4.791 Get:2 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-compose-plugin amd64 5.3.1-1~ubuntu.24.04~noble [8,100 kB]
+2026-07-09T12:43:14.971573688Z #45 5.035 debconf: delaying package configuration, since apt-utils is not installed
+2026-07-09T12:43:15.08470387Z #45 5.083 Fetched 25.0 MB in 0s (107 MB/s)
+2026-07-09T12:43:15.084723201Z #45 5.134 Selecting previously unselected package docker-ce-cli.
+2026-07-09T12:43:15.272753081Z #45 5.134 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 62633 files and directories currently installed.)
+2026-07-09T12:43:15.272771752Z #45 5.176 Preparing to unpack .../docker-ce-cli_5%3a29.6.1-1~ubuntu.24.04~noble_amd64.deb ...
+2026-07-09T12:43:15.272777001Z #45 5.186 Unpacking docker-ce-cli (5:29.6.1-1~ubuntu.24.04~noble) ...
+2026-07-09T12:43:15.667180939Z #45 5.731 Selecting previously unselected package docker-compose-plugin.
+2026-07-09T12:43:15.830847289Z #45 5.736 Preparing to unpack .../docker-compose-plugin_5.3.1-1~ubuntu.24.04~noble_amd64.deb ...
+2026-07-09T12:43:15.830865399Z #45 5.744 Unpacking docker-compose-plugin (5.3.1-1~ubuntu.24.04~noble) ...
+2026-07-09T12:43:16.202883907Z #45 6.266 Setting up docker-compose-plugin (5.3.1-1~ubuntu.24.04~noble) ...
+2026-07-09T12:43:16.401103227Z #45 6.291 Setting up docker-ce-cli (5:29.6.1-1~ubuntu.24.04~noble) ...
+2026-07-09T12:43:16.401122947Z #45 6.314 Processing triggers for man-db (2.12.0-4build2) ...
+2026-07-09T12:43:17.854720401Z #45 DONE 7.9s
+2026-07-09T12:43:18.012822917Z 
+2026-07-09T12:43:18.012846527Z #46 [final 26/54] RUN if getent group 1000 > /dev/null; then       EXISTING_GROUP=$(getent group 1000 | cut -d: -f1);     else       groupadd --gid 1000 devuser;       EXISTING_GROUP=devuser;     fi   && if getent passwd 1000 > /dev/null; then        EXISTING_USER=$(getent passwd 1000 | cut -d: -f1);        usermod -l devuser -d /home/devuser -m -s /bin/bash "${EXISTING_USER}" 2>/dev/null || true;      else        useradd          --uid 1000          --gid "${EXISTING_GROUP}"          --shell /bin/bash          --create-home          --home-dir /home/devuser          devuser;      fi   && mkdir -p /home/devuser   && echo "devuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/devuser   && chmod 0440 /etc/sudoers.d/devuser   && passwd -l devuser   && passwd -l root   && mkdir -p /home/devuser/go/bin   && cp /root/go/bin/* /home/devuser/go/bin/ 2>/dev/null || true   && chown -R 1000:1000 /home/devuser
+2026-07-09T12:43:18.100470476Z #46 0.238 passwd: password changed.
+2026-07-09T12:43:18.270845654Z #46 0.258 passwd: password changed.
+2026-07-09T12:49:19.800384857Z #46 DONE 361.9s
+2026-07-09T12:49:19.958918854Z 
+2026-07-09T12:49:19.958942455Z #47 [final 27/54] RUN mkdir -p /var/run/sshd /etc/ssh/host_keys   && chmod 700 /var/run/sshd
+2026-07-09T12:49:20.791697757Z #47 DONE 1.0s
+2026-07-09T12:49:20.892020798Z 
+2026-07-09T12:49:20.892041659Z #48 [final 28/54] COPY ssh-container/config/sshd_config /etc/ssh/sshd_config
+2026-07-09T12:49:20.892045769Z #48 DONE 0.0s
+2026-07-09T12:49:20.892048949Z 
+2026-07-09T12:49:20.892052919Z #49 [final 29/54] RUN chmod 600 /etc/ssh/sshd_config
+2026-07-09T12:49:20.892056179Z #49 DONE 0.1s
+2026-07-09T12:49:21.004366447Z 
+2026-07-09T12:49:21.004393438Z #50 [final 30/54] COPY ssh-container/config/torrc /etc/tor/torrc
+2026-07-09T12:49:21.004398358Z #50 DONE 0.0s
+2026-07-09T12:49:21.004402588Z 
+2026-07-09T12:49:21.004407058Z #51 [final 31/54] RUN mkdir -p /var/log/tor /var/lib/tor   && chown -R debian-tor:debian-tor /var/log/tor /var/lib/tor 2>/dev/null || true
+2026-07-09T12:49:21.004411058Z #51 DONE 0.1s
+2026-07-09T12:49:21.167260674Z 
+2026-07-09T12:49:21.167285795Z #52 [final 32/54] COPY ssh-container/config/proxychains4.conf /etc/proxychains4.conf
+2026-07-09T12:49:21.167290065Z #52 DONE 0.0s
+2026-07-09T12:49:21.167293165Z 
+2026-07-09T12:49:21.167296535Z #53 [final 33/54] COPY ssh-container/config/fail2ban/jail.local /etc/fail2ban/jail.local
+2026-07-09T12:49:21.167299815Z #53 DONE 0.0s
+2026-07-09T12:49:21.167302715Z 
+2026-07-09T12:49:21.167306465Z #54 [final 34/54] COPY ssh-container/config/logrotate.d/ssh-container /etc/logrotate.d/ssh-container
+2026-07-09T12:49:21.167309545Z #54 DONE 0.0s
+2026-07-09T12:49:21.167312435Z 
+2026-07-09T12:49:21.167316055Z #55 [final 35/54] COPY ssh-container/config/motd /etc/motd
+2026-07-09T12:49:21.167319126Z #55 DONE 0.0s
+2026-07-09T12:49:21.167323335Z 
+2026-07-09T12:49:21.167328976Z #56 [final 36/54] RUN chmod 644 /etc/motd
+2026-07-09T12:49:21.167334036Z #56 DONE 0.1s
+2026-07-09T12:49:21.382969387Z 
+2026-07-09T12:49:21.382992837Z #57 [final 37/54] COPY ssh-container/config/bashrc_extra   /home/devuser/.bashrc_extra
+2026-07-09T12:49:21.382996727Z #57 DONE 0.0s
+2026-07-09T12:49:21.382999847Z 
+2026-07-09T12:49:21.383004038Z #58 [final 38/54] COPY ssh-container/config/aider.conf.yml /home/devuser/.aider.conf.yml
+2026-07-09T12:49:21.383007228Z #58 DONE 0.0s
+2026-07-09T12:49:21.383010198Z 
+2026-07-09T12:49:21.383014018Z #59 [final 39/54] RUN cat /home/devuser/.bashrc_extra >> /home/devuser/.bashrc   && chown 1000:1000 /home/devuser/.bashrc   && chown 1000:1000 /home/devuser/.bashrc_extra   && chown 1000:1000 /home/devuser/.aider.conf.yml
+2026-07-09T12:49:21.383017218Z #59 DONE 0.1s
+2026-07-09T12:49:21.553482191Z 
+2026-07-09T12:49:21.553511471Z #60 [final 40/54] COPY ssh-container/scripts/auto-install.sh /auto-install.sh
+2026-07-09T12:49:21.553517282Z #60 DONE 0.0s
+2026-07-09T12:49:21.553521202Z 
+2026-07-09T12:49:21.553535922Z #61 [final 41/54] RUN chmod +x /auto-install.sh
+2026-07-09T12:49:21.553538552Z #61 DONE 0.1s
+2026-07-09T12:49:21.698808427Z 
+2026-07-09T12:49:21.698831797Z #62 [final 42/54] RUN mkdir -p /scripts
+2026-07-09T12:49:21.698837088Z #62 DONE 0.1s
+2026-07-09T12:49:21.698841628Z 
+2026-07-09T12:49:21.698846208Z #63 [final 43/54] COPY ssh-container/scripts/dan-agents.sh    /scripts/dan-agents.sh
+2026-07-09T12:49:21.698850638Z #63 DONE 0.0s
+2026-07-09T12:49:21.844123073Z 
+2026-07-09T12:49:21.844143283Z #64 [final 44/54] COPY ssh-container/scripts/dotfiles-sync.sh /scripts/dotfiles-sync.sh
+2026-07-09T12:49:21.844147234Z #64 DONE 0.0s
+2026-07-09T12:49:21.844150394Z 
+2026-07-09T12:49:21.844153894Z #65 [final 45/54] COPY ssh-container/scripts/agent-memory.sh  /scripts/agent-memory.sh
+2026-07-09T12:49:21.844157164Z #65 DONE 0.0s
+2026-07-09T12:49:21.844160024Z 
+2026-07-09T12:49:21.844163124Z #66 [final 46/54] COPY ssh-container/scripts/bore-watchdog.sh /scripts/bore-watchdog.sh
+2026-07-09T12:49:21.844166204Z #66 DONE 0.0s
+2026-07-09T12:49:21.970281995Z 
+2026-07-09T12:49:21.970303616Z #67 [final 47/54] RUN chmod +x /scripts/dan-agents.sh /scripts/dotfiles-sync.sh /scripts/agent-memory.sh /scripts/bore-watchdog.sh   && ln -sf /scripts/dan-agents.sh    /usr/local/bin/dan-agents   && ln -sf /scripts/dotfiles-sync.sh /usr/local/bin/dotfiles-sync   && ln -sf /scripts/agent-memory.sh  /usr/local/bin/dan-memory
+2026-07-09T12:49:21.970307766Z #67 DONE 0.1s
+2026-07-09T12:49:22.109367284Z 
+2026-07-09T12:49:22.109394804Z #68 [final 48/54] COPY ssh-container/scripts/entrypoint.sh    /entrypoint.sh
+2026-07-09T12:49:22.109399814Z #68 DONE 0.0s
+2026-07-09T12:49:22.109403714Z 
+2026-07-09T12:49:22.109407734Z #69 [final 49/54] COPY ssh-container/scripts/healthcheck.sh   /healthcheck.sh
+2026-07-09T12:49:22.109411734Z #69 DONE 0.0s
+2026-07-09T12:49:22.109415674Z 
+2026-07-09T12:49:22.109419535Z #70 [final 50/54] COPY ssh-container/scripts/firewall-init.sh /firewall-init.sh
+2026-07-09T12:49:22.109423465Z #70 DONE 0.0s
+2026-07-09T12:49:22.217277441Z 
+2026-07-09T12:49:22.217303922Z #71 [final 51/54] RUN chmod +x /entrypoint.sh /healthcheck.sh /firewall-init.sh
+2026-07-09T12:49:22.217308972Z #71 DONE 0.1s
+2026-07-09T12:49:22.346498026Z 
+2026-07-09T12:49:22.346523797Z #72 [final 52/54] WORKDIR /app
+2026-07-09T12:49:22.346528547Z #72 DONE 0.0s
+2026-07-09T12:49:22.346532427Z 
+2026-07-09T12:49:22.346536937Z #73 [final 53/54] COPY --from=webbuild /workspace/artifacts/api-server/dist    ./dist
+2026-07-09T12:49:22.346540827Z #73 DONE 0.1s
+2026-07-09T12:49:22.567967307Z 
+2026-07-09T12:49:22.567990638Z #74 [final 54/54] COPY --from=webbuild /workspace/artifacts/dan-ui/dist/public ./public
+2026-07-09T12:49:22.567996128Z #74 DONE 0.1s
+2026-07-09T12:49:22.568000328Z 
+2026-07-09T12:49:22.568004808Z #75 exporting to image
+2026-07-09T12:49:22.568008958Z #75 exporting layers
+2026-07-09T12:51:26.592429015Z #75 exporting layers 124.2s done
+2026-07-09T12:51:26.778474879Z #75 pushing layers
+2026-07-09T12:51:26.77849462Z #75 ...
+2026-07-09T12:51:26.77849818Z 
+2026-07-09T12:51:26.77850254Z #76 exporting cache to registry
+2026-07-09T12:51:26.77850665Z #76 preparing build cache for export
+2026-07-09T12:52:16.438094711Z #76 ...
+2026-07-09T12:52:16.438143082Z 
+2026-07-09T12:52:16.438151832Z #75 exporting to image
+2026-07-09T12:52:16.438158622Z #75 pushing layers 49.8s done
+2026-07-09T12:52:16.863975446Z #75 DONE 174.4s
+2026-07-09T12:52:16.863999326Z 
+2026-07-09T12:52:16.864005626Z #76 exporting cache to registry
+2026-07-09T12:52:46.698637049Z #76 sending cache export
+2026-07-09T12:52:52.985557799Z #76 sending cache export 6.3s done
+2026-07-09T12:52:52.98559578Z #76 DONE 86.4s
+2026-07-09T12:52:53.097771256Z ------
+2026-07-09T12:52:53.097792357Z  > importing cache manifest
+2026-07-09T12:52:53.097796046Z ------
+2026-07-09T12:52:57.273156248Z ==> Deploying...
+2026-07-09T12:52:57.347871453Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-07-09T12:56:41.93498634Z [2026-07-09T12:56:41Z] [INFO]  ======================================================================
+2026-07-09T12:56:41.986137432Z [2026-07-09T12:56:41Z] [INFO]   D.A.N. — Dynamic Access Node — starting
+2026-07-09T12:56:41.98835269Z [2026-07-09T12:56:41Z] [INFO]  ======================================================================
+2026-07-09T12:56:42.086178478Z [2026-07-09T12:56:41Z] [INFO]   Hostname:  srv-d97cvpgk1i2s73dd88p0-hibernate-77744f4b9c-8l95j
+2026-07-09T12:56:42.088284644Z [2026-07-09T12:56:42Z] [INFO]   User:      devuser
+2026-07-09T12:56:42.090152386Z [2026-07-09T12:56:42Z] [INFO]   Built on:  Ubuntu 24.04
+2026-07-09T12:56:42.091954167Z [2026-07-09T12:56:42Z] [INFO]  ======================================================================
+2026-07-09T12:56:42.186325416Z [2026-07-09T12:56:42Z] [INFO]  Checking SSH host keys in /etc/ssh/host_keys ...
+2026-07-09T12:56:42.190990615Z [2026-07-09T12:56:42Z] [INFO]  Generating rsa host key ...
+2026-07-09T12:56:43.686466323Z ==> No open ports detected, continuing to scan...
+2026-07-09T12:56:43.807856853Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-07-09T12:56:46.388612809Z [2026-07-09T12:56:46Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_rsa_key
+2026-07-09T12:56:46.390744115Z [2026-07-09T12:56:46Z] [INFO]  Generating ed25519 host key ...
+2026-07-09T12:56:46.489293806Z [2026-07-09T12:56:46Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_ed25519_key
+2026-07-09T12:56:46.491556225Z [2026-07-09T12:56:46Z] [INFO]  Generating ecdsa host key ...
+2026-07-09T12:56:46.593302371Z [2026-07-09T12:56:46Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_ecdsa_key
+2026-07-09T12:56:46.596466455Z [2026-07-09T12:56:46Z] [INFO]  Ensuring home directory structure for devuser ...
+2026-07-09T12:56:46.69465615Z /entrypoint.sh: line 94: [[: 0
+2026-07-09T12:56:46.6946741Z 0: syntax error in expression (error token is "0")
+2026-07-09T12:56:46.697049671Z [2026-07-09T12:56:46Z] [INFO]  Found 0
+2026-07-09T12:56:46.697065021Z 0 authorized SSH key(s).
+2026-07-09T12:56:46.800955403Z chown: invalid group: ‘devuser:devuser’
+2026-07-09T12:56:48.303664794Z ==> Exited with status 1
+2026-07-09T12:56:48.306189528Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2026-07-09T12:57:44.770021041Z ==> No open ports detected, continuing to scan...
+2026-07-09T12:57:44.93670096Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
