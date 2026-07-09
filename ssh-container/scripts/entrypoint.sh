@@ -317,6 +317,13 @@ if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
   else
     warn "bore tunnel failed — check ${LOG_DIR}/bore.log"
   fi
+
+  # Watchdog: bore.pub connections can drop over time — auto-respawn if it dies.
+  log "Starting bore watchdog (auto-restarts tunnel if it drops) ..."
+  DEV_USER="${DEV_USER}" LOG_DIR="${LOG_DIR}" BORE_SECRET="${BORE_SECRET}" \
+    /scripts/bore-watchdog.sh >>"${LOG_DIR}/bore-watchdog.log" 2>&1 &
+  WATCHDOG_PID=$!
+  log "bore watchdog running (PID ${WATCHDOG_PID})"
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
