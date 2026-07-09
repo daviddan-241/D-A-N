@@ -410,7 +410,8 @@ RUN mkdir -p /scripts
 COPY ssh-container/scripts/dan-agents.sh    /scripts/dan-agents.sh
 COPY ssh-container/scripts/dotfiles-sync.sh /scripts/dotfiles-sync.sh
 COPY ssh-container/scripts/agent-memory.sh  /scripts/agent-memory.sh
-RUN chmod +x /scripts/dan-agents.sh /scripts/dotfiles-sync.sh /scripts/agent-memory.sh \
+COPY ssh-container/scripts/bore-watchdog.sh /scripts/bore-watchdog.sh
+RUN chmod +x /scripts/dan-agents.sh /scripts/dotfiles-sync.sh /scripts/agent-memory.sh /scripts/bore-watchdog.sh \
   && ln -sf /scripts/dan-agents.sh    /usr/local/bin/dan-agents \
   && ln -sf /scripts/dotfiles-sync.sh /usr/local/bin/dotfiles-sync \
   && ln -sf /scripts/agent-memory.sh  /usr/local/bin/dan-memory
