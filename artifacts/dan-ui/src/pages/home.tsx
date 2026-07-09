@@ -88,7 +88,7 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 16 },
-  show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 30 } },
+  show:   { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 400, damping: 30 } },
 };
 
 export function Home() {
@@ -356,7 +356,15 @@ export function Home() {
         </p>
         <CodeBlock
           label="SSH"
-          code="ssh -i ~/.ssh/dan_ed25519 devuser@dan.local"
+          code={
+            status?.tunnel.bore.running && status.tunnel.bore.connectCommand
+              ? status.tunnel.bore.connectCommand
+              : status?.tunnel.cloudflare.running
+              ? `ssh -o "ProxyCommand cloudflared access ssh --hostname %h" devuser@<your-tunnel-host>`
+              : statusLoading
+              ? 'Fetching SSH command…'
+              : 'ssh -p <port> devuser@bore.pub  # see /connect for setup'
+          }
         />
       </motion.div>
 

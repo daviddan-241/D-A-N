@@ -150,11 +150,11 @@ python3 -c "import impacket; print('impacket', impacket.__version__)" 2>>"${LOG}
 
 # ── Fix ownership ─────────────────────────────────────────────────────────────
 log "Fixing ownership of ${HOME_DIR} ..."
-chown -R "${DEV_USER}:${DEV_USER}" "${HOME_DIR}"
+chown -R "$(id -u "${DEV_USER}" 2>/dev/null || echo 1000):$(id -g "${DEV_USER}" 2>/dev/null || echo 1000)" "${HOME_DIR}"
 
 # ── Mark complete ─────────────────────────────────────────────────────────────
 touch "${INSTALL_FLAG}"
-chown "${DEV_USER}:${DEV_USER}" "${INSTALL_FLAG}"
+chown "$(id -u "${DEV_USER}" 2>/dev/null || echo 1000):$(id -g "${DEV_USER}" 2>/dev/null || echo 1000)" "${INSTALL_FLAG}"
 
 log "=== D.A.N. first-boot install complete ==="
 log "Tools installed:"

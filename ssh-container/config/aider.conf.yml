@@ -4,22 +4,28 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Default model — DeepSeek R1 via OpenRouter (free, strong reasoning, less filtered)
-# Override per-session: aider --model openrouter/nousresearch/nous-hermes-3-llama-3.1-405b:free
+# To use local Ollama instead: aider --model ollama/dolphin-mistral
+# To use fast Groq:            aider --model groq/llama-3.3-70b-versatile
 model: openrouter/deepseek/deepseek-r1:free
+
+# Ollama local API endpoint (used when --model ollama/... is specified)
+# Ollama must be running: ollama serve
+ollama-api-base: http://localhost:11434
 
 # Repo map — give the agent a full picture of the codebase
 map-tokens: 8192
 map-refresh: auto
 
-# Let the agent suggest and execute shell commands (full autonomy)
+# Full autonomy — agent can suggest AND auto-run shell commands
+# This enables real web access: agent runs curl/fetch/w3m/torsocks commands
 suggest-shell-commands: true
 auto-accept-architect: true
 
-# Don't commit automatically — let the agent decide
+# Don't commit automatically — let the agent decide when to commit
 auto-commits: false
 dirty-commits: true
 
-# Streaming output (see what the agent is thinking)
+# Streaming output (see what the agent is thinking in real time)
 stream: true
 
 # Don't nag about updates
@@ -33,7 +39,10 @@ editor: vim
 encoding: utf-8
 
 # No token limits on responses
-max-tokens: 8096
+max-tokens: 8192
 
 # Show cost/token info
 show-model-warnings: false
+
+# Architect mode — agent plans first, then edits (higher quality)
+architect: true

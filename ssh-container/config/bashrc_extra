@@ -89,10 +89,27 @@ agent-local-l3() {
     ${MEMORY_FILE:+--read "${MEMORY_FILE}"} "$@"
 }
 
-# Override bare 'aider' to always use torsocks + memory
+# Override bare 'aider' — Tor-routed for online models, direct for local ollama
 aider() {
-  torsocks "$(command -v aider || echo 'python3 -m aider')" \
-    ${MEMORY_FILE:+--read "${MEMORY_FILE}"} "$@"
+  local mem_flag="${MEMORY_FILE:+--read ${MEMORY_FILE}}"
+  # Use argv-safe invocation — never store "python3 -m aider" as a single string
+  _aider_run() {
+    if command -v aider &>/dev/null; then
+      aider "$@"
+    else
+      python3 -m aider "$@"
+    fi
+  }
+  # Detect local ollama — never route localhost through Tor
+  if printf '%s ' "$@" | grep -qE '(ollama/|--model[[:space:]]+ollama)'; then
+    _aider_run ${mem_flag} "$@"
+  else
+    if command -v aider &>/dev/null; then
+      torsocks aider ${mem_flag} "$@"
+    else
+      torsocks python3 -m aider ${mem_flag} "$@"
+    fi
+  fi
 }
 
 alias agents='bash /scripts/dan-agents.sh'

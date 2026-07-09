@@ -8,7 +8,7 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 16 },
-  show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 380, damping: 30 } },
+  show:   { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 380, damping: 30 } },
 };
 
 const SECTIONS = [

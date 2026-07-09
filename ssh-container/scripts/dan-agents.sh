@@ -34,11 +34,31 @@ else
   echo "  [WARN] Tor not running — agents will NOT be anonymous"
 fi
 
-# ── Ollama check ──────────────────────────────────────────────────────────────
+# ── Ollama check + auto-start ─────────────────────────────────────────────────
 OLLAMA_READY=false
-if command -v ollama &>/dev/null && ollama list 2>/dev/null | grep -q "dolphin"; then
-  OLLAMA_READY=true
-  echo "  [OLLAMA] ✓ Local uncensored models available"
+if command -v ollama &>/dev/null; then
+  # Start ollama serve if not already running
+  if ! pgrep -x ollama &>/dev/null; then
+    echo "  [OLLAMA] Starting ollama server..."
+    # Use a user-writable log dir — /var/log/ssh-container may be root-only
+    local _log_dir="${LOG_DIR:-/var/log/ssh-container}"
+    if ! { mkdir -p "${_log_dir}" && touch "${_log_dir}/ollama.log"; } 2>/dev/null; then
+      _log_dir="${HOME}/.cache/dan"
+      mkdir -p "${_log_dir}"
+    fi
+    ollama serve >>"${_log_dir}/ollama.log" 2>&1 &
+    sleep 4
+  fi
+  if ollama list 2>/dev/null | grep -qE "dolphin|llama|mistral"; then
+    OLLAMA_READY=true
+    echo "  [OLLAMA] ✓ Local uncensored models available ($(ollama list 2>/dev/null | tail -n +2 | awk '{print $1}' | paste -sd', '))"
+  else
+    echo "  [OLLAMA] Installed but no models yet — pulling dolphin-mistral..."
+    ollama pull dolphin-mistral &>/dev/null &
+    echo "  [OLLAMA] Pull running in background — check: ollama list"
+  fi
+else
+  echo "  [OLLAMA] Not installed — set AUTO_INSTALL_EXTRAS=yes and redeploy"
 fi
 
 # ── Initialise agent memory ───────────────────────────────────────────────────
