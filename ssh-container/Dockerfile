@@ -338,14 +338,27 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && rm -rf /var/lib/apt/lists/*
 
 # ── Non-root developer user ───────────────────────────────────────────────────
-RUN groupadd --gid ${DEV_GID} ${DEV_USER} \
-  && useradd \
-       --uid ${DEV_UID} \
-       --gid ${DEV_GID} \
-       --shell /bin/bash \
-       --create-home \
-       --home-dir /home/${DEV_USER} \
-       ${DEV_USER} \
+# Resilient to base-image GID/UID collisions: reuse an existing group/user with
+# the requested ID instead of failing, so `useradd`/`chown` always succeed.
+RUN if getent group ${DEV_GID} > /dev/null; then \
+      EXISTING_GROUP=$(getent group ${DEV_GID} | cut -d: -f1); \
+    else \
+      groupadd --gid ${DEV_GID} ${DEV_USER}; \
+      EXISTING_GROUP=${DEV_USER}; \
+    fi \
+  && if getent passwd ${DEV_UID} > /dev/null; then \
+       EXISTING_USER=$(getent passwd ${DEV_UID} | cut -d: -f1); \
+       usermod -l ${DEV_USER} -d /home/${DEV_USER} -m -s /bin/bash "${EXISTING_USER}" 2>/dev/null || true; \
+     else \
+       useradd \
+         --uid ${DEV_UID} \
+         --gid "${EXISTING_GROUP}" \
+         --shell /bin/bash \
+         --create-home \
+         --home-dir /home/${DEV_USER} \
+         ${DEV_USER}; \
+     fi \
+  && mkdir -p /home/${DEV_USER} \
   && echo "${DEV_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${DEV_USER} \
   && chmod 0440 /etc/sudoers.d/${DEV_USER} \
   && passwd -l ${DEV_USER} \
@@ -353,7 +366,7 @@ RUN groupadd --gid ${DEV_GID} ${DEV_USER} \
   # Give devuser access to Go tools
   && mkdir -p /home/${DEV_USER}/go/bin \
   && cp /root/go/bin/* /home/${DEV_USER}/go/bin/ 2>/dev/null || true \
-  && chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/go
+  && chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}
 
 # ── SSH server setup ──────────────────────────────────────────────────────────
 RUN mkdir -p /var/run/sshd /etc/ssh/host_keys \
