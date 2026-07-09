@@ -63,6 +63,28 @@ if command -v ollama &>/dev/null; then
   log "Ollama models ready. Run 'ollama list' to see installed models."
 fi
 
+# ── Aider AI coding assistant ────────────────────────────────────────────────
+if ! command -v aider &>/dev/null; then
+  log "Installing aider (AI coding assistant) ..."
+  pip3 install --no-cache-dir --break-system-packages aider-chat 2>>"${LOG}" \
+    && log "  aider installed: $(aider --version 2>/dev/null || echo 'ok')" \
+    || warn "  aider pip install failed"
+else
+  log "aider already installed: $(aider --version 2>/dev/null || true)"
+fi
+
+# ── Web browsing tools (for aider web access via shell commands) ──────────────
+log "Installing web tools (w3m, lynx, ddgr for aider internet access) ..."
+apt-get install -y --no-install-recommends w3m lynx 2>>"${LOG}" \
+  && log "  w3m + lynx installed" \
+  || warn "  w3m/lynx install failed"
+
+pip3 install --no-cache-dir --break-system-packages ddgr 2>>"${LOG}" \
+  && ln -sf "$(python3 -c 'import site; print(site.getsitepackages()[0])')/bin/ddgr" \
+     /usr/local/bin/ddgr 2>/dev/null || true \
+  && log "  ddgr (DuckDuckGo CLI) installed" \
+  || warn "  ddgr install failed"
+
 # ── SecLists (wordlists) ──────────────────────────────────────────────────────
 SECLISTS_DIR="${HOME_DIR}/wordlists/SecLists"
 if [[ ! -d "${SECLISTS_DIR}" ]]; then

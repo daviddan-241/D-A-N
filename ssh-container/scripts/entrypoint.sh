@@ -245,30 +245,39 @@ TTYD_INTERNAL_PORT="${TTYD_INTERNAL_PORT:-7681}"
 export TTYD_INTERNAL_PORT
 if command -v ttyd &>/dev/null; then
   log "Starting ttyd web terminal on 127.0.0.1:${TTYD_INTERNAL_PORT} (internal) ..."
+
+  # ── Create a persistent tmux session as devuser ──────────────────────────
+  # ttyd attaches to this session, so the shell survives WebSocket disconnects.
+  # When you navigate away in the app and come back, you rejoin the same session.
+  # The API server uses `tmux send-keys -t main:0.0` to inject keystrokes from
+  # the key bar, bypassing all iOS iframe keyboard limitations.
+  su -l "${DEV_USER}" -c "tmux new-session -d -s main 2>/dev/null || true"
+  log "  Persistent tmux session 'main' ready for devuser"
+
   ttyd \
     --port "${TTYD_INTERNAL_PORT}" \
     --interface 127.0.0.1 \
     --credential "${WEB_TERMINAL_USER}:${WEB_TERMINAL_PASS}" \
     --writable \
-    --max-clients 10 \
+    --max-clients 5 \
     --check-origin=false \
     --client-option cursorBlink=true \
     --client-option fontSize=14 \
     --client-option fontFamily="'Menlo','Monaco','Cascadia Mono',monospace" \
-    su -l "${DEV_USER}" \
+    su -l "${DEV_USER}" -c "tmux new-session -A -s main" \
     2>>"${LOG_DIR}/ttyd.log" &
   TTYD_PID=$!
   sleep 1
   if kill -0 "${TTYD_PID}" 2>/dev/null; then
     log "ttyd running (PID ${TTYD_PID})"
     log "  Web terminal: https://<your-render-url>/webterm"
-    log "  Auth: ${WEB_TERMINAL_USER} / [configured password]"
+    log "  Session persists — navigate away and back to rejoin same shell"
   else
-    warn "ttyd failed to start — check ${LOG_DIR}/ttyd.log"
-    # Try simpler invocation
-    ttyd --port "${TTYD_INTERNAL_PORT}" --interface 127.0.0.1 --writable su -l "${DEV_USER}" \
+    warn "ttyd failed to start — retrying without tmux"
+    ttyd --port "${TTYD_INTERNAL_PORT}" --interface 127.0.0.1 --writable \
+      --check-origin=false su -l "${DEV_USER}" \
       2>>"${LOG_DIR}/ttyd.log" &
-    log "Retried ttyd without custom index."
+    log "Retried ttyd (bare shell fallback)"
   fi
 else
   warn "ttyd not found — web terminal unavailable. SSH access still works."

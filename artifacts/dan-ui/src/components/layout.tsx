@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'wouter';
 import { Home, Terminal, Wrench, Wifi } from 'lucide-react';
 import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
 
 const NAV = [
   { href: '/',         icon: Home,     label: 'Home'     },
@@ -9,13 +10,24 @@ const NAV = [
   { href: '/connect',  icon: Wifi,     label: 'Connect'  },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
+  const isTerminal = location === '/terminal';
 
   return (
     <div className="flex flex-col min-h-dvh bg-background">
       {/* ── Content ── */}
-      <main className="flex-1 flex flex-col overflow-auto pb-[calc(72px+env(safe-area-inset-bottom,0px))]">
+      {/*
+        Terminal needs the full viewport with no padding/scroll — it handles
+        its own height. All other pages scroll normally with bottom-nav padding.
+      */}
+      <main
+        className={
+          isTerminal
+            ? 'flex-1 flex flex-col overflow-hidden'
+            : 'flex-1 flex flex-col overflow-auto pb-[calc(72px+env(safe-area-inset-bottom,0px))]'
+        }
+      >
         {children}
       </main>
 
