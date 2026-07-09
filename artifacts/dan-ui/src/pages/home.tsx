@@ -18,7 +18,12 @@ interface Stats {
 interface SystemStatus {
   ssh: { running: boolean; configured: boolean; authorizedKeys: number };
   tunnel: {
-    bore: { enabled: boolean; running: boolean; connectCommand: string | null };
+    bore: {
+      enabled: boolean;
+      running: boolean;
+      connectCommand: string | null;
+      watchdog: { restartCount: number; lastRestartAt: string | null; status: string } | null;
+    };
     cloudflare: { enabled: boolean; running: boolean };
   };
   autoInstall: { enabled: boolean; done: boolean; running: boolean; lastLogLine: string | null };
@@ -285,6 +290,26 @@ export function Home() {
             }
             copyText={status?.tunnel.bore.running ? status.tunnel.bore.connectCommand : null}
           />
+          {status?.tunnel.bore.enabled && status.tunnel.bore.watchdog && (
+            <StatusRow
+              label="Tunnel watchdog"
+              state={
+                status.tunnel.bore.watchdog.status === "failed"
+                  ? "bad"
+                  : status.tunnel.bore.watchdog.restartCount > 0
+                  ? "warn"
+                  : "ok"
+              }
+              sub={
+                status.tunnel.bore.watchdog.restartCount > 0
+                  ? `Auto-restarted ${status.tunnel.bore.watchdog.restartCount} time(s) · last at ${new Date(
+                      status.tunnel.bore.watchdog.lastRestartAt ?? ""
+                    ).toLocaleString()}`
+                  : "Watching · no restarts needed"
+              }
+              copyText={null}
+            />
+          )}
           <StatusRow
             label="Tool auto-install"
             state={
