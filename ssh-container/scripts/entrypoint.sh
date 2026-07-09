@@ -90,7 +90,7 @@ for VAR_KEY in "${SSH_PUBLIC_KEY:-}" "${SSH_PUBLIC_KEYS:-}"; do
   fi
 done
 
-KEY_COUNT=$(grep -c 'ssh-' "${SSH_DIR}/authorized_keys" 2>/dev/null || echo "0")
+KEY_COUNT=$(grep -c 'ssh-' "${SSH_DIR}/authorized_keys" 2>/dev/null || true)
 if [[ "${KEY_COUNT}" -eq 0 ]]; then
   warn "authorized_keys is empty. SSH login will fail until a key is added."
   warn "  Set SSH_PUBLIC_KEY in the Render dashboard to your public key (cat ~/.ssh/id_ed25519.pub)"
@@ -127,7 +127,7 @@ fi
 chmod 755 "${HOME_DIR}"
 chmod 700 "${SSH_DIR}"
 chmod 600 "${SSH_DIR}/authorized_keys"
-chown -R "${DEV_USER}:${DEV_USER}" "${HOME_DIR}"
+chown -R "$(id -u "${DEV_USER}" 2>/dev/null || echo 1000):$(id -g "${DEV_USER}" 2>/dev/null || echo 1000)" "${HOME_DIR}"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. Patch AllowUsers dynamically
