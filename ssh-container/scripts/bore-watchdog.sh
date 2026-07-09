@@ -12,8 +12,18 @@ HOME_DIR="/home/${DEV_USER}"
 LOG_DIR="${LOG_DIR:-/var/log/ssh-container}"
 BORE_SECRET="${BORE_SECRET:-}"
 CHECK_INTERVAL="${BORE_WATCHDOG_INTERVAL:-15}"
+STATS_FILE="${LOG_DIR}/bore-watchdog-stats.json"
+
+RESTART_COUNT=0
 
 log() { echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] [bore-watchdog] $*" >> "${LOG_DIR}/bore.log"; }
+
+write_stats() {
+  local status="$1"
+  cat > "${STATS_FILE}" <<EOF
+{"restartCount": ${RESTART_COUNT}, "lastRestartAt": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')", "status": "${status}"}
+EOF
+}
 
 start_bore() {
   local cmd=(bore local 22 --to bore.pub)
@@ -29,19 +39,24 @@ start_bore() {
       echo "ssh -p ${port} ${DEV_USER}@bore.pub" > "${HOME_DIR}/.dan_ssh_connect"
       chown "${DEV_USER}:${DEV_USER}" "${HOME_DIR}/.dan_ssh_connect" 2>/dev/null || true
       log "bore up (PID ${BORE_PID}) — port ${port}"
+      write_stats "up"
     else
       log "bore up (PID ${BORE_PID}) but port not yet found in log"
+      write_stats "up-no-port"
     fi
   else
     log "bore failed to start — will retry next cycle"
+    write_stats "failed"
   fi
 }
 
 log "watchdog starting (interval ${CHECK_INTERVAL}s)"
+write_stats "watching"
 
 while true; do
   if ! pgrep -x bore >/dev/null 2>&1; then
-    log "bore not running — restarting tunnel"
+    RESTART_COUNT=$((RESTART_COUNT + 1))
+    log "bore not running — restarting tunnel (restart #${RESTART_COUNT})"
     start_bore
   fi
   sleep "${CHECK_INTERVAL}"
