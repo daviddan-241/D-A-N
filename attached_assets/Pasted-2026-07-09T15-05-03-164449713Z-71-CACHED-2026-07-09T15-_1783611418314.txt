@@ -1,0 +1,50 @@
+2026-07-09T15:05:03.164449713Z #71 CACHED
+2026-07-09T15:05:03.164451563Z 
+2026-07-09T15:05:03.164453473Z #72 [final 50/54] COPY ssh-container/scripts/firewall-init.sh /firewall-init.sh
+2026-07-09T15:05:03.164455403Z #72 CACHED
+2026-07-09T15:05:03.164457183Z 
+2026-07-09T15:05:03.164460303Z #73 [final  3/54] RUN apt-get update && apt-get install -y --no-install-recommends     nikto     sqlmap     dirb     wfuzz     whatweb     john     hydra     medusa     hashcat     hashid     masscan     arp-scan     netdiscover     exploitdb     aircrack-ng     steghide     exiftool     sslscan     testssl.sh     theharvester     recon-ng   && apt-get clean   && rm -rf /var/lib/apt/lists/*   || true   # Some packages may not exist on Ubuntu 24.04; build continues
+2026-07-09T15:05:03.164462223Z #73 CACHED
+2026-07-09T15:05:03.164464014Z 
+2026-07-09T15:05:03.164465883Z #74 [final 54/54] COPY --from=webbuild /workspace/artifacts/dan-ui/dist/public ./public
+2026-07-09T15:05:10.0282549Z #74 CACHED
+2026-07-09T15:05:10.224342456Z 
+2026-07-09T15:05:10.224361666Z #75 exporting to image
+2026-07-09T15:05:10.224365316Z #75 exporting layers done
+2026-07-09T15:05:10.224367587Z #75 pushing layers
+2026-07-09T15:05:10.72659525Z #75 pushing layers 0.7s done
+2026-07-09T15:05:11.211704549Z #75 DONE 1.2s
+2026-07-09T15:05:11.21172403Z 
+2026-07-09T15:05:11.21172927Z #76 exporting cache to registry
+2026-07-09T15:05:11.21173367Z #76 preparing build cache for export
+2026-07-09T15:05:29.644377468Z #76 sending cache export
+2026-07-09T15:05:34.655917482Z #76 sending cache export 5.0s done
+2026-07-09T15:05:34.655943203Z #76 DONE 24.6s
+2026-07-09T15:05:39.588417418Z ==> Deploying...
+2026-07-09T15:05:39.670857651Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-07-09T15:10:00.291245932Z [2026-07-09T15:10:00Z] [INFO]  ======================================================================
+2026-07-09T15:10:00.295990556Z [2026-07-09T15:10:00Z] [INFO]   D.A.N. — Dynamic Access Node — starting
+2026-07-09T15:10:00.29880194Z [2026-07-09T15:10:00Z] [INFO]  ======================================================================
+2026-07-09T15:10:00.306437689Z [2026-07-09T15:10:00Z] [INFO]   Hostname:  srv-d97cvpgk1i2s73dd88p0-hibernate-8bf9487db-nn758
+2026-07-09T15:10:00.393250967Z [2026-07-09T15:10:00Z] [INFO]   User:      devuser
+2026-07-09T15:10:00.39605514Z [2026-07-09T15:10:00Z] [INFO]   Built on:  Ubuntu 24.04
+2026-07-09T15:10:00.398410021Z [2026-07-09T15:10:00Z] [INFO]  ======================================================================
+2026-07-09T15:10:00.489661595Z [2026-07-09T15:10:00Z] [INFO]  Checking SSH host keys in /etc/ssh/host_keys ...
+2026-07-09T15:10:00.494910232Z [2026-07-09T15:10:00Z] [INFO]  Generating rsa host key ...
+2026-07-09T15:10:08.757847394Z ==> No open ports detected, continuing to scan...
+2026-07-09T15:10:08.946226281Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-07-09T15:10:17.549443266Z [2026-07-09T15:10:17Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_rsa_key
+2026-07-09T15:10:17.599082103Z [2026-07-09T15:10:17Z] [INFO]  Generating ed25519 host key ...
+2026-07-09T15:10:17.69160953Z [2026-07-09T15:10:17Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_ed25519_key
+2026-07-09T15:10:17.704400484Z [2026-07-09T15:10:17Z] [INFO]  Generating ecdsa host key ...
+2026-07-09T15:10:17.809599332Z [2026-07-09T15:10:17Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_ecdsa_key
+2026-07-09T15:10:17.819457849Z [2026-07-09T15:10:17Z] [INFO]  Ensuring home directory structure for devuser ...
+2026-07-09T15:10:17.90791321Z /entrypoint.sh: line 94: [[: 0
+2026-07-09T15:10:17.909400188Z 0: syntax error in expression (error token is "0")
+2026-07-09T15:10:17.911953645Z [2026-07-09T15:10:17Z] [INFO]  Found 0
+2026-07-09T15:10:17.911967526Z 0 authorized SSH key(s).
+2026-07-09T15:10:18.088938908Z chown: invalid group: ‘devuser:devuser’
+2026-07-09T15:10:19.968923803Z ==> Exited with status 1
+2026-07-09T15:10:19.971363091Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2026-07-09T15:11:10.297746544Z ==> No open ports detected, continuing to scan...
+2026-07-09T15:11:10.457017917Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
