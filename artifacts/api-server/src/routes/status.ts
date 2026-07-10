@@ -105,7 +105,39 @@ function extractBorePort(log: string): string | null {
 }
 
 const LAST_MODE_FILE = `${LOG_DIR}/.bore-last-mode`;
-const RESTART_LOCK = `${LOG_DIR}/.bore-restart.lock`;
+// Atomic mutual-exclusion lock shared with ssh-container/scripts/bore-watchdog.sh
+// (see LOCK_DIR there — path must match). fs.mkdirSync throws EEXIST atomically
+// if another holder (the watchdog loop) already created it, so there's no
+// check-then-act race between this endpoint and the watchdog.
+const LOCK_DIR = `${LOG_DIR}/.bore-restart.lock`;
+const LOCK_TTL_MS = 30_000;
+
+function acquireLock(): boolean {
+  try {
+    fs.mkdirSync(LOCK_DIR);
+    fs.writeFileSync(`${LOCK_DIR}/owner`, String(Math.floor(Date.now() / 1000)));
+    return true;
+  } catch {
+    // Already held — reclaim if stale (crashed holder never released it).
+    try {
+      const ts = Number(readTrimmed(`${LOCK_DIR}/owner`) || "0");
+      const ageMs = Date.now() - ts * 1000;
+      if (ageMs > LOCK_TTL_MS) {
+        fs.rmSync(LOCK_DIR, { recursive: true, force: true });
+        fs.mkdirSync(LOCK_DIR);
+        fs.writeFileSync(`${LOCK_DIR}/owner`, String(Math.floor(Date.now() / 1000)));
+        return true;
+      }
+    } catch {
+      // fall through to false
+    }
+    return false;
+  }
+}
+
+function releaseLock(): void {
+  try { fs.rmSync(LOCK_DIR, { recursive: true, force: true }); } catch { /* best-effort */ }
+}
 
 function spawnBore(useTor: boolean, boreSecret: string): ReturnType<typeof spawn> {
   const args = ["local", "22", "--to", "bore.pub"];
@@ -129,12 +161,11 @@ router.post("/status/restart-tunnel", (_req, res) => {
     return;
   }
 
+  if (!acquireLock()) {
+    res.status(409).json({ error: "bore-watchdog currently holds the tunnel lock — try again shortly." });
+    return;
+  }
   restartInFlight = true;
-  // Suppress the watchdog while we manually manage `bore` so it doesn't
-  // kill/spawn the process concurrently and stomp on our state.
-  // Lock file stores a Unix seconds timestamp (matches `date +%s` used by
-  // bore-watchdog.sh's stale-lock check) — do not switch to milliseconds.
-  try { fs.writeFileSync(RESTART_LOCK, String(Math.floor(Date.now() / 1000))); } catch { /* best-effort */ }
   killProcess("bore");
 
   const boreSecret = process.env.BORE_SECRET || "";
@@ -181,7 +212,7 @@ router.post("/status/restart-tunnel", (_req, res) => {
     } catch {
       // best-effort — status endpoint will just show "starting" if this fails
     } finally {
-      try { fs.unlinkSync(RESTART_LOCK); } catch { /* best-effort */ }
+      releaseLock();
       restartInFlight = false;
     }
   }
