@@ -313,28 +313,54 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
   BORE_SECRET="${BORE_SECRET:-}"
+  BORE_CMD_BASE="local 22 --to bore.pub"
+  [[ -n "${BORE_SECRET}" ]] && BORE_CMD_BASE="${BORE_CMD_BASE} --secret ${BORE_SECRET}"
 
-  # ── Route bore through Tor so the tunnel connection is anonymous ────────────
-  # torsocks transparently proxies bore's TCP connection to bore.pub via Tor.
-  # The SSH traffic itself arrives at port 22 on the container — Tor only wraps
-  # the bore ↔ bore.pub relay connection, keeping our IP hidden from bore.pub.
-  BORE_RUNNER="bore"
+  # bore-cli's tracing output writes the assigned port as `remote_port=NNNN`
+  # (no space before "port"), as `listening at bore.pub:NNNN`, or with a
+  # loose `port NNNN` — try all three so a formatting change in bore/tracing
+  # doesn't silently break port detection and leave the dashboard showing
+  # "see log" forever.
+  extract_bore_port() {
+    grep -oP '(?:remote_port=|bore\.pub:|port[ =])\K[0-9]+' "${LOG_DIR}/bore.log" 2>/dev/null | tail -1
+  }
+
+  # ── Try bore through Tor first (anonymous), fall back to direct ────────────
+  # bore.pub and many public relays actively refuse or immediately drop
+  # connections that arrive from Tor exit nodes as anti-abuse policy. When
+  # that happens the torsocks-wrapped process dies within seconds, forever,
+  # and the watchdog restart-loops without ever getting a real port. SSH's
+  # own transport is already end-to-end encrypted, so falling back to a
+  # direct (non-Tor) bore connection loses only bore.pub's ability to see the
+  # container's IP, not the security of the SSH session itself.
+  BORE_PID=""
+  BORE_MODE=""
   if command -v torsocks &>/dev/null; then
-    BORE_RUNNER="torsocks bore"
-    log "  bore will run through Tor (torsocks) for anonymity"
-  else
-    warn "  torsocks not found — bore will run without Tor relay anonymity"
+    log "Starting bore TCP tunnel via Tor (torsocks) ..."
+    torsocks bore ${BORE_CMD_BASE} >>"${LOG_DIR}/bore.log" 2>&1 &
+    BORE_PID=$!
+    sleep 4
+    if kill -0 "${BORE_PID}" 2>/dev/null && [[ -n "$(extract_bore_port)" ]]; then
+      BORE_MODE="tor"
+    else
+      warn "  bore via Tor failed to come up (bore.pub likely blocks Tor exit nodes) — retrying direct"
+      kill "${BORE_PID}" 2>/dev/null || true
+      wait "${BORE_PID}" 2>/dev/null || true
+      BORE_PID=""
+    fi
+  fi
+  if [[ -z "${BORE_PID}" ]]; then
+    log "Starting bore TCP tunnel directly (no Tor) ..."
+    bore ${BORE_CMD_BASE} >>"${LOG_DIR}/bore.log" 2>&1 &
+    BORE_PID=$!
+    sleep 3
+    kill -0 "${BORE_PID}" 2>/dev/null && BORE_MODE="direct"
   fi
 
-  BORE_CMD="${BORE_RUNNER} local 22 --to bore.pub"
-  [[ -n "${BORE_SECRET}" ]] && BORE_CMD="${BORE_CMD} --secret ${BORE_SECRET}"
-  log "Starting bore TCP tunnel (SSH on bore.pub) ..."
-  eval "${BORE_CMD}" >>"${LOG_DIR}/bore.log" 2>&1 &
-  BORE_PID=$!
-  sleep 3
-  if kill -0 "${BORE_PID}" 2>/dev/null; then
-    BORE_PORT=$(grep -oP 'port \K[0-9]+' "${LOG_DIR}/bore.log" 2>/dev/null | tail -1 || echo "see log")
-    log "bore tunnel running (PID ${BORE_PID}) — port: ${BORE_PORT}"
+  if [[ -n "${BORE_MODE}" ]]; then
+    BORE_PORT=$(extract_bore_port)
+    BORE_PORT="${BORE_PORT:-see log}"
+    log "bore tunnel running (PID ${BORE_PID}, mode: ${BORE_MODE}) — port: ${BORE_PORT}"
     log "  SSH: ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub"
     log "  a-shell: SSH to bore.pub port ${BORE_PORT}"
     log "  Logs: tail -f ${LOG_DIR}/bore.log"

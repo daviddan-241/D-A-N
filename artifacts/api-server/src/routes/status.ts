@@ -90,6 +90,34 @@ router.get("/status", (_req, res) => {
   });
 });
 
+// bore-cli's tracing output writes the assigned port as `remote_port=NNNN`
+// (no space before "port"), as `listening at bore.pub:NNNN`, or with a loose
+// `port NNNN` — matching all three keeps port detection working even if
+// bore/tracing changes its exact log wording. The old `/port (\d+)/` pattern
+// never matched real bore-cli output, so the dashboard was stuck on
+// "starting..." / no port forever even when the tunnel was healthy.
+function extractBorePort(log: string): string | null {
+  const match = log.match(/(?:remote_port=|bore\.pub:|port[ =])(\d+)/g);
+  if (!match) return null;
+  const last = match[match.length - 1];
+  const digits = last.match(/(\d+)$/);
+  return digits ? digits[1] : null;
+}
+
+const LAST_MODE_FILE = `${LOG_DIR}/.bore-last-mode`;
+
+function spawnBore(useTor: boolean, boreSecret: string): ReturnType<typeof spawn> {
+  const args = ["local", "22", "--to", "bore.pub"];
+  if (boreSecret) args.push("--secret", boreSecret);
+  const logFd = fs.openSync(`${LOG_DIR}/bore.log`, "a");
+  const child = useTor
+    ? spawn("torsocks", ["bore", ...args], { detached: true, stdio: ["ignore", logFd, logFd] })
+    : spawn("bore", args, { detached: true, stdio: ["ignore", logFd, logFd] });
+  child.unref();
+  fs.closeSync(logFd);
+  return child;
+}
+
 router.post("/status/restart-tunnel", (_req, res) => {
   if (process.env.BORE_ENABLE !== "yes") {
     res.status(400).json({ error: "BORE_ENABLE is not set to 'yes' — nothing to restart." });
@@ -104,42 +132,50 @@ router.post("/status/restart-tunnel", (_req, res) => {
   killProcess("bore");
 
   const boreSecret = process.env.BORE_SECRET || "";
-
-  // Route through Tor (torsocks) if available — same policy as entrypoint.sh
   const hasTorsocks = (() => {
     try { execSync("command -v torsocks", { stdio: "ignore" }); return true; }
     catch { return false; }
   })();
+  // If a previous run already learned that Tor gets refused by bore.pub for
+  // this container, skip straight to direct — don't keep retrying a path
+  // that will only crash-loop again.
+  const forceDirect = readTrimmed(LAST_MODE_FILE) === "direct";
+  const tryTor = hasTorsocks && !forceDirect;
 
-  const cmd    = hasTorsocks ? "torsocks" : "bore";
-  const args   = hasTorsocks ? ["bore", "local", "22", "--to", "bore.pub"] : ["local", "22", "--to", "bore.pub"];
-  if (boreSecret) args.push("--secret", boreSecret);
-
-  const logFd = fs.openSync(`${LOG_DIR}/bore.log`, "a");
-  const child = spawn(cmd, args, {
-    detached: true,
-    stdio: ["ignore", logFd, logFd],
-  });
-  child.unref();
+  spawnBore(tryTor, boreSecret);
 
   setTimeout(() => {
-    fs.closeSync(logFd);
-    const running = isProcessRunning("bore");
-    if (running) {
-      try {
+    const torUp = isProcessRunning("bore") && extractBorePort(readTrimmed(`${LOG_DIR}/bore.log`) || "");
+    let mode: "tor" | "direct" | null = tryTor ? (torUp ? "tor" : null) : (isProcessRunning("bore") ? "direct" : null);
+
+    if (tryTor && !torUp) {
+      // Tor path didn't come up with a resolvable port — kill it and retry direct.
+      killProcess("bore");
+      spawnBore(false, boreSecret);
+      setTimeout(() => finishRestart("direct"), 3000);
+      return;
+    }
+    finishRestart(mode ?? (tryTor ? "tor" : "direct"));
+  }, 4000);
+
+  function finishRestart(mode: string) {
+    try {
+      fs.writeFileSync(LAST_MODE_FILE, mode);
+      const running = isProcessRunning("bore");
+      if (running) {
         const log = fs.readFileSync(`${LOG_DIR}/bore.log`, "utf8");
-        const match = log.match(/port (\d+)/g);
-        const port = match ? match[match.length - 1].replace("port ", "") : null;
+        const port = extractBorePort(log);
         if (port) {
           const cmd = `ssh -p ${port} ${DEV_USER}@bore.pub`;
           fs.writeFileSync(`${HOME_DIR}/.dan_ssh_connect`, `${cmd}\n`);
         }
-      } catch {
-        // best-effort — status endpoint will just show "starting" if this fails
       }
+    } catch {
+      // best-effort — status endpoint will just show "starting" if this fails
+    } finally {
+      restartInFlight = false;
     }
-    restartInFlight = false;
-  }, 3000);
+  }
 
   res.json({ restarting: true });
 });

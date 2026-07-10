@@ -28,6 +28,23 @@ SCREENSHOT   = "/tmp/dan-browser-screenshot.png"
 MAX_TEXT     = 12000   # chars returned to aider (avoid context overflow)
 DEFAULT_TO   = 30_000  # ms
 
+# ── Tor availability / opt-out ─────────────────────────────────────────────────
+# Many sign-up / account-creation flows actively block or CAPTCHA-wall Tor exit
+# nodes as anti-abuse policy, so a hard Tor-only proxy would make "create an
+# account" tasks fail even though the browser itself works fine. Use Tor by
+# default for anonymity, but transparently fall back to a direct connection if
+# Tor's SOCKS port isn't actually reachable, and allow opting out entirely via
+# DAN_BROWSER_NO_TOR=1 (e.g. for sites that reject Tor outright).
+def _tor_available() -> bool:
+    if os.environ.get("DAN_BROWSER_NO_TOR") == "1":
+        return False
+    import socket
+    try:
+        with socket.create_connection(("127.0.0.1", 9050), timeout=2):
+            return True
+    except OSError:
+        return False
+
 # ── Minimal human-ish headers ──────────────────────────────────────────────────
 EXTRA_HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
@@ -36,10 +53,13 @@ EXTRA_HEADERS = {
 }
 
 def make_browser(p, headless=True):
-    """Launch Chromium with Tor proxy + anti-fingerprint flags."""
+    """Launch Chromium with Tor proxy (when reachable) + anti-fingerprint flags."""
+    use_tor = _tor_available()
+    if not use_tor:
+        print("[browser-auto] Tor not used for this session (unreachable or DAN_BROWSER_NO_TOR=1) — connecting directly", file=sys.stderr)
     return p.chromium.launch(
         headless=headless,
-        proxy={"server": TOR_PROXY},
+        proxy={"server": TOR_PROXY} if use_tor else None,
         args=[
             "--no-sandbox",
             "--disable-setuid-sandbox",

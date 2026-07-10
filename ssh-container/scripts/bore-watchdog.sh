@@ -25,27 +25,60 @@ write_stats() {
 EOF
 }
 
-start_bore() {
-  # Route bore through Tor for anonymity (same as entrypoint)
-  local runner="bore"
-  command -v torsocks &>/dev/null && runner="torsocks bore"
+extract_port() {
+  grep -oP '(?:remote_port=|bore\.pub:|port[ =])\K[0-9]+' "${LOG_DIR}/bore.log" 2>/dev/null | tail -1
+}
 
-  local cmd=($runner local 22 --to bore.pub)
-  [[ -n "${BORE_SECRET}" ]] && cmd+=(--secret "${BORE_SECRET}")
-  log "starting: ${cmd[*]}"
-  "${cmd[@]}" >>"${LOG_DIR}/bore.log" 2>&1 &
-  BORE_PID=$!
-  sleep 3
-  if kill -0 "${BORE_PID}" 2>/dev/null; then
+# Tracks whether the last successful start used Tor or went direct, so
+# repeated restarts don't keep retrying a Tor path that bore.pub is actively
+# refusing (many public relays block Tor exit nodes as anti-abuse policy).
+# Once a direct connection is needed, stick with direct.
+LAST_MODE_FILE="${LOG_DIR}/.bore-last-mode"
+FORCE_DIRECT=0
+[[ -f "${LAST_MODE_FILE}" && "$(cat "${LAST_MODE_FILE}" 2>/dev/null)" == "direct" ]] && FORCE_DIRECT=1
+
+start_bore() {
+  local cmd_base=(local 22 --to bore.pub)
+  [[ -n "${BORE_SECRET}" ]] && cmd_base+=(--secret "${BORE_SECRET}")
+  local mode="direct"
+  local pid=""
+
+  if [[ "${FORCE_DIRECT}" -eq 0 ]] && command -v torsocks &>/dev/null; then
+    log "starting: torsocks bore ${cmd_base[*]}"
+    torsocks bore "${cmd_base[@]}" >>"${LOG_DIR}/bore.log" 2>&1 &
+    pid=$!
+    sleep 4
+    if kill -0 "${pid}" 2>/dev/null && [[ -n "$(extract_port)" ]]; then
+      mode="tor"
+    else
+      log "bore via Tor failed (bore.pub likely blocks Tor exit nodes) — switching to direct for future restarts"
+      kill "${pid}" 2>/dev/null || true
+      wait "${pid}" 2>/dev/null || true
+      pid=""
+      FORCE_DIRECT=1
+    fi
+  fi
+
+  if [[ -z "${pid}" ]]; then
+    log "starting: bore ${cmd_base[*]}"
+    bore "${cmd_base[@]}" >>"${LOG_DIR}/bore.log" 2>&1 &
+    pid=$!
+    sleep 3
+    kill -0 "${pid}" 2>/dev/null || pid=""
+  fi
+
+  BORE_PID="${pid}"
+  if [[ -n "${pid}" ]]; then
+    echo "${mode}" > "${LAST_MODE_FILE}" 2>/dev/null || true
     local port
-    port=$(grep -oP 'port \K[0-9]+' "${LOG_DIR}/bore.log" 2>/dev/null | tail -1 || echo "")
+    port=$(extract_port)
     if [[ -n "${port}" ]]; then
       echo "ssh -p ${port} ${DEV_USER}@bore.pub" > "${HOME_DIR}/.dan_ssh_connect"
       chown "${DEV_USER}:${DEV_USER}" "${HOME_DIR}/.dan_ssh_connect" 2>/dev/null || true
-      log "bore up (PID ${BORE_PID}) — port ${port}"
+      log "bore up (PID ${pid}, mode: ${mode}) — port ${port}"
       write_stats "up"
     else
-      log "bore up (PID ${BORE_PID}) but port not yet found in log"
+      log "bore up (PID ${pid}, mode: ${mode}) but port not yet found in log"
       write_stats "up-no-port"
     fi
   else
