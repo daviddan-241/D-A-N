@@ -262,8 +262,9 @@ if command -v ttyd &>/dev/null; then
     --max-clients 5 \
     --check-origin=false \
     --client-option cursorBlink=true \
-    --client-option fontSize=14 \
-    --client-option fontFamily="'Menlo','Monaco','Cascadia Mono',monospace" \
+    --client-option fontSize=15 \
+    --client-option fontFamily="'Menlo','Monaco','Cascadia Mono','Fira Code',monospace" \
+    --client-option 'theme={"background":"#0a0a0f","foreground":"#d4d4d4","cursor":"#ff6b2b","cursorAccent":"#0a0a0f","selectionBackground":"rgba(255,107,43,0.25)","black":"#1a1a24","brightBlack":"#3a3a4a","red":"#f07070","brightRed":"#ff8888","green":"#7ec58c","brightGreen":"#9be0a8","yellow":"#d4bb6a","brightYellow":"#e8d080","blue":"#5b9bd5","brightBlue":"#78b4f0","magenta":"#c58bc5","brightMagenta":"#dda0dd","cyan":"#5bc8c8","brightCyan":"#78e0e0","white":"#c0c0cc","brightWhite":"#e8e8f0"}'  \
     su -l "${DEV_USER}" -c "tmux new-session -A -s main" \
     2>>"${LOG_DIR}/ttyd.log" &
   TTYD_PID=$!
@@ -312,7 +313,20 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
   BORE_SECRET="${BORE_SECRET:-}"
-  BORE_CMD="bore local 22 --to bore.pub"
+
+  # ── Route bore through Tor so the tunnel connection is anonymous ────────────
+  # torsocks transparently proxies bore's TCP connection to bore.pub via Tor.
+  # The SSH traffic itself arrives at port 22 on the container — Tor only wraps
+  # the bore ↔ bore.pub relay connection, keeping our IP hidden from bore.pub.
+  BORE_RUNNER="bore"
+  if command -v torsocks &>/dev/null; then
+    BORE_RUNNER="torsocks bore"
+    log "  bore will run through Tor (torsocks) for anonymity"
+  else
+    warn "  torsocks not found — bore will run without Tor relay anonymity"
+  fi
+
+  BORE_CMD="${BORE_RUNNER} local 22 --to bore.pub"
   [[ -n "${BORE_SECRET}" ]] && BORE_CMD="${BORE_CMD} --secret ${BORE_SECRET}"
   log "Starting bore TCP tunnel (SSH on bore.pub) ..."
   eval "${BORE_CMD}" >>"${LOG_DIR}/bore.log" 2>&1 &

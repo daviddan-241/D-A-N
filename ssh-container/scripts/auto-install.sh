@@ -73,17 +73,44 @@ else
   log "aider already installed: $(aider --version 2>/dev/null || true)"
 fi
 
-# ── Web browsing tools (for aider web access via shell commands) ──────────────
-log "Installing web tools (w3m, lynx, ddgr for aider internet access) ..."
+# ── Web browsing tools (text-mode: w3m, lynx, ddgr) ──────────────────────────
+log "Installing text-mode web tools (w3m, lynx, ddgr) ..."
 apt-get install -y --no-install-recommends w3m lynx 2>>"${LOG}" \
   && log "  w3m + lynx installed" \
   || warn "  w3m/lynx install failed"
 
 pip3 install --no-cache-dir --break-system-packages ddgr 2>>"${LOG}" \
-  && ln -sf "$(python3 -c 'import site; print(site.getsitepackages()[0])')/bin/ddgr" \
-     /usr/local/bin/ddgr 2>/dev/null || true \
   && log "  ddgr (DuckDuckGo CLI) installed" \
   || warn "  ddgr install failed"
+
+# ── Playwright + Chromium — full headless browser automation via Tor ──────────
+# This gives aider a real browser to create accounts, fill forms, automate
+# signups on crypto apps, social networks, etc. — all routed through Tor.
+log "Installing Playwright (headless Chromium automation) ..."
+pip3 install --no-cache-dir --break-system-packages playwright 2>>"${LOG}" \
+  && log "  playwright Python lib installed" \
+  || warn "  playwright pip install failed — browser automation unavailable"
+
+# Install Chromium browser binary (Playwright manages its own copy)
+# Use --with-deps to also install OS dependencies
+if command -v playwright &>/dev/null || python3 -m playwright --version &>/dev/null 2>&1; then
+  log "Downloading Playwright Chromium (may take a few minutes) ..."
+  python3 -m playwright install chromium 2>>"${LOG}" \
+    && log "  Playwright Chromium ready" \
+    || warn "  Playwright Chromium download failed"
+  # Install system deps for Chromium
+  python3 -m playwright install-deps chromium 2>>"${LOG}" \
+    || true  # non-fatal — browser may still work without all deps
+else
+  warn "  playwright command not found — Chromium not installed"
+fi
+
+# Install the browser-auto.py wrapper to a system path
+if [[ -f /scripts/browser-auto.py ]]; then
+  chmod +x /scripts/browser-auto.py
+  log "  browser-auto.py installed at /scripts/browser-auto.py"
+  log "  Shell commands: browser <url> | browser-click <url> <sel> | browser-fill ..."
+fi
 
 # ── SecLists (wordlists) ──────────────────────────────────────────────────────
 SECLISTS_DIR="${HOME_DIR}/wordlists/SecLists"

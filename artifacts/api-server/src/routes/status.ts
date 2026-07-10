@@ -104,11 +104,19 @@ router.post("/status/restart-tunnel", (_req, res) => {
   killProcess("bore");
 
   const boreSecret = process.env.BORE_SECRET || "";
-  const args = ["local", "22", "--to", "bore.pub"];
+
+  // Route through Tor (torsocks) if available — same policy as entrypoint.sh
+  const hasTorsocks = (() => {
+    try { execSync("command -v torsocks", { stdio: "ignore" }); return true; }
+    catch { return false; }
+  })();
+
+  const cmd    = hasTorsocks ? "torsocks" : "bore";
+  const args   = hasTorsocks ? ["bore", "local", "22", "--to", "bore.pub"] : ["local", "22", "--to", "bore.pub"];
   if (boreSecret) args.push("--secret", boreSecret);
 
   const logFd = fs.openSync(`${LOG_DIR}/bore.log`, "a");
-  const child = spawn("bore", args, {
+  const child = spawn(cmd, args, {
     detached: true,
     stdio: ["ignore", logFd, logFd],
   });

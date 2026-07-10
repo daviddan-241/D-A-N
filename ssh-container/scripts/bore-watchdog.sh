@@ -26,7 +26,11 @@ EOF
 }
 
 start_bore() {
-  local cmd=(bore local 22 --to bore.pub)
+  # Route bore through Tor for anonymity (same as entrypoint)
+  local runner="bore"
+  command -v torsocks &>/dev/null && runner="torsocks bore"
+
+  local cmd=($runner local 22 --to bore.pub)
   [[ -n "${BORE_SECRET}" ]] && cmd+=(--secret "${BORE_SECRET}")
   log "starting: ${cmd[*]}"
   "${cmd[@]}" >>"${LOG_DIR}/bore.log" 2>&1 &
