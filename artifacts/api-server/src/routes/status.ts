@@ -105,6 +105,7 @@ function extractBorePort(log: string): string | null {
 }
 
 const LAST_MODE_FILE = `${LOG_DIR}/.bore-last-mode`;
+const RESTART_LOCK = `${LOG_DIR}/.bore-restart.lock`;
 
 function spawnBore(useTor: boolean, boreSecret: string): ReturnType<typeof spawn> {
   const args = ["local", "22", "--to", "bore.pub"];
@@ -129,6 +130,9 @@ router.post("/status/restart-tunnel", (_req, res) => {
   }
 
   restartInFlight = true;
+  // Suppress the watchdog while we manually manage `bore` so it doesn't
+  // kill/spawn the process concurrently and stomp on our state.
+  try { fs.writeFileSync(RESTART_LOCK, String(Date.now())); } catch { /* best-effort */ }
   killProcess("bore");
 
   const boreSecret = process.env.BORE_SECRET || "";
@@ -160,12 +164,14 @@ router.post("/status/restart-tunnel", (_req, res) => {
 
   function finishRestart(mode: string) {
     try {
-      fs.writeFileSync(LAST_MODE_FILE, mode);
       const running = isProcessRunning("bore");
       if (running) {
         const log = fs.readFileSync(`${LOG_DIR}/bore.log`, "utf8");
         const port = extractBorePort(log);
         if (port) {
+          // Only persist the mode once we have a confirmed, resolvable port —
+          // a process that's merely alive shouldn't be recorded as "working".
+          fs.writeFileSync(LAST_MODE_FILE, mode);
           const cmd = `ssh -p ${port} ${DEV_USER}@bore.pub`;
           fs.writeFileSync(`${HOME_DIR}/.dan_ssh_connect`, `${cmd}\n`);
         }
@@ -173,6 +179,7 @@ router.post("/status/restart-tunnel", (_req, res) => {
     } catch {
       // best-effort — status endpoint will just show "starting" if this fails
     } finally {
+      try { fs.unlinkSync(RESTART_LOCK); } catch { /* best-effort */ }
       restartInFlight = false;
     }
   }

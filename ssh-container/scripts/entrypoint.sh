@@ -333,9 +333,15 @@ if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
   # own transport is already end-to-end encrypted, so falling back to a
   # direct (non-Tor) bore connection loses only bore.pub's ability to see the
   # container's IP, not the security of the SSH session itself.
+  # If a previous boot/restart already learned that bore.pub refuses this
+  # container's Tor exit node, don't retry Tor again — go straight to direct.
+  LAST_MODE_FILE="${LOG_DIR}/.bore-last-mode"
+  FORCE_DIRECT=0
+  [[ -f "${LAST_MODE_FILE}" && "$(cat "${LAST_MODE_FILE}" 2>/dev/null)" == "direct" ]] && FORCE_DIRECT=1
+
   BORE_PID=""
   BORE_MODE=""
-  if command -v torsocks &>/dev/null; then
+  if [[ "${FORCE_DIRECT}" -eq 0 ]] && command -v torsocks &>/dev/null; then
     log "Starting bore TCP tunnel via Tor (torsocks) ..."
     torsocks bore ${BORE_CMD_BASE} >>"${LOG_DIR}/bore.log" 2>&1 &
     BORE_PID=$!
@@ -360,6 +366,10 @@ if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
   if [[ -n "${BORE_MODE}" ]]; then
     BORE_PORT=$(extract_bore_port)
     BORE_PORT="${BORE_PORT:-see log}"
+    # Only record the mode once we actually have a resolvable port, so a
+    # flaky-but-technically-running process doesn't get misattributed as the
+    # working mode for future restarts.
+    [[ "${BORE_PORT}" != "see log" ]] && echo "${BORE_MODE}" > "${LAST_MODE_FILE}" 2>/dev/null || true
     log "bore tunnel running (PID ${BORE_PID}, mode: ${BORE_MODE}) — port: ${BORE_PORT}"
     log "  SSH: ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub"
     log "  a-shell: SSH to bore.pub port ${BORE_PORT}"

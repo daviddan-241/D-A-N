@@ -69,9 +69,12 @@ start_bore() {
 
   BORE_PID="${pid}"
   if [[ -n "${pid}" ]]; then
-    echo "${mode}" > "${LAST_MODE_FILE}" 2>/dev/null || true
     local port
     port=$(extract_port)
+    # Only persist the mode once we have a resolvable port — a process that's
+    # merely alive but never reports a port shouldn't be recorded as "this
+    # mode works" for future restarts.
+    [[ -n "${port}" ]] && echo "${mode}" > "${LAST_MODE_FILE}" 2>/dev/null || true
     if [[ -n "${port}" ]]; then
       echo "ssh -p ${port} ${DEV_USER}@bore.pub" > "${HOME_DIR}/.dan_ssh_connect"
       chown "${DEV_USER}:${DEV_USER}" "${HOME_DIR}/.dan_ssh_connect" 2>/dev/null || true
@@ -90,7 +93,16 @@ start_bore() {
 log "watchdog starting (interval ${CHECK_INTERVAL}s)"
 write_stats "watching"
 
+RESTART_LOCK="${LOG_DIR}/.bore-restart.lock"
+
 while true; do
+  # Skip this cycle if a manual restart (POST /api/status/restart-tunnel) is
+  # currently in flight — otherwise the watchdog and the manual restart can
+  # kill/spawn `bore` at the same time and stomp on each other's state.
+  if [[ -f "${RESTART_LOCK}" ]]; then
+    sleep "${CHECK_INTERVAL}"
+    continue
+  fi
   if ! pgrep -x bore >/dev/null 2>&1; then
     RESTART_COUNT=$((RESTART_COUNT + 1))
     log "bore not running — restarting tunnel (restart #${RESTART_COUNT})"
