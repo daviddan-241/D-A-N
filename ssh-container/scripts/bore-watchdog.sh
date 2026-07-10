@@ -94,16 +94,27 @@ log "watchdog starting (interval ${CHECK_INTERVAL}s)"
 write_stats "watching"
 
 RESTART_LOCK="${LOG_DIR}/.bore-restart.lock"
+LOCK_TTL=30  # seconds — treat an older lock as stale (crashed manual restart) and ignore it
+
+lock_held() {
+  [[ -f "${RESTART_LOCK}" ]] || return 1
+  local age
+  age=$(( $(date +%s) - $(cat "${RESTART_LOCK}" 2>/dev/null || echo 0) ))
+  if [[ "${age}" -gt "${LOCK_TTL}" ]]; then
+    log "ignoring stale restart lock (${age}s old) — treating as crashed manual restart"
+    rm -f "${RESTART_LOCK}" 2>/dev/null || true
+    return 1
+  fi
+  return 0
+}
 
 while true; do
   # Skip this cycle if a manual restart (POST /api/status/restart-tunnel) is
   # currently in flight — otherwise the watchdog and the manual restart can
-  # kill/spawn `bore` at the same time and stomp on each other's state.
-  if [[ -f "${RESTART_LOCK}" ]]; then
-    sleep "${CHECK_INTERVAL}"
-    continue
-  fi
-  if ! pgrep -x bore >/dev/null 2>&1; then
+  # kill/spawn `bore` at the same time and stomp on each other's state. Re-check
+  # immediately before acting (not just at loop top) to close the window where
+  # a manual restart starts between our lock check and pgrep/start_bore.
+  if ! lock_held && ! pgrep -x bore >/dev/null 2>&1 && ! lock_held; then
     RESTART_COUNT=$((RESTART_COUNT + 1))
     log "bore not running — restarting tunnel (restart #${RESTART_COUNT})"
     start_bore

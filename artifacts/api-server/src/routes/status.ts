@@ -132,7 +132,9 @@ router.post("/status/restart-tunnel", (_req, res) => {
   restartInFlight = true;
   // Suppress the watchdog while we manually manage `bore` so it doesn't
   // kill/spawn the process concurrently and stomp on our state.
-  try { fs.writeFileSync(RESTART_LOCK, String(Date.now())); } catch { /* best-effort */ }
+  // Lock file stores a Unix seconds timestamp (matches `date +%s` used by
+  // bore-watchdog.sh's stale-lock check) — do not switch to milliseconds.
+  try { fs.writeFileSync(RESTART_LOCK, String(Math.floor(Date.now() / 1000))); } catch { /* best-effort */ }
   killProcess("bore");
 
   const boreSecret = process.env.BORE_SECRET || "";
