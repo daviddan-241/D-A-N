@@ -327,12 +327,16 @@ RUN pip3 install --no-cache-dir --break-system-packages playwright \
 # ── Ollama — local uncensored AI runtime (binary baked in, models pulled at boot) ─
 # Baking the binary prevents the auto-install.sh failure; models are still
 # pulled on first boot by auto-install.sh (too large to include in the image).
-RUN curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null \
-  || (curl -fsSL \
-        "https://github.com/ollama/ollama/releases/latest/download/ollama-linux-amd64" \
-        -o /usr/local/bin/ollama \
-      && chmod +x /usr/local/bin/ollama) \
-  || echo "WARN: Ollama install failed at build time — will retry at runtime"
+# Ollama — pin to a known-good release; avoid the install script which
+# tries to create systemd units and fails in Docker.
+# v0.3.14 ships a single self-contained binary for linux/amd64.
+ARG OLLAMA_VERSION=0.3.14
+RUN curl -fsSL \
+      "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64" \
+      -o /usr/local/bin/ollama \
+  && chmod +x /usr/local/bin/ollama \
+  && /usr/local/bin/ollama --version \
+  || echo "WARN: Ollama binary download failed — run: curl -fsSL https://ollama.com/install.sh | sh"
 
 # ── feroxbuster — fast, recursive content discovery ──────────────────────────
 RUN curl -fsSL \

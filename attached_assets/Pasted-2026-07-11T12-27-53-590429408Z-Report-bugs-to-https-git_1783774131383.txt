@@ -1,0 +1,50 @@
+2026-07-11T12:27:53.590429408Z Report bugs to https://github.com/fail2ban/fail2ban/issues
+2026-07-11T12:27:53.682121125Z [2026-07-11T12:27:53Z] [WARN]  fail2ban failed to start (may lack permissions in some environments)
+2026-07-11T12:27:53.684019623Z [2026-07-11T12:27:53Z] [INFO]  Validating sshd configuration ...
+2026-07-11T12:27:53.787879977Z [2026-07-11T12:27:53Z] [INFO]  sshd configuration OK.
+2026-07-11T12:27:53.880158065Z [2026-07-11T12:27:53Z] [INFO]  AUTO_INSTALL_EXTRAS=yes — running first-boot tool install (background) ...
+2026-07-11T12:27:53.880823539Z Auto-install started in background. Check: tail -f /var/log/ssh-container/auto-install.log
+2026-07-11T12:27:53.883130426Z [2026-07-11T12:27:53Z] [INFO]  Starting ttyd web terminal on 127.0.0.1:7681 (internal) ...
+2026-07-11T12:27:54.387734994Z [2026-07-11T12:27:54Z] [INFO]    Persistent tmux session 'main' ready for devuser
+2026-07-11T12:27:55.485568617Z [2026-07-11T12:27:55Z] [INFO]  ttyd running (PID 297)
+2026-07-11T12:27:55.487539267Z [2026-07-11T12:27:55Z] [INFO]    Web terminal: https://<your-render-url>/webterm
+2026-07-11T12:27:55.58049225Z [2026-07-11T12:27:55Z] [INFO]    Session persists — navigate away and back to rejoin same shell
+2026-07-11T12:27:55.584193855Z [2026-07-11T12:27:55Z] [INFO]  Starting bore TCP tunnel via Tor (torsocks) ...
+2026-07-11T12:27:57.161869695Z [2026-07-11T12:27:57Z] [AUTO-INSTALL] WARN: Ollama install failed — install manually: curl -fsSL https://ollama.com/install.sh | sh
+2026-07-11T12:27:59.588156511Z [2026-07-11T12:27:59Z] [WARN]    bore via Tor failed to come up (bore.pub likely blocks Tor exit nodes) — retrying direct
+2026-07-11T12:27:59.590941797Z [2026-07-11T12:27:59Z] [INFO]  Starting bore TCP tunnel directly (no Tor) ...
+2026-07-11T12:28:16.095258401Z [2026-07-11T12:28:16Z] [INFO]  bore tunnel process running (PID 361, mode: direct) — port not yet in log
+2026-07-11T12:28:16.100584409Z [2026-07-11T12:28:16Z] [INFO]    The watchdog will write ~/.dan_ssh_connect once the port appears.
+2026-07-11T12:28:16.185464998Z [2026-07-11T12:28:16Z] [INFO]    Dashboard will pick it up within ~15 s. Logs: tail -f /var/log/ssh-container/bore.log
+2026-07-11T12:28:16.194034341Z [2026-07-11T12:28:16Z] [INFO]  Starting bore watchdog (auto-restarts tunnel if it drops) ...
+2026-07-11T12:28:16.285002894Z [2026-07-11T12:28:16Z] [INFO]  bore watchdog running (PID 554)
+2026-07-11T12:28:16.384858046Z [2026-07-11T12:28:16Z] [INFO]  Starting GitHub persistence sync ...
+2026-07-11T12:28:16.492155358Z [2026-07-11T12:28:16Z] [INFO]  GitHub sync running — logs: tail -f /var/log/ssh-container/dotfiles.log
+2026-07-11T12:28:16.780778774Z [2026-07-11T12:28:16Z] [INFO]  Starting sshd (background) ...
+2026-07-11T12:28:17.89163735Z [2026-07-11T12:28:17Z] [WARN]  sshd failed to start — check /var/log/ssh-container/sshd.log
+2026-07-11T12:28:17.901239094Z [2026-07-11T12:28:17Z] [INFO]  ======================================================================
+2026-07-11T12:28:17.982591752Z [2026-07-11T12:28:17Z] [INFO]   D.A.N. is live
+2026-07-11T12:28:17.987634534Z [2026-07-11T12:28:17Z] [INFO]  ======================================================================
+2026-07-11T12:28:18.084974905Z [2026-07-11T12:28:17Z] [INFO]   Web app:          https://<your-render-url>  (dashboard + web terminal)
+2026-07-11T12:28:18.190236046Z [2026-07-11T12:28:18Z] [INFO]   Web Terminal:      https://<your-render-url>/webterm  (auth: devuser / [WEB_TERMINAL_PASS])
+2026-07-11T12:28:18.284071457Z [2026-07-11T12:28:18Z] [INFO]   SSH (Cloudflare): ssh -o 'ProxyCommand cloudflared access ssh --hostname %h' devuser@<tunnel-host>
+2026-07-11T12:28:18.385897079Z [2026-07-11T12:28:18Z] [INFO]   SSH (bore):       ssh -p <PORT> devuser@bore.pub  (check: cat ~/.dan_ssh_connect)
+2026-07-11T12:28:18.389345559Z [2026-07-11T12:28:18Z] [INFO]   GitHub sync:      cat /var/log/ssh-container/dotfiles.log
+2026-07-11T12:28:18.492271603Z [2026-07-11T12:28:18Z] [INFO]   Logs dir:         /var/log/ssh-container/
+2026-07-11T12:28:18.599369232Z [2026-07-11T12:28:18Z] [INFO]  ======================================================================
+2026-07-11T12:28:18.686153309Z [2026-07-11T12:28:18Z] [INFO]  Starting D.A.N. app on :10000 ...
+2026-07-11T12:28:26.784106981Z {"level":30,"time":1783772906783,"pid":635,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-56d6c4dbbd-sgv89","ttydPort":"7681","msg":"Web terminal proxy enabled at /webterm"}
+2026-07-11T12:28:26.980285664Z {"level":30,"time":1783772906784,"pid":635,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-56d6c4dbbd-sgv89","publicDir":"/app/public","msg":"Serving bundled frontend"}
+2026-07-11T12:28:26.980303964Z {"level":30,"time":1783772906885,"pid":635,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-56d6c4dbbd-sgv89","port":10000,"msg":"Server listening"}
+2026-07-11T12:28:27.681400082Z (node:635) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-07-11T12:28:27.681418972Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-07-11T12:28:27.880894022Z {"level":30,"time":1783772907880,"pid":635,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-56d6c4dbbd-sgv89","req":{"id":1,"method":"HEAD","url":"/"},"res":{"statusCode":200},"responseTime":203,"msg":"request completed"}
+2026-07-11T12:28:33.6938089Z ==> Your service is live 🎉
+2026-07-11T12:28:33.758171241Z ==> 
+2026-07-11T12:28:33.760960756Z ==> ///////////////////////////////////////////////////////////
+2026-07-11T12:28:33.763364852Z ==> 
+2026-07-11T12:28:33.765920431Z ==> Available at your primary URL https://d-a-n-hwqd.onrender.com
+2026-07-11T12:28:33.768480041Z ==> 
+2026-07-11T12:28:33.771140563Z ==> ///////////////////////////////////////////////////////////
+2026-07-11T12:28:33.784764079Z {"level":30,"time":1783772913784,"pid":635,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-56d6c4dbbd-sgv89","req":{"id":2,"method":"GET","url":"/"},"res":{"statusCode":200},"responseTime":4,"msg":"request completed"}
+2026-07-11T12:28:50.48102958Z {"level":30,"time":1783772930480,"pid":635,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-56d6c4dbbd-sgv89","req":{"id":3,"method":"HEAD","url":"/"},"res":{"statusCode":200},"responseTime":60,"msg":"request completed"}

@@ -1,29 +1,23 @@
 import { Router, type IRouter } from "express";
-import { execSync, spawn } from "node:child_process";
+import { execSync } from "node:child_process";
 import fs from "node:fs";
+import {
+  getTunnelState,
+  restartTunnel,
+} from "../tunnel-manager";
 
 const router: IRouter = Router();
 
-const DEV_USER = process.env.DEV_USER || "devuser";
+const DEV_USER = process.env["DEV_USER"] ?? "devuser";
 const HOME_DIR = `/home/${DEV_USER}`;
 const LOG_DIR = "/var/log/ssh-container";
 
-let restartInFlight = false;
-
 function isProcessRunning(name: string): boolean {
   try {
-    execSync(`pgrep -x ${name}`, { stdio: "ignore" });
+    execSync(`pgrep -x ${name}`, { stdio: "ignore", timeout: 2000 });
     return true;
   } catch {
     return false;
-  }
-}
-
-function killProcess(name: string): void {
-  try {
-    execSync(`pkill -x ${name}`, { stdio: "ignore" });
-  } catch {
-    // no matching process — nothing to kill
   }
 }
 
@@ -35,55 +29,54 @@ function readTrimmed(path: string): string | null {
   }
 }
 
-function readWatchdogStats(): { restartCount: number; lastRestartAt: string | null; status: string } | null {
-  try {
-    const raw = fs.readFileSync(`${LOG_DIR}/bore-watchdog-stats.json`, "utf8");
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
 function countAuthorizedKeys(): number {
   const content = readTrimmed(`${HOME_DIR}/.ssh/authorized_keys`);
   if (!content) return 0;
   return content
     .split("\n")
-    .filter((line) => /^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp|sk-)/.test(line.trim())).length;
+    .filter((line) =>
+      /^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp|sk-)/.test(line.trim()),
+    ).length;
 }
 
+// ── GET /api/status ───────────────────────────────────────────────────────────
 router.get("/status", (_req, res) => {
   const sshdRunning = isProcessRunning("sshd");
-  const boreRunning = isProcessRunning("bore");
-  const cloudflaredRunning = isProcessRunning("cloudflared");
   const authorizedKeys = countAuthorizedKeys();
   const autoInstallDone = fs.existsSync(`${HOME_DIR}/.dan_extras_installed`);
   const autoInstallLog = readTrimmed(`${LOG_DIR}/auto-install.log`);
-  const autoInstallRunning = !autoInstallDone && isProcessRunning("auto-install.sh");
+  const autoInstallRunning =
+    !autoInstallDone && isProcessRunning("auto-install.sh");
 
-  // Always live-read bore.log for the port — don't rely solely on the connect
-  // file, which may be absent (tunnel still starting) or stale from a prior run.
-  // If we find a real port, write/refresh the connect file so `cat ~/.dan_ssh_connect`
-  // always matches what the dashboard shows.
-  let boreConnectCommand = readTrimmed(`${HOME_DIR}/.dan_ssh_connect`);
-  if (boreRunning) {
-    try {
-      const boreLog = fs.readFileSync(`${LOG_DIR}/bore.log`, "utf8");
-      const livePort = extractBorePort(boreLog);
-      if (livePort) {
-        const cmd = `ssh -p ${livePort} ${DEV_USER}@bore.pub`;
-        // Only update the file when the port actually changed (or file was missing/stale)
-        if (boreConnectCommand !== cmd) {
-          try {
-            fs.writeFileSync(`${HOME_DIR}/.dan_ssh_connect`, `${cmd}\n`);
-          } catch {
-            // best-effort — may not have write access
-          }
-        }
-        boreConnectCommand = cmd;
-      }
-    } catch {
-      // bore.log unreadable — fall back to whatever the connect file had
+  // Bore: use TunnelManager's in-memory state (port captured via pipe, not log file)
+  const tunnel = getTunnelState();
+  const boreEnabled = process.env["BORE_ENABLE"] === "yes";
+  const boreRunning =
+    tunnel.status === "live" ||
+    tunnel.status === "starting" ||
+    tunnel.status === "retrying" ||
+    isProcessRunning("bore");
+  const connectCommand = tunnel.port
+    ? `ssh -p ${tunnel.port} ${DEV_USER}@bore.pub`
+    : null;
+
+  // Watchdog stats (legacy file written by bore-watchdog.sh, may be absent)
+  let watchdogStats: {
+    restartCount: number;
+    lastRestartAt: string | null;
+    status: string;
+  } | null = null;
+  try {
+    const raw = fs.readFileSync(`${LOG_DIR}/bore-watchdog-stats.json`, "utf8");
+    watchdogStats = JSON.parse(raw);
+  } catch {
+    /* absent — use tunnel manager's restart count instead */
+    if (boreEnabled) {
+      watchdogStats = {
+        restartCount: tunnel.restarts,
+        lastRestartAt: tunnel.startedAt,
+        status: tunnel.status,
+      };
     }
   }
 
@@ -95,158 +88,52 @@ router.get("/status", (_req, res) => {
     },
     tunnel: {
       bore: {
-        enabled: process.env.BORE_ENABLE === "yes",
+        enabled: boreEnabled,
         running: boreRunning,
-        connectCommand: boreConnectCommand,
-        watchdog: readWatchdogStats(),
+        connectCommand,
+        tunnelStatus: tunnel.status,
+        watchdog: watchdogStats,
       },
       cloudflare: {
-        enabled: Boolean(process.env.CLOUDFLARE_TUNNEL_TOKEN),
-        running: cloudflaredRunning,
+        enabled: Boolean(process.env["CLOUDFLARE_TUNNEL_TOKEN"]),
+        running: isProcessRunning("cloudflared"),
       },
     },
     autoInstall: {
-      enabled: process.env.AUTO_INSTALL_EXTRAS === "yes",
+      enabled: process.env["AUTO_INSTALL_EXTRAS"] === "yes",
       done: autoInstallDone,
       running: autoInstallRunning,
-      lastLogLine: autoInstallLog ? autoInstallLog.split("\n").slice(-1)[0] : null,
+      lastLogLine: autoInstallLog
+        ? autoInstallLog.split("\n").slice(-1)[0]
+        : null,
     },
     timestamp: new Date().toISOString(),
   });
 });
 
-// bore-cli tracing output varies by version. We try multiple patterns so that
-// a formatting change in bore doesn't silently break port detection.
-function extractBorePort(log: string): string | null {
-  const patterns = [
-    /bore\.pub:(\d+)/g,
-    /remote_port=(\d+)/g,
-    /Listening at [^:\s]+:(\d+)/g,
-    /port[ =:](\d{4,5})/gi,
-  ];
-  for (const re of patterns) {
-    const matches = [...log.matchAll(re)];
-    if (matches.length > 0) {
-      const last = matches[matches.length - 1];
-      if (last[1]) return last[1];
-    }
+// ── POST /api/tunnel/start ────────────────────────────────────────────────────
+// Kills any running bore and spawns a fresh one with piped output.
+// Returns immediately; client polls GET /api/status until port appears.
+router.post("/tunnel/start", (_req, res) => {
+  if (process.env["BORE_ENABLE"] !== "yes") {
+    res
+      .status(400)
+      .json({ error: "BORE_ENABLE=yes is not set on this Render service." });
+    return;
   }
-  return null;
-}
+  restartTunnel();
+  res.json({ restarting: true, message: "Bore tunnel restarting — poll /api/status for port." });
+});
 
-const LAST_MODE_FILE = `${LOG_DIR}/.bore-last-mode`;
-// Atomic mutual-exclusion lock shared with ssh-container/scripts/bore-watchdog.sh
-// (see LOCK_DIR there — path must match). fs.mkdirSync throws EEXIST atomically
-// if another holder (the watchdog loop) already created it, so there's no
-// check-then-act race between this endpoint and the watchdog.
-const LOCK_DIR = `${LOG_DIR}/.bore-restart.lock`;
-const LOCK_TTL_MS = 30_000;
-
-function acquireLock(): boolean {
-  try {
-    fs.mkdirSync(LOCK_DIR);
-    fs.writeFileSync(`${LOCK_DIR}/owner`, String(Math.floor(Date.now() / 1000)));
-    return true;
-  } catch {
-    // Already held — reclaim if stale (crashed holder never released it).
-    try {
-      const ts = Number(readTrimmed(`${LOCK_DIR}/owner`) || "0");
-      const ageMs = Date.now() - ts * 1000;
-      if (ageMs > LOCK_TTL_MS) {
-        fs.rmSync(LOCK_DIR, { recursive: true, force: true });
-        fs.mkdirSync(LOCK_DIR);
-        fs.writeFileSync(`${LOCK_DIR}/owner`, String(Math.floor(Date.now() / 1000)));
-        return true;
-      }
-    } catch {
-      // fall through to false
-    }
-    return false;
-  }
-}
-
-function releaseLock(): void {
-  try { fs.rmSync(LOCK_DIR, { recursive: true, force: true }); } catch { /* best-effort */ }
-}
-
-function spawnBore(useTor: boolean, boreSecret: string): ReturnType<typeof spawn> {
-  const args = ["local", "22", "--to", "bore.pub"];
-  if (boreSecret) args.push("--secret", boreSecret);
-  const logFd = fs.openSync(`${LOG_DIR}/bore.log`, "a");
-  const child = useTor
-    ? spawn("torsocks", ["bore", ...args], { detached: true, stdio: ["ignore", logFd, logFd] })
-    : spawn("bore", args, { detached: true, stdio: ["ignore", logFd, logFd] });
-  child.unref();
-  fs.closeSync(logFd);
-  return child;
-}
-
+// ── POST /api/status/restart-tunnel (legacy alias) ────────────────────────────
 router.post("/status/restart-tunnel", (_req, res) => {
-  if (process.env.BORE_ENABLE !== "yes") {
-    res.status(400).json({ error: "BORE_ENABLE is not set to 'yes' — nothing to restart." });
+  if (process.env["BORE_ENABLE"] !== "yes") {
+    res
+      .status(400)
+      .json({ error: "BORE_ENABLE=yes is not set on this Render service." });
     return;
   }
-  if (restartInFlight) {
-    res.status(409).json({ error: "A tunnel restart is already in progress." });
-    return;
-  }
-
-  if (!acquireLock()) {
-    res.status(409).json({ error: "bore-watchdog currently holds the tunnel lock — try again shortly." });
-    return;
-  }
-  restartInFlight = true;
-  killProcess("bore");
-
-  const boreSecret = process.env.BORE_SECRET || "";
-  const hasTorsocks = (() => {
-    try { execSync("command -v torsocks", { stdio: "ignore" }); return true; }
-    catch { return false; }
-  })();
-  // If a previous run already learned that Tor gets refused by bore.pub for
-  // this container, skip straight to direct — don't keep retrying a path
-  // that will only crash-loop again.
-  const forceDirect = readTrimmed(LAST_MODE_FILE) === "direct";
-  const tryTor = hasTorsocks && !forceDirect;
-
-  spawnBore(tryTor, boreSecret);
-
-  setTimeout(() => {
-    const torUp = isProcessRunning("bore") && extractBorePort(readTrimmed(`${LOG_DIR}/bore.log`) || "");
-    let mode: "tor" | "direct" | null = tryTor ? (torUp ? "tor" : null) : (isProcessRunning("bore") ? "direct" : null);
-
-    if (tryTor && !torUp) {
-      // Tor path didn't come up with a resolvable port — kill it and retry direct.
-      killProcess("bore");
-      spawnBore(false, boreSecret);
-      setTimeout(() => finishRestart("direct"), 3000);
-      return;
-    }
-    finishRestart(mode ?? (tryTor ? "tor" : "direct"));
-  }, 4000);
-
-  function finishRestart(mode: string) {
-    try {
-      const running = isProcessRunning("bore");
-      if (running) {
-        const log = fs.readFileSync(`${LOG_DIR}/bore.log`, "utf8");
-        const port = extractBorePort(log);
-        if (port) {
-          // Only persist the mode once we have a confirmed, resolvable port —
-          // a process that's merely alive shouldn't be recorded as "working".
-          fs.writeFileSync(LAST_MODE_FILE, mode);
-          const cmd = `ssh -p ${port} ${DEV_USER}@bore.pub`;
-          fs.writeFileSync(`${HOME_DIR}/.dan_ssh_connect`, `${cmd}\n`);
-        }
-      }
-    } catch {
-      // best-effort — status endpoint will just show "starting" if this fails
-    } finally {
-      releaseLock();
-      restartInFlight = false;
-    }
-  }
-
+  restartTunnel();
   res.json({ restarting: true });
 });
 

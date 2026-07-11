@@ -470,13 +470,20 @@ fi
 log "Starting sshd (background) ..."
 # Render ephemeral tmpfs wipes /var/run at boot — recreate it.
 mkdir -p /var/run/sshd && chmod 755 /var/run/sshd
+# sshd daemonizes — the parent PID we capture exits immediately after forking
+# the daemon child. Use pgrep to confirm the daemon is actually running.
 /usr/sbin/sshd -e >>"${LOG_DIR}/sshd.log" 2>&1 &
-SSHD_PID=$!
-sleep 1
-if kill -0 "${SSHD_PID}" 2>/dev/null; then
-  log "sshd running (PID ${SSHD_PID})"
+sleep 2
+if pgrep -x sshd >/dev/null 2>&1; then
+  log "sshd running (daemon PID: $(pgrep -x sshd | head -1))"
 else
-  warn "sshd failed to start — check ${LOG_DIR}/sshd.log"
+  # Try once more with extra debug output
+  warn "sshd daemon not found — retrying with -D (foreground debug)..."
+  /usr/sbin/sshd -D -e >>"${LOG_DIR}/sshd.log" 2>&1 &
+  sleep 2
+  pgrep -x sshd >/dev/null 2>&1 \
+    && log "sshd running on retry" \
+    || warn "sshd still not running — check ${LOG_DIR}/sshd.log"
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────

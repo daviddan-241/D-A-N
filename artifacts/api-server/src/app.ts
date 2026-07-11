@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { initTunnel } from "./tunnel-manager";
 
 const app: Express = express();
 
@@ -15,16 +16,10 @@ app.use(
     logger,
     serializers: {
       req(req) {
-        return {
-          id: req.id,
-          method: req.method,
-          url: req.url?.split("?")[0],
-        };
+        return { id: req.id, method: req.method, url: req.url?.split("?")[0] };
       },
       res(res) {
-        return {
-          statusCode: res.statusCode,
-        };
+        return { statusCode: res.statusCode };
       },
     },
   }),
@@ -35,11 +30,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
+// ── Bore tunnel manager ───────────────────────────────────────────────────────
+// Start/adopt bore immediately so the port appears as fast as possible.
+// initTunnel() is a no-op when BORE_ENABLE !== "yes".
+initTunnel();
+
 // ── Embedded web terminal (ttyd) ──────────────────────────────────────────────
-// In the single-service Render deployment, ttyd runs internally on
-// TTYD_INTERNAL_PORT and this app proxies /webterm to it (HTTP + WebSocket).
-// ttyd uses HTTP Basic Auth — we inject the Authorization header server-side
-// so the browser never sees a 401 challenge (which iOS blocks in iframes).
+// ttyd runs on TTYD_INTERNAL_PORT; this app proxies /webterm to it.
+// Two critical fixes for iOS Safari iframes:
+//   1. The Authorization header must be injected for BOTH the initial HTTP
+//      request AND the WebSocket upgrade — iOS blocks 401 challenges in iframes.
+//   2. The pathRewrite must apply consistently so ttyd's asset requests work.
 let terminalProxy: ReturnType<typeof createProxyMiddleware> | undefined;
 const ttydPort = process.env["TTYD_INTERNAL_PORT"];
 const ttydUser = process.env["WEB_TERMINAL_USER"] ?? "dan";
@@ -51,50 +52,77 @@ if (ttydPort) {
     target: `http://127.0.0.1:${ttydPort}`,
     changeOrigin: true,
     ws: true,
-    pathFilter: "/webterm",
+    pathFilter: (pathname: string) => pathname.startsWith("/webterm"),
     pathRewrite: { "^/webterm": "" },
-    // Inject auth so ttyd never challenges the browser — critical for iOS iframe
+    // Inject auth for HTTP requests (initial page load, assets)
     headers: { Authorization: ttydAuthHeader },
+    on: {
+      // Inject auth for WebSocket upgrade — critical fix for iOS iframe blank screen.
+      // Without this, ttyd returns 401 on the WS handshake and the terminal is empty.
+      proxyReqWs: (proxyReq) => {
+        proxyReq.setHeader("Authorization", ttydAuthHeader);
+      },
+      error: (err, _req, res) => {
+        logger.warn({ err }, "ttyd proxy error");
+        const r = res as express.Response;
+        if (r && typeof r.status === "function") {
+          r.status(502).json({ error: "terminal proxy error" });
+        }
+      },
+    },
   });
   app.use(terminalProxy);
   logger.info({ ttydPort }, "Web terminal proxy enabled at /webterm");
 }
 
 // ── Terminal availability probe ───────────────────────────────────────────────
-// Lets the UI know whether ttyd is actually reachable before loading the iframe.
 import http from "node:http";
 
 app.get("/api/terminal-ping", (_req, res) => {
   if (!ttydPort) {
-    res.json({ available: false, reason: "TTYD_INTERNAL_PORT not set — ttyd only runs in the Render container" });
+    res.json({
+      available: false,
+      reason:
+        "TTYD_INTERNAL_PORT not set — web terminal only runs in the Render container",
+    });
     return;
   }
-  // Guard: only one of (response / error / timeout) may send a reply
   let replied = false;
   const reply = (body: { available: boolean; reason?: string }) => {
     if (replied) return;
     replied = true;
     res.json(body);
   };
-
   const probe = http.get(
-    { host: "127.0.0.1", port: Number(ttydPort), path: "/", timeout: 2000,
-      headers: { Authorization: ttydAuthHeader } },
+    {
+      host: "127.0.0.1",
+      port: Number(ttydPort),
+      path: "/",
+      timeout: 2000,
+      headers: { Authorization: ttydAuthHeader },
+    },
     (r) => {
       probe.destroy();
-      // 200 or 3xx = ttyd is up and accepting our credentials.
-      // 401 = wrong credentials; 5xx = crash. Both mean "not usable".
-      const ok = r.statusCode !== undefined && r.statusCode >= 200 && r.statusCode < 400;
-      reply({ available: ok, ...(!ok && { reason: `ttyd returned HTTP ${r.statusCode}` }) });
-    }
+      const ok =
+        r.statusCode !== undefined &&
+        r.statusCode >= 200 &&
+        r.statusCode < 400;
+      reply({
+        available: ok,
+        ...(!ok && { reason: `ttyd returned HTTP ${r.statusCode}` }),
+      });
+    },
   );
-  probe.on("error", (err) => reply({ available: false, reason: `ttyd not reachable: ${err.message}` }));
-  probe.on("timeout", () => { probe.destroy(); reply({ available: false, reason: "ttyd timed out" }); });
+  probe.on("error", (err) =>
+    reply({ available: false, reason: `ttyd not reachable: ${err.message}` }),
+  );
+  probe.on("timeout", () => {
+    probe.destroy();
+    reply({ available: false, reason: "ttyd timed out" });
+  });
 });
 
 // ── Static frontend (dan-ui) ──────────────────────────────────────────────────
-// When bundled together for the single-service deployment, the built dan-ui
-// static files live in a `public/` directory alongside this server's dist/.
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(currentDir, "../public");
 if (fs.existsSync(publicDir)) {
