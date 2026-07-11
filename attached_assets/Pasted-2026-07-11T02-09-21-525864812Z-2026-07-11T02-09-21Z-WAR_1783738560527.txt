@@ -1,0 +1,50 @@
+2026-07-11T02:09:21.525864812Z [2026-07-11T02:09:21Z] [WARN]  fail2ban failed to start (may lack permissions in some environments)
+2026-07-11T02:09:21.529988727Z [2026-07-11T02:09:21Z] [INFO]  Validating sshd configuration ...
+2026-07-11T02:09:21.72590204Z [2026-07-11T02:09:21Z] [INFO]  sshd configuration OK.
+2026-07-11T02:09:21.728611206Z [2026-07-11T02:09:21Z] [INFO]  AUTO_INSTALL_EXTRAS=yes — running first-boot tool install (background) ...
+2026-07-11T02:09:21.729444883Z Auto-install started in background. Check: tail -f /var/log/ssh-container/auto-install.log
+2026-07-11T02:09:21.731300331Z [2026-07-11T02:09:21Z] [INFO]  Starting ttyd web terminal on 127.0.0.1:7681 (internal) ...
+2026-07-11T02:09:22.331723353Z [2026-07-11T02:09:22Z] [INFO]    Persistent tmux session 'main' ready for devuser
+2026-07-11T02:09:23.428877577Z [2026-07-11T02:09:23Z] [INFO]  ttyd running (PID 299)
+2026-07-11T02:09:23.431246646Z [2026-07-11T02:09:23Z] [INFO]    Web terminal: https://<your-render-url>/webterm
+2026-07-11T02:09:23.527249678Z [2026-07-11T02:09:23Z] [INFO]    Session persists — navigate away and back to rejoin same shell
+2026-07-11T02:09:23.529947013Z [2026-07-11T02:09:23Z] [INFO]  Starting bore TCP tunnel via Tor (torsocks) ...
+2026-07-11T02:09:24.335486111Z [2026-07-11T02:09:24Z] [AUTO-INSTALL] WARN: Ollama install failed — install manually: curl https://ollama.ai/install.sh | sh
+2026-07-11T02:09:27.534082843Z [2026-07-11T02:09:27Z] [WARN]    bore via Tor failed to come up (bore.pub likely blocks Tor exit nodes) — retrying direct
+2026-07-11T02:09:27.627454811Z [2026-07-11T02:09:27Z] [INFO]  Starting bore TCP tunnel directly (no Tor) ...
+2026-07-11T02:09:41.232284071Z [2026-07-11T02:09:41Z] [INFO]  bore tunnel process running (PID 375, mode: direct) — port not yet in log
+2026-07-11T02:09:41.326466717Z [2026-07-11T02:09:41Z] [INFO]    The watchdog will write ~/.dan_ssh_connect once the port appears.
+2026-07-11T02:09:41.330401269Z [2026-07-11T02:09:41Z] [INFO]    Dashboard will pick it up within ~15 s. Logs: tail -f /var/log/ssh-container/bore.log
+2026-07-11T02:09:41.330983551Z [2026-07-11T02:09:41Z] [INFO]  Starting bore watchdog (auto-restarts tunnel if it drops) ...
+2026-07-11T02:09:41.431401156Z [2026-07-11T02:09:41Z] [INFO]  bore watchdog running (PID 432)
+2026-07-11T02:09:41.526114974Z [2026-07-11T02:09:41Z] [INFO]  Starting GitHub persistence sync ...
+2026-07-11T02:09:41.726513086Z [2026-07-11T02:09:41Z] [INFO]  GitHub sync running — logs: tail -f /var/log/ssh-container/dotfiles.log
+2026-07-11T02:09:41.827268999Z [2026-07-11T02:09:41Z] [INFO]  Starting sshd (background) ...
+2026-07-11T02:09:43.026963298Z [2026-07-11T02:09:43Z] [WARN]  sshd failed to start — check /var/log/ssh-container/sshd.log
+2026-07-11T02:09:43.029479259Z [2026-07-11T02:09:43Z] [INFO]  ======================================================================
+2026-07-11T02:09:43.125510385Z [2026-07-11T02:09:43Z] [INFO]   D.A.N. is live
+2026-07-11T02:09:43.225963312Z [2026-07-11T02:09:43Z] [INFO]  ======================================================================
+2026-07-11T02:09:43.327258675Z [2026-07-11T02:09:43Z] [INFO]   Web app:          https://<your-render-url>  (dashboard + web terminal)
+2026-07-11T02:09:43.329728746Z [2026-07-11T02:09:43Z] [INFO]   Web Terminal:      https://<your-render-url>/webterm  (auth: devuser / [WEB_TERMINAL_PASS])
+2026-07-11T02:09:43.427155221Z [2026-07-11T02:09:43Z] [INFO]   SSH (Cloudflare): ssh -o 'ProxyCommand cloudflared access ssh --hostname %h' devuser@<tunnel-host>
+2026-07-11T02:09:43.430158313Z [2026-07-11T02:09:43Z] [INFO]   SSH (bore):       ssh -p <PORT> devuser@bore.pub  (check: cat ~/.dan_ssh_connect)
+2026-07-11T02:09:43.525533944Z [2026-07-11T02:09:43Z] [INFO]   GitHub sync:      cat /var/log/ssh-container/dotfiles.log
+2026-07-11T02:09:43.625624274Z [2026-07-11T02:09:43Z] [INFO]   Logs dir:         /var/log/ssh-container/
+2026-07-11T02:09:43.726946878Z [2026-07-11T02:09:43Z] [INFO]  ======================================================================
+2026-07-11T02:09:43.730129664Z [2026-07-11T02:09:43Z] [INFO]  Starting D.A.N. app on :10000 ...
+2026-07-11T02:09:50.928863185Z {"level":30,"time":1783735790928,"pid":511,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-cf7674fc-q2fds","ttydPort":"7681","msg":"Web terminal proxy enabled at /webterm"}
+2026-07-11T02:09:51.026212049Z {"level":30,"time":1783735790929,"pid":511,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-cf7674fc-q2fds","publicDir":"/app/public","msg":"Serving bundled frontend"}
+2026-07-11T02:09:51.026239009Z {"level":30,"time":1783735790931,"pid":511,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-cf7674fc-q2fds","port":10000,"msg":"Server listening"}
+2026-07-11T02:09:51.216821079Z ==> No open ports detected on 0.0.0.0, continuing to scan...
+2026-07-11T02:09:51.371823054Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-07-11T02:09:51.728424374Z (node:511) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-07-11T02:09:51.728453445Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-07-11T02:09:51.827808Z {"level":30,"time":1783735791826,"pid":511,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-cf7674fc-q2fds","req":{"id":1,"method":"HEAD","url":"/"},"res":{"statusCode":200},"responseTime":199,"msg":"request completed"}
+2026-07-11T02:09:59.608955212Z ==> Your service is live 🎉
+2026-07-11T02:09:59.710658998Z ==> 
+2026-07-11T02:09:59.71283875Z ==> ///////////////////////////////////////////////////////////
+2026-07-11T02:09:59.714655864Z ==> 
+2026-07-11T02:09:59.716861526Z ==> Available at your primary URL https://d-a-n-hwqd.onrender.com
+2026-07-11T02:09:59.719051367Z ==> 
+2026-07-11T02:09:59.723508992Z ==> ///////////////////////////////////////////////////////////
+2026-07-11T02:09:59.729002913Z {"level":30,"time":1783735799728,"pid":511,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-cf7674fc-q2fds","req":{"id":2,"method":"GET","url":"/"},"res":{"statusCode":200},"responseTime":17,"msg":"request completed"}
