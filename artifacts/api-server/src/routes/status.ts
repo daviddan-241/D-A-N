@@ -115,18 +115,23 @@ router.get("/status", (_req, res) => {
   });
 });
 
-// bore-cli's tracing output writes the assigned port as `remote_port=NNNN`
-// (no space before "port"), as `listening at bore.pub:NNNN`, or with a loose
-// `port NNNN` — matching all three keeps port detection working even if
-// bore/tracing changes its exact log wording. The old `/port (\d+)/` pattern
-// never matched real bore-cli output, so the dashboard was stuck on
-// "starting..." / no port forever even when the tunnel was healthy.
+// bore-cli tracing output varies by version. We try multiple patterns so that
+// a formatting change in bore doesn't silently break port detection.
 function extractBorePort(log: string): string | null {
-  const match = log.match(/(?:remote_port=|bore\.pub:|port[ =])(\d+)/g);
-  if (!match) return null;
-  const last = match[match.length - 1];
-  const digits = last.match(/(\d+)$/);
-  return digits ? digits[1] : null;
+  const patterns = [
+    /bore\.pub:(\d+)/g,
+    /remote_port=(\d+)/g,
+    /Listening at [^:\s]+:(\d+)/g,
+    /port[ =:](\d{4,5})/gi,
+  ];
+  for (const re of patterns) {
+    const matches = [...log.matchAll(re)];
+    if (matches.length > 0) {
+      const last = matches[matches.length - 1];
+      if (last[1]) return last[1];
+    }
+  }
+  return null;
 }
 
 const LAST_MODE_FILE = `${LOG_DIR}/.bore-last-mode`;

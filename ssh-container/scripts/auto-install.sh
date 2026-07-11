@@ -24,43 +24,68 @@ sudo -u "${DEV_USER}" bash /scripts/agent-memory.sh init 2>>"${LOG}" || \
 
 # ── Ollama — local uncensored AI (no content filters, no API key needed) ──────
 if ! command -v ollama &>/dev/null; then
-  log "Installing Ollama (local AI runtime — no API key, no restrictions) ..."
-  curl -fsSL https://ollama.ai/install.sh | sh 2>>"${LOG}" \
-    && log "Ollama installed." \
-    || warn "Ollama install failed — install manually: curl https://ollama.ai/install.sh | sh"
+  log "Installing Ollama binary (baked into image should have worked — retrying) ..."
+  curl -fsSL https://ollama.com/install.sh | sh 2>>"${LOG}" \
+    || curl -fsSL "https://github.com/ollama/ollama/releases/latest/download/ollama-linux-amd64" \
+         -o /usr/local/bin/ollama 2>>"${LOG}" \
+    && chmod +x /usr/local/bin/ollama \
+    && log "Ollama installed via fallback." \
+    || warn "Ollama install failed — install manually: curl -fsSL https://ollama.com/install.sh | sh"
 else
-  log "Ollama already installed: $(ollama --version 2>/dev/null || true)"
+  log "Ollama already installed: $(ollama --version 2>/dev/null || echo 'ok')"
 fi
 
 # Start ollama server in the background so we can pull models
 if command -v ollama &>/dev/null; then
   log "Starting Ollama server ..."
-  ollama serve >>"${LOG}" 2>&1 &
+  # OLLAMA_MODELS: store models in devuser's home so they survive on the volume
+  export OLLAMA_HOST="127.0.0.1:11434"
+  export OLLAMA_MODELS="${HOME_DIR}/.ollama/models"
+  mkdir -p "${OLLAMA_MODELS}"
+  chown -R "$(id -u "${DEV_USER}" 2>/dev/null || echo 1000)" "${HOME_DIR}/.ollama" 2>/dev/null || true
+
+  # Run as devuser so model files are owned correctly
+  sudo -u "${DEV_USER}" env OLLAMA_HOST="${OLLAMA_HOST}" OLLAMA_MODELS="${OLLAMA_MODELS}" \
+    ollama serve >>"${LOG}" 2>&1 &
   OLLAMA_PID=$!
-  sleep 5  # give it time to start
+  sleep 6  # give it time to start
 
-  # ── Pull uncensored models ────────────────────────────────────────────────
-  # dolphin-mistral: uncensored, no system prompt, follows any instruction
-  log "Pulling dolphin-mistral (uncensored Mistral — no content filters) ..."
-  ollama pull dolphin-mistral 2>>"${LOG}" \
-    && log "  dolphin-mistral ready — use: aider --model ollama/dolphin-mistral" \
-    || warn "  dolphin-mistral pull failed"
+  # Verify ollama server is up before pulling
+  OLLAMA_UP=0
+  for _i in $(seq 1 10); do
+    if curl -sf http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
+      OLLAMA_UP=1; break
+    fi
+    sleep 2
+  done
 
-  # llama3.1 for general coding tasks
-  log "Pulling llama3.1:8b (fast general purpose) ..."
-  ollama pull llama3.1:8b 2>>"${LOG}" \
-    && log "  llama3.1:8b ready — use: aider --model ollama/llama3.1:8b" \
-    || warn "  llama3.1:8b pull failed"
+  if [[ "${OLLAMA_UP}" -eq 1 ]]; then
+    # ── Pull uncensored models ──────────────────────────────────────────────
+    # Use Tor for anonymous model downloads
+    log "Pulling phi3:mini (fast, small — 2.2GB, works on Render free) ..."
+    sudo -u "${DEV_USER}" env OLLAMA_HOST="${OLLAMA_HOST}" \
+      ollama pull phi3:mini 2>>"${LOG}" \
+      && log "  phi3:mini ready — use: ollama run phi3:mini" \
+      || warn "  phi3:mini pull failed"
 
-  # dolphin-llama3: uncensored Llama 3
-  log "Pulling dolphin-llama3 (uncensored Llama 3) ..."
-  ollama pull dolphin-llama3 2>>"${LOG}" \
-    && log "  dolphin-llama3 ready — use: aider --model ollama/dolphin-llama3" \
-    || warn "  dolphin-llama3 pull failed"
+    log "Pulling dolphin-mistral (uncensored Mistral — no content filters) ..."
+    sudo -u "${DEV_USER}" env OLLAMA_HOST="${OLLAMA_HOST}" \
+      ollama pull dolphin-mistral 2>>"${LOG}" \
+      && log "  dolphin-mistral ready — use: aider --model ollama/dolphin-mistral" \
+      || warn "  dolphin-mistral pull failed"
 
-  # Create symlink so 'ollama' is accessible to devuser
+    log "Pulling dolphin-llama3:8b (uncensored Llama 3) ..."
+    sudo -u "${DEV_USER}" env OLLAMA_HOST="${OLLAMA_HOST}" \
+      ollama pull dolphin-llama3:8b 2>>"${LOG}" \
+      && log "  dolphin-llama3:8b ready — use: aider --model ollama/dolphin-llama3:8b" \
+      || warn "  dolphin-llama3:8b pull failed"
+
+    log "Ollama models ready. Run 'ollama list' to see installed models."
+  else
+    warn "Ollama server failed to come up — model pull skipped. Try: ollama serve & then ollama pull phi3:mini"
+  fi
+  # Ensure ollama is accessible to devuser
   ln -sf "$(command -v ollama)" /usr/local/bin/ollama 2>/dev/null || true
-  log "Ollama models ready. Run 'ollama list' to see installed models."
 fi
 
 # ── Aider AI coding assistant ────────────────────────────────────────────────

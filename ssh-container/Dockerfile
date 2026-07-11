@@ -133,6 +133,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bsdextrautils \
     binutils \
     file \
+    # Password wordlist generator
+    crunch \
     # Misc system
     sudo \
     less \
@@ -322,6 +324,26 @@ RUN pip3 install --no-cache-dir --break-system-packages playwright \
   && python3 -m playwright install --with-deps chromium \
   || echo "WARN: Playwright/Chromium build-time install failed — browser automation unavailable"
 
+# ── Ollama — local uncensored AI runtime (binary baked in, models pulled at boot) ─
+# Baking the binary prevents the auto-install.sh failure; models are still
+# pulled on first boot by auto-install.sh (too large to include in the image).
+RUN curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null \
+  || (curl -fsSL \
+        "https://github.com/ollama/ollama/releases/latest/download/ollama-linux-amd64" \
+        -o /usr/local/bin/ollama \
+      && chmod +x /usr/local/bin/ollama) \
+  || echo "WARN: Ollama install failed at build time — will retry at runtime"
+
+# ── feroxbuster — fast, recursive content discovery ──────────────────────────
+RUN curl -fsSL \
+      "https://github.com/epi052/feroxbuster/releases/latest/download/x86_64-linux-feroxbuster.zip" \
+      -o /tmp/feroxbuster.zip \
+  && unzip -q /tmp/feroxbuster.zip -d /tmp/feroxbuster \
+  && mv /tmp/feroxbuster/feroxbuster /usr/local/bin/ \
+  && chmod +x /usr/local/bin/feroxbuster \
+  && rm -rf /tmp/feroxbuster* \
+  || echo "WARN: feroxbuster install failed"
+
 # ── cloudflared (Cloudflare Tunnel — free SSH through HTTPS) ─────────────────
 # Lets you SSH into this container from anywhere without open ports.
 # Usage: set CLOUDFLARE_TUNNEL_TOKEN env var in Render dashboard.
@@ -334,7 +356,7 @@ RUN curl -fsSL \
 # ── bore (instant TCP tunnel — zero-config SSH fallback) ─────────────────────
 # bore local 22 --to bore.pub  →  ssh -p <PORT> devuser@bore.pub
 # Use BORE_SECRET env var for a consistent port across restarts.
-ARG BORE_VERSION=0.5.0
+ARG BORE_VERSION=0.5.1
 RUN curl -fsSL \
       "https://github.com/ekzhang/bore/releases/download/v${BORE_VERSION}/bore-v${BORE_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
       -o /tmp/bore.tar.gz \
