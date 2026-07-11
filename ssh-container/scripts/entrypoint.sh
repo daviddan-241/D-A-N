@@ -325,6 +325,14 @@ fi
 #     Set BORE_SECRET=<any-string> for a consistent port across restarts.
 # ─────────────────────────────────────────────────────────────────────────────
 if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
+  # This whole section launches/health-checks background processes (bore,
+  # torsocks, the watchdog) with patterns like `kill -0 $PID && VAR=val` and
+  # bare `[[ ... ]] && VAR=val`. Under `set -e`, a transient nonzero from any
+  # of these (e.g. the bore process having already died by the time we check
+  # it) was observed taking down the *entire* container on Render — sshd,
+  # ttyd and the Node app never got a chance to start. None of these checks
+  # are meant to be fatal, so disable errexit for just this section.
+  set +e
   BORE_SECRET="${BORE_SECRET:-}"
   BORE_CMD_BASE="local 22 --to bore.pub"
   [[ -n "${BORE_SECRET}" ]] && BORE_CMD_BASE="${BORE_CMD_BASE} --secret ${BORE_SECRET}"
@@ -400,6 +408,7 @@ if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
     /scripts/bore-watchdog.sh >>"${LOG_DIR}/bore-watchdog.log" 2>&1 &
   WATCHDOG_PID=$!
   log "bore watchdog running (PID ${WATCHDOG_PID})"
+  set -e
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
