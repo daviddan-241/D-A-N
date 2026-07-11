@@ -8,6 +8,7 @@ set -euo pipefail
 LOG_DIR="/var/log/ssh-container"
 LOG_FILE="${LOG_DIR}/startup.log"
 DEV_USER="${DEV_USER:-devuser}"
+DAN_HOSTNAME="${DAN_HOSTNAME:-dan-devbox}"
 WEB_TERMINAL_USER="${WEB_TERMINAL_USER:-dan}"
 WEB_TERMINAL_PASS="${WEB_TERMINAL_PASS:-changeme}"
 AUTO_INSTALL_EXTRAS="${AUTO_INSTALL_EXTRAS:-no}"
@@ -20,10 +21,22 @@ err()  { echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] [ERROR] $*" | tee -a "${LOG_FI
 mkdir -p "${LOG_DIR}"
 chmod 750 "${LOG_DIR}"
 
+# ── Custom hostname (shows up in the shell prompt as dave@${DAN_HOSTNAME}) ────
+# `hostname` itself often fails on unprivileged containers (Render doesn't
+# grant CAP_SYS_ADMIN), so this is best-effort — /etc/hosts is what actually
+# makes the name resolve locally, which is what the prompt needs.
+if command -v hostname &>/dev/null; then
+  hostname "${DAN_HOSTNAME}" 2>/dev/null || true
+fi
+echo "${DAN_HOSTNAME}" > /etc/hostname 2>/dev/null || true
+if ! grep -q "${DAN_HOSTNAME}" /etc/hosts 2>/dev/null; then
+  echo "127.0.0.1 ${DAN_HOSTNAME}" >> /etc/hosts 2>/dev/null || true
+fi
+
 log "======================================================================"
 log " D.A.N. — Dynamic Access Node — starting"
 log "======================================================================"
-log " Hostname:  $(hostname)"
+log " Hostname:  $(hostname 2>/dev/null || echo "${DAN_HOSTNAME}")"
 log " User:      ${DEV_USER}"
 log " Built on:  Ubuntu 24.04"
 log "======================================================================"

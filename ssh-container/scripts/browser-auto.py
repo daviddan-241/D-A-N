@@ -130,15 +130,50 @@ def get_inputs(page) -> list:
     except Exception:
         return []
 
+CAPTCHA_MARKERS = [
+    "recaptcha", "g-recaptcha", "hcaptcha", "h-captcha", "cf-turnstile",
+    "cloudflare", "are you human", "verify you are human", "captcha-delivery",
+    "press and hold", "unusual traffic",
+]
+
+def detect_captcha(page):
+    """Best-effort detection of a CAPTCHA/anti-bot wall on the current page.
+    Returns a short description if found, else None. Sign-up/account-creation
+    flows commonly gate on these, so aider needs to know rather than silently
+    treating a blocked page as normal content."""
+    try:
+        haystack = (page.content() or "").lower()
+    except Exception:
+        return None
+    for marker in CAPTCHA_MARKERS:
+        if marker in haystack:
+            return marker
+    return None
+
 def print_page_summary(page, url: str):
     title = page.title()
     text  = extract_text(page)
     links = get_links(page)
     inputs = get_inputs(page)
+    captcha = detect_captcha(page)
     print(f"=== PAGE: {title} ===")
     print(f"URL: {page.url}")
     print(f"ORIGINAL: {url}")
     print()
+    if captcha:
+        api_key = os.environ.get("DAN_CAPTCHA_API_KEY", "")
+        print("── CAPTCHA DETECTED ────────────────────────────────────")
+        print(f"  Marker: {captcha!r}")
+        if api_key:
+            print("  DAN_CAPTCHA_API_KEY is set, but automatic solving isn't wired up yet —")
+            print("  this still needs a human. Run browser-shot to see it, solve it in a")
+            print("  real browser session, or retry later.")
+        else:
+            print("  No solver configured. Options:")
+            print("   1) Run `browser-shot <url>` to see the challenge and solve it manually.")
+            print("   2) Set DAN_CAPTCHA_API_KEY (a 2captcha/CapSolver key) once solving support lands.")
+            print("   3) Retry — some anti-bot walls are IP/session-based and pass on a fresh Tor circuit (tor-newid).")
+        print()
     print("── TEXT ────────────────────────────────────────────────")
     print(text)
     print()

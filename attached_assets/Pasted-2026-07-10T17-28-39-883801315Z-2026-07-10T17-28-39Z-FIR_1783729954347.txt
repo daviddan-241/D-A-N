@@ -1,0 +1,50 @@
+2026-07-10T17:28:39.883801315Z [2026-07-10T17:28:39Z] [FIREWALL] NET_ADMIN capability not available; skipping ufw (iptables rules not modifiable)
+2026-07-10T17:28:39.885341437Z [2026-07-10T17:28:39Z] [FIREWALL] Host-level firewall should restrict access to the published SSH port instead.
+2026-07-10T17:28:39.887461735Z [2026-07-10T17:28:39Z] [INFO]  Starting fail2ban ...
+2026-07-10T17:28:40.296764191Z Usage: fail2ban-server [OPTIONS]
+2026-07-10T17:28:40.296774982Z 
+2026-07-10T17:28:40.296778612Z Fail2Ban v1.0.2 reads log file that contains password failure report
+2026-07-10T17:28:40.296783292Z and bans the corresponding IP addresses using firewall rules.
+2026-07-10T17:28:40.296786482Z 
+2026-07-10T17:28:40.296789632Z Options:
+2026-07-10T17:28:40.296792722Z     -c, --conf <DIR>        configuration directory
+2026-07-10T17:28:40.296797163Z     -s, --socket <FILE>     socket path
+2026-07-10T17:28:40.296800292Z     -p, --pidfile <FILE>    pidfile path
+2026-07-10T17:28:40.296804883Z     --pname <NAME>          name of the process (main thread) to identify instance (default fail2ban-server)
+2026-07-10T17:28:40.296808003Z     --loglevel <LEVEL>      logging level
+2026-07-10T17:28:40.296811393Z     --logtarget <TARGET>    logging target, use file-name or stdout, stderr, syslog or sysout.
+2026-07-10T17:28:40.296826823Z     --syslogsocket auto|<FILE>
+2026-07-10T17:28:40.296830203Z     -d                      dump configuration. For debugging
+2026-07-10T17:28:40.296833524Z     --dp, --dump-pretty     dump the configuration using more human readable representation
+2026-07-10T17:28:40.296836693Z     -t, --test              test configuration (can be also specified with start parameters)
+2026-07-10T17:28:40.296840154Z     -i                      interactive mode
+2026-07-10T17:28:40.296843204Z     -v                      increase verbosity
+2026-07-10T17:28:40.296846334Z     -q                      decrease verbosity
+2026-07-10T17:28:40.296849574Z     -x                      force execution of the server (remove socket file)
+2026-07-10T17:28:40.296852824Z     -b                      start server in background (default)
+2026-07-10T17:28:40.296855044Z     -f                      start server in foreground
+2026-07-10T17:28:40.296857024Z     --async                 start server in async mode (for internal usage only, don't read configuration)
+2026-07-10T17:28:40.296858904Z     --timeout               timeout to wait for the server (for internal usage only, don't read configuration)
+2026-07-10T17:28:40.296860854Z     --str2sec <STRING>      convert time abbreviation format to seconds
+2026-07-10T17:28:40.296862784Z     -h, --help              display this help message
+2026-07-10T17:28:40.296864944Z     -V, --version           print the version (-V returns machine-readable short format)
+2026-07-10T17:28:40.296866784Z 
+2026-07-10T17:28:40.296868734Z Report bugs to https://github.com/fail2ban/fail2ban/issues
+2026-07-10T17:28:40.383307592Z [2026-07-10T17:28:40Z] [WARN]  fail2ban failed to start (may lack permissions in some environments)
+2026-07-10T17:28:40.385107002Z [2026-07-10T17:28:40Z] [INFO]  Validating sshd configuration ...
+2026-07-10T17:28:40.511459819Z [2026-07-10T17:28:40Z] [INFO]  sshd configuration OK.
+2026-07-10T17:28:40.576886974Z [2026-07-10T17:28:40Z] [INFO]  AUTO_INSTALL_EXTRAS=yes — running first-boot tool install (background) ...
+2026-07-10T17:28:40.57748505Z Auto-install started in background. Check: tail -f /var/log/ssh-container/auto-install.log
+2026-07-10T17:28:40.676957014Z [2026-07-10T17:28:40Z] [INFO]  Starting ttyd web terminal on 127.0.0.1:7681 (internal) ...
+2026-07-10T17:28:41.082286042Z [2026-07-10T17:28:41Z] [INFO]    Persistent tmux session 'main' ready for devuser
+2026-07-10T17:28:42.086207971Z [2026-07-10T17:28:42Z] [INFO]  ttyd running (PID 294)
+2026-07-10T17:28:42.087995359Z [2026-07-10T17:28:42Z] [INFO]    Web terminal: https://<your-render-url>/webterm
+2026-07-10T17:28:42.176899695Z [2026-07-10T17:28:42Z] [INFO]    Session persists — navigate away and back to rejoin same shell
+2026-07-10T17:28:42.277447948Z [2026-07-10T17:28:42Z] [INFO]  Starting bore TCP tunnel via Tor (torsocks) ...
+2026-07-10T17:28:43.277217543Z [2026-07-10T17:28:43Z] [AUTO-INSTALL] WARN: Ollama install failed — install manually: curl https://ollama.ai/install.sh | sh
+2026-07-10T17:28:46.282067539Z [2026-07-10T17:28:46Z] [WARN]    bore via Tor failed to come up (bore.pub likely blocks Tor exit nodes) — retrying direct
+2026-07-10T17:28:46.377146553Z [2026-07-10T17:28:46Z] [INFO]  Starting bore TCP tunnel directly (no Tor) ...
+2026-07-10T17:28:50.590419748Z ==> Exited with status 1
+2026-07-10T17:28:50.602439705Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2026-07-10T17:29:15.034373578Z ==> No open ports detected on 0.0.0.0, continuing to scan...
+2026-07-10T17:29:15.1407305Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
