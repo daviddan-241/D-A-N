@@ -1,0 +1,50 @@
+2026-07-11T03:39:59.823272025Z [2026-07-11T03:39:59Z] [WARN]  Tor did not fully bootstrap within 60 s — continuing anyway
+2026-07-11T03:39:59.826028296Z [2026-07-11T03:39:59Z] [WARN]    Check: tail -f /var/log/ssh-container/tor.log
+2026-07-11T03:39:59.827968779Z [2026-07-11T03:39:59Z] [INFO]  Configuring firewall ...
+2026-07-11T03:39:59.88737345Z [2026-07-11T03:39:59Z] [FIREWALL] NET_ADMIN capability not available; skipping ufw (iptables rules not modifiable)
+2026-07-11T03:39:59.888644854Z [2026-07-11T03:39:59Z] [FIREWALL] Host-level firewall should restrict access to the published SSH port instead.
+2026-07-11T03:39:59.891511291Z [2026-07-11T03:39:59Z] [INFO]  Starting fail2ban ...
+2026-07-11T03:40:00.290290054Z Usage: fail2ban-server [OPTIONS]
+2026-07-11T03:40:00.290320016Z 
+2026-07-11T03:40:00.290326716Z Fail2Ban v1.0.2 reads log file that contains password failure report
+2026-07-11T03:40:00.290333137Z and bans the corresponding IP addresses using firewall rules.
+2026-07-11T03:40:00.290338327Z 
+2026-07-11T03:40:00.290343697Z Options:
+2026-07-11T03:40:00.290349368Z     -c, --conf <DIR>        configuration directory
+2026-07-11T03:40:00.290355358Z     -s, --socket <FILE>     socket path
+2026-07-11T03:40:00.290360608Z     -p, --pidfile <FILE>    pidfile path
+2026-07-11T03:40:00.290366739Z     --pname <NAME>          name of the process (main thread) to identify instance (default fail2ban-server)
+2026-07-11T03:40:00.290372299Z     --loglevel <LEVEL>      logging level
+2026-07-11T03:40:00.290378029Z     --logtarget <TARGET>    logging target, use file-name or stdout, stderr, syslog or sysout.
+2026-07-11T03:40:00.290397661Z     --syslogsocket auto|<FILE>
+2026-07-11T03:40:00.290401531Z     -d                      dump configuration. For debugging
+2026-07-11T03:40:00.290405161Z     --dp, --dump-pretty     dump the configuration using more human readable representation
+2026-07-11T03:40:00.290409031Z     -t, --test              test configuration (can be also specified with start parameters)
+2026-07-11T03:40:00.290412551Z     -i                      interactive mode
+2026-07-11T03:40:00.290416032Z     -v                      increase verbosity
+2026-07-11T03:40:00.290419872Z     -q                      decrease verbosity
+2026-07-11T03:40:00.290423472Z     -x                      force execution of the server (remove socket file)
+2026-07-11T03:40:00.290427182Z     -b                      start server in background (default)
+2026-07-11T03:40:00.290430263Z     -f                      start server in foreground
+2026-07-11T03:40:00.290433513Z     --async                 start server in async mode (for internal usage only, don't read configuration)
+2026-07-11T03:40:00.290437173Z     --timeout               timeout to wait for the server (for internal usage only, don't read configuration)
+2026-07-11T03:40:00.290440553Z     --str2sec <STRING>      convert time abbreviation format to seconds
+2026-07-11T03:40:00.290443823Z     -h, --help              display this help message
+2026-07-11T03:40:00.290447613Z     -V, --version           print the version (-V returns machine-readable short format)
+2026-07-11T03:40:00.290451164Z 
+2026-07-11T03:40:00.290454634Z Report bugs to https://github.com/fail2ban/fail2ban/issues
+2026-07-11T03:40:00.380113557Z [2026-07-11T03:40:00Z] [WARN]  fail2ban failed to start (may lack permissions in some environments)
+2026-07-11T03:40:00.381975086Z [2026-07-11T03:40:00Z] [INFO]  Validating sshd configuration ...
+2026-07-11T03:40:00.495081326Z [2026-07-11T03:40:00Z] [INFO]  sshd configuration OK.
+2026-07-11T03:40:00.575721234Z [2026-07-11T03:40:00Z] [INFO]  AUTO_INSTALL_EXTRAS=yes — running first-boot tool install (background) ...
+2026-07-11T03:40:00.576277216Z Auto-install started in background. Check: tail -f /var/log/ssh-container/auto-install.log
+2026-07-11T03:40:00.584115003Z [2026-07-11T03:40:00Z] [INFO]  Starting ttyd web terminal on 127.0.0.1:7681 (internal) ...
+2026-07-11T03:40:01.176096593Z [2026-07-11T03:40:01Z] [INFO]    Persistent tmux session 'main' ready for devuser
+2026-07-11T03:40:02.181828888Z [2026-07-11T03:40:02Z] [INFO]  ttyd running (PID 298)
+2026-07-11T03:40:02.279938754Z [2026-07-11T03:40:02Z] [INFO]    Web terminal: https://<your-render-url>/webterm
+2026-07-11T03:40:02.282627401Z [2026-07-11T03:40:02Z] [INFO]    Session persists — navigate away and back to rejoin same shell
+2026-07-11T03:40:02.282629991Z /entrypoint.sh: line 425: syntax error near unexpected token `fi'
+2026-07-11T03:40:03.701146517Z ==> Exited with status 2
+2026-07-11T03:40:03.703845888Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2026-07-11T03:40:49.744830827Z ==> No open ports detected on 0.0.0.0, continuing to scan...
+2026-07-11T03:40:49.846672401Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
