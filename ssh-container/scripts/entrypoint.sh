@@ -385,19 +385,32 @@ if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
   fi
 
   if [[ -n "${BORE_MODE}" ]]; then
-    BORE_PORT=$(extract_bore_port)
-    BORE_PORT="${BORE_PORT:-see log}"
-    # Only record the mode once we actually have a resolvable port, so a
-    # flaky-but-technically-running process doesn't get misattributed as the
-    # working mode for future restarts.
-    [[ "${BORE_PORT}" != "see log" ]] && echo "${BORE_MODE}" > "${LAST_MODE_FILE}" 2>/dev/null || true
-    log "bore tunnel running (PID ${BORE_PID}, mode: ${BORE_MODE}) — port: ${BORE_PORT}"
-    log "  SSH: ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub"
-    log "  a-shell: SSH to bore.pub port ${BORE_PORT}"
-    log "  Logs: tail -f ${LOG_DIR}/bore.log"
-    # Write connection info to a file the user can cat at any time
-    echo "ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub" > "/home/${DEV_USER}/.dan_ssh_connect"
-    chown "${DEV_USER}:${DEV_USER}" "/home/${DEV_USER}/.dan_ssh_connect" 2>/dev/null || true
+    # Poll up to 10 more seconds for the port to appear in the log — bore
+    # sometimes logs it a moment after the process is confirmed alive.
+    BORE_PORT=""
+    for _i in $(seq 1 10); do
+      BORE_PORT=$(extract_bore_port)
+      [[ -n "${BORE_PORT}" ]] && break
+      sleep 1
+    done
+    # Only record the mode and write the connect file when we have a real port
+    # number — never write "see log" or a placeholder, because the dashboard and
+    # the watchdog both read this file to show the live command to the user.
+    if [[ -n "${BORE_PORT}" ]]; then
+      echo "${BORE_MODE}" > "${LAST_MODE_FILE}" 2>/dev/null || true
+      log "bore tunnel running (PID ${BORE_PID}, mode: ${BORE_MODE}) — port: ${BORE_PORT}"
+      log "  SSH: ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub"
+      log "  a-shell: SSH to bore.pub port ${BORE_PORT}"
+      log "  Logs: tail -f ${LOG_DIR}/bore.log"
+      echo "ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub" > "/home/${DEV_USER}/.dan_ssh_connect"
+      chown "${DEV_USER}:${DEV_USER}" "/home/${DEV_USER}/.dan_ssh_connect" 2>/dev/null || true
+    else
+      log "bore tunnel process running (PID ${BORE_PID}, mode: ${BORE_MODE}) — port not yet in log"
+      log "  The watchdog will write ~/.dan_ssh_connect once the port appears."
+      log "  Dashboard will pick it up within ~15 s. Logs: tail -f ${LOG_DIR}/bore.log"
+      # Do NOT write the connect file with a placeholder — leave it absent so
+      # the dashboard shows "starting…" instead of a wrong command.
+    fi
   else
     warn "bore tunnel failed — check ${LOG_DIR}/bore.log"
   fi

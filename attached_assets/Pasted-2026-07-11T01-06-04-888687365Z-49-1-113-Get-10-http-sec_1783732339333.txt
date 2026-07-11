@@ -1,0 +1,50 @@
+2026-07-11T01:06:04.888687365Z #49 1.113 Get:10 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1,491 kB]
+2026-07-11T01:06:05.012646615Z #49 1.162 Get:11 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,023 kB]
+2026-07-11T01:06:05.012665497Z #49 1.213 Get:12 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [43.8 kB]
+2026-07-11T01:06:05.012668817Z #49 1.237 Get:13 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-07-11T01:06:05.198624914Z #49 1.423 Get:14 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-07-11T01:06:05.385182034Z #49 1.609 Get:15 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1,808 kB]
+2026-07-11T01:06:05.830081852Z #49 2.054 Get:16 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+2026-07-11T01:06:06.519244879Z #49 2.740 Get:17 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+2026-07-11T01:06:06.688509879Z #49 2.744 Get:18 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+2026-07-11T01:06:06.688534402Z #49 2.744 Get:19 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1,524 kB]
+2026-07-11T01:06:06.688538372Z #49 2.798 Get:20 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,359 kB]
+2026-07-11T01:06:06.688541322Z #49 2.826 Get:21 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2,113 kB]
+2026-07-11T01:06:06.688544642Z #49 2.912 Get:22 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [49.5 kB]
+2026-07-11T01:06:06.839878618Z #49 2.913 Get:23 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [671 B]
+2026-07-11T01:06:06.8398993Z #49 2.913 Get:24 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [48.9 kB]
+2026-07-11T01:06:06.83990412Z #49 2.914 Get:25 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [35.9 kB]
+2026-07-11T01:06:07.30646048Z #49 3.530 Fetched 31.5 MB in 3s (9,526 kB/s)
+2026-07-11T01:06:08.06190342Z #49 3.530 Reading package lists...
+2026-07-11T01:06:08.777416462Z #49 4.310 Reading package lists...
+2026-07-11T01:06:09.005122128Z #49 5.055 Building dependency tree...
+2026-07-11T01:06:09.155867982Z #49 5.229 Reading state information...
+2026-07-11T01:06:09.178475918Z #49 5.402 Suggested packages:
+2026-07-11T01:06:09.179058249Z #49 5.402   docker-model-plugin
+2026-07-11T01:06:09.17906378Z #49 5.402 Recommended packages:
+2026-07-11T01:06:09.17906783Z #49 5.402   docker-buildx-plugin
+2026-07-11T01:06:09.411576107Z #49 5.430 The following NEW packages will be installed:
+2026-07-11T01:06:09.411595839Z #49 5.431   docker-ce-cli docker-compose-plugin
+2026-07-11T01:06:09.411600919Z #49 5.486 0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.
+2026-07-11T01:06:09.41160518Z #49 5.486 Need to get 25.0 MB of archives.
+2026-07-11T01:06:09.411629802Z #49 5.486 After this operation, 78.3 MB of additional disk space will be used.
+2026-07-11T01:06:09.411635442Z #49 5.486 Get:1 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce-cli amd64 5:29.6.1-1~ubuntu.24.04~noble [16.9 MB]
+2026-07-11T01:06:09.411639263Z #49 5.636 Get:2 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-compose-plugin amd64 5.3.1-1~ubuntu.24.04~noble [8,100 kB]
+2026-07-11T01:06:09.61637314Z #49 5.840 debconf: delaying package configuration, since apt-utils is not installed
+2026-07-11T01:06:09.733340326Z #49 5.877 Fetched 25.0 MB in 0s (101 MB/s)
+2026-07-11T01:06:09.733359078Z #49 5.905 Selecting previously unselected package docker-ce-cli.
+2026-07-11T01:06:09.892814217Z #49 5.905 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 114057 files and directories currently installed.)
+2026-07-11T01:06:09.892829988Z #49 5.963 Preparing to unpack .../docker-ce-cli_5%3a29.6.1-1~ubuntu.24.04~noble_amd64.deb ...
+2026-07-11T01:06:09.892833609Z #49 5.966 Unpacking docker-ce-cli (5:29.6.1-1~ubuntu.24.04~noble) ...
+2026-07-11T01:06:10.216015992Z #49 6.440 Selecting previously unselected package docker-compose-plugin.
+2026-07-11T01:06:10.378674453Z #49 6.450 Preparing to unpack .../docker-compose-plugin_5.3.1-1~ubuntu.24.04~noble_amd64.deb ...
+2026-07-11T01:06:10.378687584Z #49 6.452 Unpacking docker-compose-plugin (5.3.1-1~ubuntu.24.04~noble) ...
+2026-07-11T01:06:10.689575347Z #49 6.914 Setting up docker-compose-plugin (5.3.1-1~ubuntu.24.04~noble) ...
+2026-07-11T01:06:10.854464214Z #49 6.921 Setting up docker-ce-cli (5:29.6.1-1~ubuntu.24.04~noble) ...
+2026-07-11T01:06:10.854483145Z #49 6.928 Processing triggers for man-db (2.12.0-4build2) ...
+2026-07-11T01:06:12.534697882Z #49 DONE 8.8s
+2026-07-11T01:06:12.664339832Z 
+2026-07-11T01:06:12.664366754Z #50 [final 31/59] RUN if getent group 1000 > /dev/null; then       EXISTING_GROUP=$(getent group 1000 | cut -d: -f1);     else       groupadd --gid 1000 devuser;       EXISTING_GROUP=devuser;     fi   && if getent passwd 1000 > /dev/null; then        EXISTING_USER=$(getent passwd 1000 | cut -d: -f1);        usermod -l devuser -d /home/devuser -m -s /bin/bash "${EXISTING_USER}" 2>/dev/null || true;      else        useradd          --uid 1000          --gid "${EXISTING_GROUP}"          --shell /bin/bash          --create-home          --home-dir /home/devuser          devuser;      fi   && mkdir -p /home/devuser   && echo "devuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/devuser   && chmod 0440 /etc/sudoers.d/devuser   && passwd -l devuser   && passwd -l root   && mkdir -p /home/devuser/go/bin   && cp /root/go/bin/* /home/devuser/go/bin/ 2>/dev/null || true   && chown -R 1000:1000 /home/devuser
+2026-07-11T01:06:12.664375305Z #50 0.127 passwd: password changed.
+2026-07-11T01:06:12.823522448Z #50 0.136 passwd: password changed.
+2026-07-11T01:11:46.971989053Z Deploy cancelled

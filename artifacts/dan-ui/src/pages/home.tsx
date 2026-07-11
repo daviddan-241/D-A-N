@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import {
-  Activity, ChevronRight, Clock, Lock, Layers, Terminal,
+  ChevronRight, Clock, Lock, Layers, Terminal,
   Wrench, Wifi, Zap, CheckCircle2, XCircle, LoaderCircle, Copy, Check, RefreshCw,
 } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
@@ -31,21 +31,38 @@ interface SystemStatus {
 
 type Tri = 'ok' | 'warn' | 'bad';
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text, fullWidth = false }: { text: string; fullWidth?: boolean }) {
   const [copied, setCopied] = useState(false);
+  const doCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // clipboard unavailable — ignore
+    }
+  };
+  if (fullWidth) {
+    return (
+      <button
+        type="button"
+        onClick={doCopy}
+        className={`flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-semibold text-sm transition-all press-scale active:scale-95 ${
+          copied
+            ? 'bg-success/20 text-success border border-success/30'
+            : 'bg-primary text-primary-foreground shadow-glow hover:opacity-90'
+        }`}
+      >
+        {copied ? <Check className="w-4 h-4" strokeWidth={2.5} /> : <Copy className="w-4 h-4" strokeWidth={2} />}
+        {copied ? 'Copied!' : 'Copy SSH command'}
+      </button>
+    );
+  }
   return (
     <button
       type="button"
-      onClick={async (e) => {
-        e.preventDefault();
-        try {
-          await navigator.clipboard.writeText(text);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1800);
-        } catch {
-          // clipboard unavailable — ignore
-        }
-      }}
+      onClick={doCopy}
       className={`flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0 transition-colors ${
         copied ? 'bg-success/15 text-success' : 'bg-muted/60 text-muted-foreground hover:text-foreground'
       }`}
@@ -119,6 +136,11 @@ export function Home() {
       setRestarting(false);
     }, 4000);
   };
+
+  // Extract just the port number from the full ssh command
+  const boreCmd = status?.tunnel.bore.connectCommand ?? null;
+  const borePort = boreCmd?.match(/-p\s+(\d+)/)?.[1] ?? null;
+  const tunnelLive = (status?.tunnel.bore.running && Boolean(borePort)) || status?.tunnel.cloudflare.running;
 
   useEffect(() => {
     fetch(`${base}/api/stats`)
@@ -244,6 +266,60 @@ export function Home() {
           </div>
         ))}
       </motion.div>
+
+      {/* ── SSH Connection Hero ── */}
+      {status?.tunnel.bore.enabled && (
+        <motion.div variants={item}
+          className={`rounded-2xl overflow-hidden border-2 transition-colors ${
+            tunnelLive
+              ? 'border-success/40 bg-success/5'
+              : 'border-amber-500/30 bg-amber-500/5'
+          }`}
+        >
+          {/* header row */}
+          <div className="flex items-center gap-2.5 px-4 pt-4 pb-2">
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+              tunnelLive ? 'bg-success animate-pulse' : 'bg-amber-500 animate-pulse'
+            }`} />
+            <span className="text-sm font-semibold text-foreground flex-1">
+              {tunnelLive ? 'SSH tunnel live' : statusLoading ? 'Checking tunnel…' : 'Waiting for port…'}
+            </span>
+            {tunnelLive && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-success/15 text-success">LIVE</span>
+            )}
+          </div>
+
+          {/* big port number */}
+          <div className="flex items-center justify-center px-4 py-1">
+            {borePort ? (
+              <div className="flex items-baseline gap-2">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Port</span>
+                <span className="text-5xl font-black font-mono tracking-tighter text-primary tabular-nums select-all">
+                  {borePort}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-baseline gap-2">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Port</span>
+                <span className="text-4xl font-black font-mono text-muted-foreground/30 animate-pulse">·····</span>
+              </div>
+            )}
+          </div>
+
+          {/* command + copy button */}
+          <div className="px-4 pb-3">
+            <div className="flex items-center gap-2 bg-background/60 rounded-xl border border-border/50 px-3 py-2.5 font-mono text-[13px] overflow-x-auto mb-3">
+              <span className="text-primary select-none flex-shrink-0">$</span>
+              <span className="flex-1 whitespace-nowrap text-foreground select-all">
+                {statusLoading ? 'Fetching…' : (boreCmd ?? (status?.tunnel.cloudflare.running ? 'ssh devuser@<your-tunnel>' : 'Waiting for bore.pub port…'))}
+              </span>
+            </div>
+            {!statusLoading && boreCmd && (
+              <CopyButton text={boreCmd} fullWidth />
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* ── System status ── */}
       <motion.div variants={item} className="space-y-2">

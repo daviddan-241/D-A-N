@@ -57,10 +57,35 @@ router.get("/status", (_req, res) => {
   const boreRunning = isProcessRunning("bore");
   const cloudflaredRunning = isProcessRunning("cloudflared");
   const authorizedKeys = countAuthorizedKeys();
-  const boreConnectCommand = readTrimmed(`${HOME_DIR}/.dan_ssh_connect`);
   const autoInstallDone = fs.existsSync(`${HOME_DIR}/.dan_extras_installed`);
   const autoInstallLog = readTrimmed(`${LOG_DIR}/auto-install.log`);
   const autoInstallRunning = !autoInstallDone && isProcessRunning("auto-install.sh");
+
+  // Always live-read bore.log for the port — don't rely solely on the connect
+  // file, which may be absent (tunnel still starting) or stale from a prior run.
+  // If we find a real port, write/refresh the connect file so `cat ~/.dan_ssh_connect`
+  // always matches what the dashboard shows.
+  let boreConnectCommand = readTrimmed(`${HOME_DIR}/.dan_ssh_connect`);
+  if (boreRunning) {
+    try {
+      const boreLog = fs.readFileSync(`${LOG_DIR}/bore.log`, "utf8");
+      const livePort = extractBorePort(boreLog);
+      if (livePort) {
+        const cmd = `ssh -p ${livePort} ${DEV_USER}@bore.pub`;
+        // Only update the file when the port actually changed (or file was missing/stale)
+        if (boreConnectCommand !== cmd) {
+          try {
+            fs.writeFileSync(`${HOME_DIR}/.dan_ssh_connect`, `${cmd}\n`);
+          } catch {
+            // best-effort — may not have write access
+          }
+        }
+        boreConnectCommand = cmd;
+      }
+    } catch {
+      // bore.log unreadable — fall back to whatever the connect file had
+    }
+  }
 
   res.json({
     ssh: {
