@@ -284,6 +284,44 @@ RUN pip3 install --no-cache-dir --break-system-packages aider-chat 2>/dev/null |
   && ln -sf "$(python3 -c 'import site; print(site.getsitepackages()[0])')/bin/aider" \
        /usr/local/bin/aider 2>/dev/null || true
 
+# ── Metasploit Framework (baked into the image at build time) ────────────────
+# Previously this ran from auto-install.sh on first boot, which took 5-10 min
+# and had to redo the work on every Render restart (free tier has no real
+# persistent disk, so the "install once" flag never survives a redeploy).
+# Installing here means msfconsole is present the instant the container
+# starts — no waiting after connecting from a-Shell Mini.
+RUN curl -fsSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb \
+      > /tmp/msfinstall \
+  && chmod 755 /tmp/msfinstall \
+  && /tmp/msfinstall \
+  && rm -f /tmp/msfinstall \
+  && msfconsole -v || echo "WARN: Metasploit build-time install failed — will not be auto-available"
+
+# ── Sherlock (OSINT username search — baked in) ───────────────────────────────
+RUN git clone --depth=1 https://github.com/sherlock-project/sherlock.git /opt/sherlock \
+  && pip3 install --no-cache-dir --break-system-packages -r /opt/sherlock/requirements.txt \
+  && ln -sf /opt/sherlock/sherlock/sherlock.py /usr/local/bin/sherlock \
+  && chmod +x /usr/local/bin/sherlock \
+  || echo "WARN: Sherlock build-time install failed"
+
+# ── SQLMap (latest from git, in addition to the apt package above) ───────────
+RUN git clone --depth=1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap \
+  && ln -sf /opt/sqlmap/sqlmap.py /usr/local/bin/sqlmapgit \
+  || echo "WARN: SQLMap git build-time install failed"
+
+# ── theHarvester + recon-ng OSINT tools (apt versions can be stale/broken —
+#    pull latest from git as a build-time fallback so `theHarvester`/`recon-ng`
+#    are always real, working binaries rather than relying on first-boot) ────
+RUN (command -v theHarvester &>/dev/null || pip3 install --no-cache-dir --break-system-packages theHarvester) \
+  || echo "WARN: theHarvester install failed"
+
+# ── Playwright + Chromium — real headless browser automation, baked in ───────
+# Installed at build time (not first boot) so `browser <url>` etc. work
+# immediately on connect instead of requiring a multi-minute background job.
+RUN pip3 install --no-cache-dir --break-system-packages playwright \
+  && python3 -m playwright install --with-deps chromium \
+  || echo "WARN: Playwright/Chromium build-time install failed — browser automation unavailable"
+
 # ── cloudflared (Cloudflare Tunnel — free SSH through HTTPS) ─────────────────
 # Lets you SSH into this container from anywhere without open ports.
 # Usage: set CLOUDFLARE_TUNNEL_TOKEN env var in Render dashboard.

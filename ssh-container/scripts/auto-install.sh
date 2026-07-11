@@ -83,26 +83,18 @@ pip3 install --no-cache-dir --break-system-packages ddgr 2>>"${LOG}" \
   && log "  ddgr (DuckDuckGo CLI) installed" \
   || warn "  ddgr install failed"
 
-# ── Playwright + Chromium — full headless browser automation via Tor ──────────
-# This gives aider a real browser to create accounts, fill forms, automate
-# signups on crypto apps, social networks, etc. — all routed through Tor.
-log "Installing Playwright (headless Chromium automation) ..."
-pip3 install --no-cache-dir --break-system-packages playwright 2>>"${LOG}" \
-  && log "  playwright Python lib installed" \
-  || warn "  playwright pip install failed — browser automation unavailable"
-
-# Install Chromium browser binary (Playwright manages its own copy)
-# Use --with-deps to also install OS dependencies
+# ── Playwright + Chromium ─────────────────────────────────────────────────────
+# Now baked into the image at build time (Dockerfile) so browser automation
+# works immediately on connect. Only fall back to installing here if the
+# build-time install didn't happen (e.g. an older image).
 if command -v playwright &>/dev/null || python3 -m playwright --version &>/dev/null 2>&1; then
-  log "Downloading Playwright Chromium (may take a few minutes) ..."
-  python3 -m playwright install chromium 2>>"${LOG}" \
-    && log "  Playwright Chromium ready" \
-    || warn "  Playwright Chromium download failed"
-  # Install system deps for Chromium
-  python3 -m playwright install-deps chromium 2>>"${LOG}" \
-    || true  # non-fatal — browser may still work without all deps
+  log "Playwright already installed (build-time) — skipping."
 else
-  warn "  playwright command not found — Chromium not installed"
+  warn "Playwright missing — build-time install must have failed. Installing now (slow) ..."
+  pip3 install --no-cache-dir --break-system-packages playwright 2>>"${LOG}" \
+    && python3 -m playwright install --with-deps chromium 2>>"${LOG}" \
+    && log "  Playwright + Chromium installed" \
+    || warn "  Playwright/Chromium fallback install failed — browser automation unavailable"
 fi
 
 # Install the browser-auto.py wrapper to a system path
@@ -142,23 +134,27 @@ if command -v nuclei &>/dev/null; then
     warn "Nuclei template update failed"
 fi
 
-# ── Metasploit Framework ──────────────────────────────────────────────────────
-if ! command -v msfconsole &>/dev/null; then
-  log "Installing Metasploit Framework (5-10 min) ..."
+# ── Metasploit / Sherlock / SQLMap (git) ──────────────────────────────────────
+# These are now baked into the image at build time (see Dockerfile) so they're
+# available the instant the container boots — no waiting after SSH connect.
+# Only fall back to installing here if the build-time step somehow didn't run.
+if command -v msfconsole &>/dev/null; then
+  log "Metasploit already installed (build-time)."
+else
+  warn "msfconsole missing — build-time install must have failed. Installing now (5-10 min) ..."
   curl -fsSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb \
     > /tmp/msfinstall 2>>"${LOG}" \
   && chmod 755 /tmp/msfinstall \
   && /tmp/msfinstall 2>>"${LOG}" \
   && log "Metasploit installed." \
   || warn "Metasploit install failed"
-else
-  log "Metasploit already installed."
 fi
 
-# ── Sherlock (OSINT username search) ─────────────────────────────────────────
-SHERLOCK_DIR="${HOME_DIR}/tools/sherlock"
-if [[ ! -d "${SHERLOCK_DIR}" ]]; then
-  log "Installing Sherlock ..."
+if command -v sherlock &>/dev/null; then
+  log "Sherlock already installed (build-time)."
+else
+  warn "sherlock missing — build-time install must have failed. Installing now ..."
+  SHERLOCK_DIR="${HOME_DIR}/tools/sherlock"
   torsocks git clone --depth=1 https://github.com/sherlock-project/sherlock.git \
     "${SHERLOCK_DIR}" 2>>"${LOG}" \
   && pip3 install --no-cache-dir --break-system-packages -r "${SHERLOCK_DIR}/requirements.txt" 2>>"${LOG}" \
@@ -168,10 +164,11 @@ if [[ ! -d "${SHERLOCK_DIR}" ]]; then
   || warn "Sherlock install failed"
 fi
 
-# ── SQLMap (latest from git) ──────────────────────────────────────────────────
-SQLMAP_DIR="${HOME_DIR}/tools/sqlmap"
-if [[ ! -d "${SQLMAP_DIR}" ]]; then
-  log "Installing SQLMap from git ..."
+if command -v sqlmapgit &>/dev/null || [[ -f /opt/sqlmap/sqlmap.py ]]; then
+  log "SQLMap (git) already installed (build-time)."
+else
+  warn "sqlmapgit missing — build-time install must have failed. Installing now ..."
+  SQLMAP_DIR="${HOME_DIR}/tools/sqlmap"
   torsocks git clone --depth=1 https://github.com/sqlmapproject/sqlmap.git \
     "${SQLMAP_DIR}" 2>>"${LOG}" \
   && ln -sf "${SQLMAP_DIR}/sqlmap.py" /usr/local/bin/sqlmapgit \
@@ -206,18 +203,18 @@ touch "${INSTALL_FLAG}"
 chown "$(id -u "${DEV_USER}" 2>/dev/null || echo 1000):$(id -g "${DEV_USER}" 2>/dev/null || echo 1000)" "${INSTALL_FLAG}"
 
 log "=== D.A.N. first-boot install complete ==="
-log "Tools installed:"
+log "Tools baked into the image (available instantly, no wait):"
+log "  Metasploit, Sherlock, SQLMap (git), Playwright+Chromium,"
+log "  nmap/hydra/hashcat/john/nikto/theHarvester/recon-ng and the rest of the apt security set"
+log "Tools installed by this background job:"
 log "  Ollama + uncensored models → ollama list"
 log "    dolphin-mistral  (uncensored, no content filters)"
 log "    dolphin-llama3   (uncensored Llama 3)"
 log "    llama3.1:8b      (fast general purpose)"
 log "  SecLists wordlists → ~/wordlists/SecLists"
 log "  rockyou.txt        → ~/wordlists/rockyou.txt"
-log "  Sherlock           → sherlock"
-log "  SQLMap (git)       → ~/tools/sqlmap"
 log "  Nuclei templates   → updated"
 log "  BeEF               → ~/tools/beef"
-log "  Metasploit         → msfconsole"
 log ""
 log "Unrestricted local AI usage:"
 log "  agent-local        (dolphin-mistral — no content filters)"
