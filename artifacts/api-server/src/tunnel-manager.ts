@@ -45,12 +45,10 @@ function extractPort(text: string): string | null {
 }
 
 function canUseTorsocks(): boolean {
-  try {
-    execSync("command -v torsocks", { stdio: "ignore", timeout: 1000 });
-    return true;
-  } catch {
-    return false;
-  }
+  // Render containers don't allow Tor (no raw network / NAT rules).
+  // bore.pub also actively rejects Tor exit-node connections as anti-abuse.
+  // Always go direct — it's faster and more reliable.
+  return false;
 }
 
 function isBoreAlive(): boolean {
@@ -119,9 +117,14 @@ function spawnBore(useTor: boolean): void {
   _state.mode = useTor ? "tor" : "direct";
   _state.startedAt = new Date().toISOString();
 
+  // bore.pub is a PUBLIC server — it runs with NO server-side secret.
+  // Passing --secret to a server that has none causes immediate HMAC rejection
+  // and bore exits with code 1 every time.  Only pass --secret when pointing
+  // at your own private bore server (e.g. BORE_SERVER=my.server.com).
+  const boreServer = process.env["BORE_SERVER"] ?? "bore.pub";
   const secret = process.env["BORE_SECRET"] ?? "";
-  const boreArgs = ["local", "22", "--to", "bore.pub"];
-  if (secret) boreArgs.push("--secret", secret);
+  const boreArgs = ["local", "22", "--to", boreServer];
+  if (secret && boreServer !== "bore.pub") boreArgs.push("--secret", secret);
 
   const bin = useTor ? "torsocks" : "bore";
   const args = useTor ? ["bore", ...boreArgs] : boreArgs;

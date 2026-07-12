@@ -1,0 +1,50 @@
+2026-07-12T00:22:19.650740757Z #77 [final 57/57] COPY --from=webbuild /workspace/artifacts/dan-ui/dist/public ./public
+2026-07-12T00:22:19.65124966Z #77 DONE 0.1s
+2026-07-12T00:22:19.807766326Z 
+2026-07-12T00:22:19.807794546Z #78 exporting to image
+2026-07-12T00:22:19.807799986Z #78 exporting layers
+2026-07-12T00:27:01.156820137Z #78 exporting layers 281.5s done
+2026-07-12T00:27:01.34904468Z #78 pushing layers
+2026-07-12T00:27:01.34906843Z #78 ...
+2026-07-12T00:27:01.34907339Z 
+2026-07-12T00:27:01.34907852Z #79 exporting cache to registry
+2026-07-12T00:27:01.34908357Z #79 preparing build cache for export
+2026-07-12T00:28:01.700587354Z #79 ...
+2026-07-12T00:28:01.700613895Z 
+2026-07-12T00:28:01.700622175Z #78 exporting to image
+2026-07-12T00:28:01.700628625Z #78 pushing layers 60.5s done
+2026-07-12T00:28:02.439546412Z #78 DONE 342.8s
+2026-07-12T00:28:02.439566512Z 
+2026-07-12T00:28:02.439570862Z #79 exporting cache to registry
+2026-07-12T00:28:18.519667785Z #79 sending cache export
+2026-07-12T00:28:23.812910369Z #79 sending cache export 5.3s done
+2026-07-12T00:28:23.81293202Z #79 DONE 82.6s
+2026-07-12T00:28:24.006142959Z ------
+2026-07-12T00:28:24.0061665Z  > importing cache manifest
+2026-07-12T00:28:24.006171849Z ------
+2026-07-12T00:28:26.662628316Z ==> Deploying...
+2026-07-12T00:28:26.739212735Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-07-12T00:32:52.628604095Z [2026-07-12T00:32:52Z] [INFO]  ======================================================================
+2026-07-12T00:32:52.631295847Z [2026-07-12T00:32:52Z] [INFO]   D.A.N. — Dynamic Access Node — starting
+2026-07-12T00:32:52.634735017Z [2026-07-12T00:32:52Z] [INFO]  ======================================================================
+2026-07-12T00:32:52.730042818Z [2026-07-12T00:32:52Z] [INFO]   Hostname:  srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h
+2026-07-12T00:32:52.732571457Z [2026-07-12T00:32:52Z] [INFO]   User:      devuser
+2026-07-12T00:32:52.734863721Z [2026-07-12T00:32:52Z] [INFO]   Built on:  Ubuntu 24.04
+2026-07-12T00:32:52.740287586Z [2026-07-12T00:32:52Z] [INFO]  ======================================================================
+2026-07-12T00:32:52.830332606Z [2026-07-12T00:32:52Z] [INFO]  Checking SSH host keys in /etc/ssh/host_keys ...
+2026-07-12T00:32:52.8339374Z [2026-07-12T00:32:52Z] [INFO]  Generating rsa host key ...
+2026-07-12T00:32:55.236007793Z ==> No open ports detected, continuing to scan...
+2026-07-12T00:32:55.336312791Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-07-12T00:33:00.131023249Z [2026-07-12T00:33:00Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_rsa_key
+2026-07-12T00:33:00.13367165Z [2026-07-12T00:33:00Z] [INFO]  Generating ed25519 host key ...
+2026-07-12T00:33:00.233039096Z [2026-07-12T00:33:00Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_ed25519_key
+2026-07-12T00:33:00.236444085Z [2026-07-12T00:33:00Z] [INFO]  Generating ecdsa host key ...
+2026-07-12T00:33:00.336338944Z [2026-07-12T00:33:00Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_ecdsa_key
+2026-07-12T00:33:00.338205057Z [2026-07-12T00:33:00Z] [INFO]  Ensuring home directory structure for devuser ...
+2026-07-12T00:33:00.629245351Z [2026-07-12T00:33:00Z] [INFO]  Installed SSH public key from env var (fingerprint: SHA256:H2Ikhlm4DrmzSZTUblFHnUiTYv0Kf0XKnBIa55j9lnU)
+2026-07-12T00:33:00.638168928Z [2026-07-12T00:33:00Z] [INFO]  Found 1 authorized SSH key(s).
+2026-07-12T00:33:10.040872126Z [2026-07-12T00:33:10Z] [INFO]  Patching AllowUsers in sshd_config → devuser ...
+2026-07-12T00:33:10.229136194Z [2026-07-12T00:33:10Z] [INFO]  Starting Tor anonymization layer ...
+2026-07-12T00:33:10.35736271Z [2026-07-12T00:33:10Z] [WARN]  Tor failed to start — check /var/log/ssh-container/tor.log
+2026-07-12T00:33:56.169706401Z ==> No open ports detected, continuing to scan...
+2026-07-12T00:33:56.2572464Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding

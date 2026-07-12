@@ -40,7 +40,10 @@ FORCE_DIRECT=0
 
 start_bore() {
   local cmd_base=(local 22 --to bore.pub)
-  [[ -n "${BORE_SECRET}" ]] && cmd_base+=(--secret "${BORE_SECRET}")
+  # bore.pub is PUBLIC — passing --secret causes immediate HMAC rejection.
+  # Only use --secret with a private bore server (BORE_SERVER=your.host).
+  [[ -n "${BORE_SECRET}" && "${BORE_SERVER:-bore.pub}" != "bore.pub" ]] \
+    && cmd_base+=(--secret "${BORE_SECRET}")
   local mode="direct"
   local pid=""
 
@@ -146,7 +149,10 @@ FORCE_DIRECT=0
 
 start_bore() {
   local cmd_base=(local 22 --to bore.pub)
-  [[ -n "${BORE_SECRET}" ]] && cmd_base+=(--secret "${BORE_SECRET}")
+  # bore.pub is PUBLIC — passing --secret causes immediate HMAC rejection.
+  # Only use --secret with a private bore server (BORE_SERVER=your.host).
+  [[ -n "${BORE_SECRET}" && "${BORE_SERVER:-bore.pub}" != "bore.pub" ]] \
+    && cmd_base+=(--secret "${BORE_SECRET}")
   local mode="direct"
   local pid=""
 
@@ -252,7 +258,10 @@ FORCE_DIRECT=0
 
 start_bore() {
   local cmd_base=(local 22 --to bore.pub)
-  [[ -n "${BORE_SECRET}" ]] && cmd_base+=(--secret "${BORE_SECRET}")
+  # bore.pub is PUBLIC — passing --secret causes immediate HMAC rejection.
+  # Only use --secret with a private bore server (BORE_SERVER=your.host).
+  [[ -n "${BORE_SECRET}" && "${BORE_SERVER:-bore.pub}" != "bore.pub" ]] \
+    && cmd_base+=(--secret "${BORE_SECRET}")
   local mode="direct"
   local pid=""
 
@@ -358,7 +367,10 @@ FORCE_DIRECT=0
 
 start_bore() {
   local cmd_base=(local 22 --to bore.pub)
-  [[ -n "${BORE_SECRET}" ]] && cmd_base+=(--secret "${BORE_SECRET}")
+  # bore.pub is PUBLIC — passing --secret causes immediate HMAC rejection.
+  # Only use --secret with a private bore server (BORE_SERVER=your.host).
+  [[ -n "${BORE_SECRET}" && "${BORE_SERVER:-bore.pub}" != "bore.pub" ]] \
+    && cmd_base+=(--secret "${BORE_SECRET}")
   local mode="direct"
   local pid=""
 
@@ -465,7 +477,10 @@ FORCE_DIRECT=0
 
 start_bore() {
   local cmd_base=(local 22 --to bore.pub)
-  [[ -n "${BORE_SECRET}" ]] && cmd_base+=(--secret "${BORE_SECRET}")
+  # bore.pub is PUBLIC — passing --secret causes immediate HMAC rejection.
+  # Only use --secret with a private bore server (BORE_SERVER=your.host).
+  [[ -n "${BORE_SECRET}" && "${BORE_SERVER:-bore.pub}" != "bore.pub" ]] \
+    && cmd_base+=(--secret "${BORE_SECRET}")
   local mode="direct"
   local pid=""
 

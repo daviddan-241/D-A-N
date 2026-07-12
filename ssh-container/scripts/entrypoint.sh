@@ -167,9 +167,9 @@ tor --RunAsDaemon 1 \
     --PidFile /var/run/tor.pid \
     >>"${LOG_DIR}/tor.log" 2>&1 || warn "Tor failed to start — check ${LOG_DIR}/tor.log"
 
-# Wait up to 60 s for Tor to bootstrap — check freshly-truncated log only
+# Wait up to 8 s for Tor — Render containers rarely allow it; don't block boot
 TOR_READY=0
-for i in $(seq 1 30); do
+for i in $(seq 1 4); do
   if grep -q "Bootstrapped 100%" /var/log/tor/notices.log 2>/dev/null || \
      grep -q "Bootstrapped 100%" "${LOG_DIR}/tor.log" 2>/dev/null; then
     TOR_READY=1
@@ -203,7 +203,7 @@ if [[ "${TOR_READY}" -eq 1 ]]; then
     warn "  Run 'tor-check' after login to confirm your exit IP"
   fi
 else
-  warn "Tor did not fully bootstrap within 60 s — continuing anyway"
+  warn "Tor did not fully bootstrap within 8 s — continuing anyway (normal on Render)"
   warn "  Check: tail -f ${LOG_DIR}/tor.log"
 fi
 
@@ -278,18 +278,20 @@ if command -v ttyd &>/dev/null; then
   su -l "${DEV_USER}" -c "tmux new-session -d -s main 2>/dev/null || true"
   log "  Persistent tmux session 'main' ready for devuser"
 
+  # No --credential: the terminal is only reachable via the app's HTTPS proxy.
+  # Adding an extra auth layer caused WebSocket 401 failures in iOS Safari.
+  # sudo -u is more reliable than su -l in unprivileged containers.
   ttyd \
     --port "${TTYD_INTERNAL_PORT}" \
     --interface 127.0.0.1 \
-    --credential "${WEB_TERMINAL_USER}:${WEB_TERMINAL_PASS}" \
     --writable \
     --max-clients 5 \
     --check-origin=false \
     --client-option cursorBlink=true \
     --client-option fontSize=15 \
     --client-option fontFamily="'Menlo','Monaco','Cascadia Mono','Fira Code',monospace" \
-    --client-option 'theme={"background":"#0a0a0f","foreground":"#d4d4d4","cursor":"#ff6b2b","cursorAccent":"#0a0a0f","selectionBackground":"rgba(255,107,43,0.25)","black":"#1a1a24","brightBlack":"#3a3a4a","red":"#f07070","brightRed":"#ff8888","green":"#7ec58c","brightGreen":"#9be0a8","yellow":"#d4bb6a","brightYellow":"#e8d080","blue":"#5b9bd5","brightBlue":"#78b4f0","magenta":"#c58bc5","brightMagenta":"#dda0dd","cyan":"#5bc8c8","brightCyan":"#78e0e0","white":"#c0c0cc","brightWhite":"#e8e8f0"}'  \
-    su -l "${DEV_USER}" -c "tmux new-session -A -s main" \
+    --client-option 'theme={"background":"#0a0a0f","foreground":"#d4d4d4","cursor":"#ff6b2b","cursorAccent":"#0a0a0f","selectionBackground":"rgba(255,107,43,0.25)","black":"#1a1a24","brightBlack":"#3a3a4a","red":"#f07070","brightRed":"#ff8888","green":"#7ec58c","brightGreen":"#9be0a8","yellow":"#d4bb6a","brightYellow":"#e8d080","blue":"#5b9bd5","brightBlue":"#78b4f0","magenta":"#c58bc5","brightMagenta":"#dda0dd","cyan":"#5bc8c8","brightCyan":"#78e0e0","white":"#c0c0cc","brightWhite":"#e8e8f0"}' \
+    sudo -u "${DEV_USER}" tmux new-session -A -s main \
     2>>"${LOG_DIR}/ttyd.log" &
   TTYD_PID=$!
   sleep 1
@@ -300,7 +302,7 @@ if command -v ttyd &>/dev/null; then
   else
     warn "ttyd failed to start — retrying without tmux"
     ttyd --port "${TTYD_INTERNAL_PORT}" --interface 127.0.0.1 --writable \
-      --check-origin=false su -l "${DEV_USER}" \
+      --check-origin=false sudo -u "${DEV_USER}" /bin/bash --login \
       2>>"${LOG_DIR}/ttyd.log" &
     log "Retried ttyd (bare shell fallback)"
   fi
@@ -344,9 +346,15 @@ if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
   # ttyd and the Node app never got a chance to start. None of these checks
   # are meant to be fatal, so disable errexit for just this section.
   set +e
+  # bore.pub is a PUBLIC server — passing --secret causes immediate HMAC
+  # rejection and bore exits with code 1. Only use --secret with a private
+  # bore server (set BORE_SERVER=your.host).
+  BORE_SERVER="${BORE_SERVER:-bore.pub}"
   BORE_SECRET="${BORE_SECRET:-}"
-  BORE_CMD_BASE="local 22 --to bore.pub"
-  [[ -n "${BORE_SECRET}" ]] && BORE_CMD_BASE="${BORE_CMD_BASE} --secret ${BORE_SECRET}"
+  BORE_CMD_BASE="local 22 --to ${BORE_SERVER}"
+  # Only add --secret when NOT using the public bore.pub server
+  [[ -n "${BORE_SECRET}" && "${BORE_SERVER}" != "bore.pub" ]] && \
+    BORE_CMD_BASE="${BORE_CMD_BASE} --secret ${BORE_SECRET}"
 
   # bore-cli's tracing output writes the assigned port as `remote_port=NNNN`
   # (no space before "port"), as `listening at bore.pub:NNNN`, or with a

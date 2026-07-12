@@ -1,0 +1,150 @@
+2026-07-12T00:33:00.336338944Z [2026-07-12T00:33:00Z] [INFO]  Generated: /etc/ssh/host_keys/ssh_host_ecdsa_key
+2026-07-12T00:33:00.338205057Z [2026-07-12T00:33:00Z] [INFO]  Ensuring home directory structure for devuser ...
+2026-07-12T00:33:00.629245351Z [2026-07-12T00:33:00Z] [INFO]  Installed SSH public key from env var (fingerprint: SHA256:H2Ikhlm4DrmzSZTUblFHnUiTYv0Kf0XKnBIa55j9lnU)
+2026-07-12T00:33:00.638168928Z [2026-07-12T00:33:00Z] [INFO]  Found 1 authorized SSH key(s).
+2026-07-12T00:33:10.040872126Z [2026-07-12T00:33:10Z] [INFO]  Patching AllowUsers in sshd_config → devuser ...
+2026-07-12T00:33:10.229136194Z [2026-07-12T00:33:10Z] [INFO]  Starting Tor anonymization layer ...
+2026-07-12T00:33:10.35736271Z [2026-07-12T00:33:10Z] [WARN]  Tor failed to start — check /var/log/ssh-container/tor.log
+2026-07-12T00:33:56.169706401Z ==> No open ports detected, continuing to scan...
+2026-07-12T00:33:56.2572464Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-07-12T00:34:10.609350767Z [2026-07-12T00:34:10Z] [WARN]  Tor did not fully bootstrap within 60 s — continuing anyway
+2026-07-12T00:34:10.611487967Z [2026-07-12T00:34:10Z] [WARN]    Check: tail -f /var/log/ssh-container/tor.log
+2026-07-12T00:34:10.629770441Z [2026-07-12T00:34:10Z] [INFO]  Configuring firewall ...
+2026-07-12T00:34:10.667163209Z [2026-07-12T00:34:10Z] [FIREWALL] NET_ADMIN capability not available; skipping ufw (iptables rules not modifiable)
+2026-07-12T00:34:10.73059959Z [2026-07-12T00:34:10Z] [FIREWALL] Host-level firewall should restrict access to the published SSH port instead.
+2026-07-12T00:34:10.733928158Z [2026-07-12T00:34:10Z] [INFO]  Starting fail2ban ...
+2026-07-12T00:34:11.231811629Z Usage: fail2ban-server [OPTIONS]
+2026-07-12T00:34:11.23184317Z 
+2026-07-12T00:34:11.23184988Z Fail2Ban v1.0.2 reads log file that contains password failure report
+2026-07-12T00:34:11.23185552Z and bans the corresponding IP addresses using firewall rules.
+2026-07-12T00:34:11.23186012Z 
+2026-07-12T00:34:11.23186498Z Options:
+2026-07-12T00:34:11.231869831Z     -c, --conf <DIR>        configuration directory
+2026-07-12T00:34:11.231874921Z     -s, --socket <FILE>     socket path
+2026-07-12T00:34:11.231879671Z     -p, --pidfile <FILE>    pidfile path
+2026-07-12T00:34:11.231885291Z     --pname <NAME>          name of the process (main thread) to identify instance (default fail2ban-server)
+2026-07-12T00:34:11.231890821Z     --loglevel <LEVEL>      logging level
+2026-07-12T00:34:11.231896341Z     --logtarget <TARGET>    logging target, use file-name or stdout, stderr, syslog or sysout.
+2026-07-12T00:34:11.231919682Z     --syslogsocket auto|<FILE>
+2026-07-12T00:34:11.231923272Z     -d                      dump configuration. For debugging
+2026-07-12T00:34:11.231926392Z     --dp, --dump-pretty     dump the configuration using more human readable representation
+2026-07-12T00:34:11.231929272Z     -t, --test              test configuration (can be also specified with start parameters)
+2026-07-12T00:34:11.231936182Z     -i                      interactive mode
+2026-07-12T00:34:11.231939002Z     -v                      increase verbosity
+2026-07-12T00:34:11.231942362Z     -q                      decrease verbosity
+2026-07-12T00:34:11.231945622Z     -x                      force execution of the server (remove socket file)
+2026-07-12T00:34:11.231948412Z     -b                      start server in background (default)
+2026-07-12T00:34:11.231951242Z     -f                      start server in foreground
+2026-07-12T00:34:11.231954042Z     --async                 start server in async mode (for internal usage only, don't read configuration)
+2026-07-12T00:34:11.231956693Z     --timeout               timeout to wait for the server (for internal usage only, don't read configuration)
+2026-07-12T00:34:11.231959873Z     --str2sec <STRING>      convert time abbreviation format to seconds
+2026-07-12T00:34:11.231962823Z     -h, --help              display this help message
+2026-07-12T00:34:11.231965863Z     -V, --version           print the version (-V returns machine-readable short format)
+2026-07-12T00:34:11.231968663Z 
+2026-07-12T00:34:11.231971773Z Report bugs to https://github.com/fail2ban/fail2ban/issues
+2026-07-12T00:34:11.241290289Z [2026-07-12T00:34:11Z] [WARN]  fail2ban failed to start (may lack permissions in some environments)
+2026-07-12T00:34:11.329869064Z [2026-07-12T00:34:11Z] [INFO]  Validating sshd configuration ...
+2026-07-12T00:34:11.42968689Z [2026-07-12T00:34:11Z] [INFO]  sshd configuration OK.
+2026-07-12T00:34:11.432151007Z [2026-07-12T00:34:11Z] [INFO]  AUTO_INSTALL_EXTRAS=yes — first-boot setup queued (starts in 30s after bore/sshd settle) ...
+2026-07-12T00:34:11.434215825Z [2026-07-12T00:34:11Z] [INFO]  Follow: tail -f /var/log/ssh-container/auto-install.log
+2026-07-12T00:34:11.530357326Z [2026-07-12T00:34:11Z] [INFO]  Starting ttyd web terminal on 127.0.0.1:7681 (internal) ...
+2026-07-12T00:34:11.73485277Z [2026-07-12T00:34:11Z] [INFO]    Persistent tmux session 'main' ready for devuser
+2026-07-12T00:34:12.830996422Z [2026-07-12T00:34:12Z] [INFO]  ttyd running (PID 285)
+2026-07-12T00:34:12.832943298Z [2026-07-12T00:34:12Z] [INFO]    Web terminal: https://<your-render-url>/webterm
+2026-07-12T00:34:12.834915524Z [2026-07-12T00:34:12Z] [INFO]    Session persists — navigate away and back to rejoin same shell
+2026-07-12T00:34:12.837393891Z [2026-07-12T00:34:12Z] [INFO]  Starting bore TCP tunnel via Tor (torsocks) ...
+2026-07-12T00:34:16.934267863Z [2026-07-12T00:34:16Z] [WARN]    bore via Tor failed to come up (bore.pub likely blocks Tor exit nodes) — retrying direct
+2026-07-12T00:34:16.947574202Z [2026-07-12T00:34:16Z] [INFO]  Starting bore TCP tunnel directly (no Tor) ...
+2026-07-12T00:34:31.034671442Z [2026-07-12T00:34:31Z] [INFO]  bore tunnel process running (PID 315, mode: direct) — port not yet in log
+2026-07-12T00:34:31.036786301Z [2026-07-12T00:34:31Z] [INFO]    The watchdog will write ~/.dan_ssh_connect once the port appears.
+2026-07-12T00:34:31.039063614Z [2026-07-12T00:34:31Z] [INFO]    Dashboard will pick it up within ~15 s. Logs: tail -f /var/log/ssh-container/bore.log
+2026-07-12T00:34:31.041075111Z [2026-07-12T00:34:31Z] [INFO]  Starting bore watchdog (auto-restarts tunnel if it drops) ...
+2026-07-12T00:34:31.130512976Z [2026-07-12T00:34:31Z] [INFO]  bore watchdog running (PID 492)
+2026-07-12T00:34:31.132754608Z [2026-07-12T00:34:31Z] [INFO]  Starting GitHub persistence sync ...
+2026-07-12T00:34:31.229714267Z [2026-07-12T00:34:31Z] [INFO]  GitHub sync running — logs: tail -f /var/log/ssh-container/dotfiles.log
+2026-07-12T00:34:31.232170614Z [2026-07-12T00:34:31Z] [INFO]  Starting sshd (background) ...
+2026-07-12T00:34:33.533058925Z [2026-07-12T00:34:33Z] [INFO]  sshd running (daemon PID: 522)
+2026-07-12T00:34:33.629598665Z [2026-07-12T00:34:33Z] [INFO]  ======================================================================
+2026-07-12T00:34:33.729931783Z [2026-07-12T00:34:33Z] [INFO]   D.A.N. is live
+2026-07-12T00:34:33.732694487Z [2026-07-12T00:34:33Z] [INFO]  ======================================================================
+2026-07-12T00:34:33.830114357Z [2026-07-12T00:34:33Z] [INFO]   Web app:          https://<your-render-url>  (dashboard + web terminal)
+2026-07-12T00:34:33.832681766Z [2026-07-12T00:34:33Z] [INFO]   Web Terminal:      https://<your-render-url>/webterm  (auth: devuser / [WEB_TERMINAL_PASS])
+2026-07-12T00:34:33.92984515Z [2026-07-12T00:34:33Z] [INFO]   SSH (Cloudflare): ssh -o 'ProxyCommand cloudflared access ssh --hostname %h' devuser@<tunnel-host>
+2026-07-12T00:34:33.932385469Z [2026-07-12T00:34:33Z] [INFO]   SSH (bore):       ssh -p <PORT> devuser@bore.pub  (check: cat ~/.dan_ssh_connect)
+2026-07-12T00:34:34.033506775Z [2026-07-12T00:34:34Z] [INFO]   GitHub sync:      cat /var/log/ssh-container/dotfiles.log
+2026-07-12T00:34:34.133993647Z [2026-07-12T00:34:34Z] [INFO]   Logs dir:         /var/log/ssh-container/
+2026-07-12T00:34:34.136354772Z [2026-07-12T00:34:34Z] [INFO]  ======================================================================
+2026-07-12T00:34:34.230566797Z [2026-07-12T00:34:34Z] [INFO]  Starting D.A.N. app on :10000 ...
+2026-07-12T00:34:38.431824946Z {"level":30,"time":1783816478431,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","msg":"TunnelManager: initializing"}
+2026-07-12T00:34:39.128882057Z {"level":30,"time":1783816478833,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","bin":"torsocks","args":["bore","local","22","--to","bore.pub","--secret","daviddan09"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T00:34:39.128904298Z {"level":30,"time":1783816479028,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","ttydPort":"7681","msg":"Web terminal proxy enabled at /webterm"}
+2026-07-12T00:34:39.128907538Z {"level":30,"time":1783816479029,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","publicDir":"/app/public","msg":"Serving bundled frontend"}
+2026-07-12T00:34:39.128910888Z {"level":30,"time":1783816479031,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","port":10000,"msg":"Server listening"}
+2026-07-12T00:34:39.406672162Z (node:579) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-07-12T00:34:39.406695863Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-07-12T00:34:39.431545039Z {"level":30,"time":1783816479431,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":1,"method":"HEAD","url":"/"},"res":{"statusCode":200},"responseTime":26,"msg":"request completed"}
+2026-07-12T00:34:42.232293065Z {"level":40,"time":1783816482232,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T00:34:45.334107895Z {"level":30,"time":1783816485333,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","bin":"bore","args":["local","22","--to","bore.pub","--secret","daviddan09"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T00:34:47.648946214Z ==> Your service is live 🎉
+2026-07-12T00:34:47.753913427Z ==> 
+2026-07-12T00:34:47.758128377Z ==> ///////////////////////////////////////////////////////////
+2026-07-12T00:34:47.760564643Z ==> 
+2026-07-12T00:34:47.765088288Z ==> Available at your primary URL https://d-a-n-hwqd.onrender.com
+2026-07-12T00:34:47.767481493Z ==> 
+2026-07-12T00:34:47.772673551Z ==> ///////////////////////////////////////////////////////////
+2026-07-12T00:34:48.034787909Z {"level":30,"time":1783816488033,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":2,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":404,"msg":"request completed"}
+2026-07-12T00:34:48.229332652Z {"level":30,"time":1783816488133,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":3,"method":"GET","url":"/"},"res":{"statusCode":200},"responseTime":100,"msg":"request completed"}
+2026-07-12T00:34:48.532087366Z {"level":40,"time":1783816488531,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T00:34:49.529123176Z {"level":30,"time":1783816489528,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":4,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":398,"msg":"request completed"}
+2026-07-12T00:34:50.931470799Z {"level":30,"time":1783816490931,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":5,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":348,"msg":"request completed"}
+2026-07-12T00:34:52.433011663Z {"level":30,"time":1783816492432,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":6,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":304,"msg":"request completed"}
+2026-07-12T00:34:53.132784027Z {"level":30,"time":1783816493132,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","bin":"bore","args":["local","22","--to","bore.pub","--secret","daviddan09"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T00:34:53.929301295Z {"level":30,"time":1783816493928,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":7,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":310,"msg":"request completed"}
+2026-07-12T00:34:54.728875204Z {"level":30,"time":1783816494635,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":8,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":358,"msg":"request completed"}
+2026-07-12T00:34:55.630139152Z {"level":30,"time":1783816495629,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":9,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":301,"msg":"request completed"}
+2026-07-12T00:34:56.311376396Z {"level":40,"time":1783816496311,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T00:34:56.73139413Z {"level":30,"time":1783816496731,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":10,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":56,"msg":"request completed"}
+2026-07-12T00:34:58.329286448Z {"level":30,"time":1783816498265,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":11,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":15,"msg":"request completed"}
+2026-07-12T00:34:59.843164638Z {"level":30,"time":1783816499840,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":12,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":109,"msg":"request completed"}
+2026-07-12T00:35:01.343291888Z {"level":30,"time":1783816501342,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":13,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":68,"msg":"request completed"}
+2026-07-12T00:35:02.931920391Z {"level":30,"time":1783816502931,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":14,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":93,"msg":"request completed"}
+2026-07-12T00:35:03.068163092Z {"level":30,"time":1783816503067,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","bin":"bore","args":["local","22","--to","bore.pub","--secret","daviddan09"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T00:35:04.431727924Z {"level":30,"time":1783816504431,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":15,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":61,"msg":"request completed"}
+2026-07-12T00:35:05.884112507Z {"level":30,"time":1783816505883,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":16,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":15,"msg":"request completed"}
+2026-07-12T00:35:06.154857587Z {"level":40,"time":1783816506154,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T00:35:07.535330181Z {"level":30,"time":1783816507533,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":17,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":84,"msg":"request completed"}
+2026-07-12T00:35:09.034900178Z {"level":30,"time":1783816509034,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":18,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":105,"msg":"request completed"}
+2026-07-12T00:35:09.332326508Z {"level":30,"time":1783816509332,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":19,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":32,"msg":"request completed"}
+2026-07-12T00:35:10.530944703Z {"level":30,"time":1783816510530,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":20,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":36,"msg":"request completed"}
+2026-07-12T00:35:12.01157329Z {"level":30,"time":1783816512011,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":21,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":15,"msg":"request completed"}
+2026-07-12T00:35:13.544175352Z {"level":30,"time":1783816513543,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":22,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":14,"msg":"request completed"}
+2026-07-12T00:35:15.130605573Z {"level":30,"time":1783816515130,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":23,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":49,"msg":"request completed"}
+2026-07-12T00:35:16.33016014Z {"level":30,"time":1783816516329,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","bin":"bore","args":["local","22","--to","bore.pub","--secret","daviddan09"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T00:35:16.617994247Z {"level":30,"time":1783816516617,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":24,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":16,"msg":"request completed"}
+2026-07-12T00:35:18.237319151Z {"level":30,"time":1783816518236,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":25,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":105,"msg":"request completed"}
+2026-07-12T00:35:19.423534287Z {"level":40,"time":1783816519423,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T00:35:19.731196674Z {"level":30,"time":1783816519730,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":26,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":78,"msg":"request completed"}
+2026-07-12T00:35:21.235864588Z {"level":30,"time":1783816521235,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":27,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":37,"msg":"request completed"}
+2026-07-12T00:35:22.83054885Z {"level":30,"time":1783816522830,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":28,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":102,"msg":"request completed"}
+2026-07-12T00:35:24.334528977Z {"level":30,"time":1783816524260,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":29,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":18,"msg":"request completed"}
+2026-07-12T00:35:24.431610939Z {"level":30,"time":1783816524431,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":30,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":101,"msg":"request completed"}
+2026-07-12T00:35:25.829065516Z {"level":30,"time":1783816525828,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":31,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":78,"msg":"request completed"}
+2026-07-12T00:35:27.317132483Z {"level":30,"time":1783816527316,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":32,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":14,"msg":"request completed"}
+2026-07-12T00:35:28.8327355Z {"level":30,"time":1783816528832,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":33,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":15,"msg":"request completed"}
+2026-07-12T00:35:30.361173945Z {"level":30,"time":1783816530360,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":34,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":14,"msg":"request completed"}
+2026-07-12T00:35:31.930532508Z {"level":30,"time":1783816531930,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":35,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":34,"msg":"request completed"}
+2026-07-12T00:35:33.538378514Z {"level":30,"time":1783816533532,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":36,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":109,"msg":"request completed"}
+2026-07-12T00:35:34.648457803Z {"level":30,"time":1783816534634,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","bin":"bore","args":["local","22","--to","bore.pub","--secret","daviddan09"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T00:35:35.035518482Z {"level":30,"time":1783816535034,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":37,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":96,"msg":"request completed"}
+2026-07-12T00:35:36.530927309Z {"level":30,"time":1783816536530,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":38,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":59,"msg":"request completed"}
+2026-07-12T00:35:37.031552142Z {"level":30,"time":1783816537031,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":39,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":22,"msg":"request completed"}
+2026-07-12T00:35:37.740206199Z {"level":40,"time":1783816537739,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T00:35:38.943928981Z {"level":30,"time":1783816538943,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","bin":"torsocks","args":["bore","local","22","--to","bore.pub","--secret","daviddan09"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T00:35:39.030588071Z {"level":30,"time":1783816539030,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":40,"method":"POST","url":"/api/tunnel/start"},"res":{"statusCode":200},"responseTime":100,"msg":"request completed"}
+2026-07-12T00:35:40.433619135Z {"level":30,"time":1783816540433,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":41,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":16,"msg":"request completed"}
+2026-07-12T00:35:41.976965074Z {"level":30,"time":1783816541976,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":42,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":15,"msg":"request completed"}
+2026-07-12T00:35:42.114210418Z {"level":40,"time":1783816542113,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T00:35:43.531263767Z {"level":30,"time":1783816543530,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":43,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":90,"msg":"request completed"}
+2026-07-12T00:35:44.925461656Z {"level":30,"time":1783816544925,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":44,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":15,"msg":"request completed"}
+2026-07-12T00:35:45.121009552Z {"level":30,"time":1783816545120,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","bin":"bore","args":["local","22","--to","bore.pub","--secret","daviddan09"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T00:35:46.531612061Z {"level":30,"time":1783816546531,"pid":579,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-6487b75d47-2qv4h","req":{"id":45,"method":"GET","url":"/api/status"},"res":{"statusCode":200},"responseTime":89,"msg":"request completed"}

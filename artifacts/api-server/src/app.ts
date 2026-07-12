@@ -48,20 +48,17 @@ const ttydPass = process.env["WEB_TERMINAL_PASS"] ?? "changeme";
 const ttydAuthHeader = `Basic ${Buffer.from(`${ttydUser}:${ttydPass}`).toString("base64")}`;
 
 if (ttydPort) {
+  // ttyd runs without --credential (auth removed to fix iOS Safari blank terminal).
+  // The terminal is only reachable via this HTTPS proxy — no extra auth needed.
+  // No pathRewrite: WebSocket from xterm.js connects to ws://<host>/ws directly;
+  // the server.on('upgrade') handler in index.ts forwards all upgrades here.
   terminalProxy = createProxyMiddleware({
     target: `http://127.0.0.1:${ttydPort}`,
     changeOrigin: true,
     ws: true,
     pathFilter: (pathname: string) => pathname.startsWith("/webterm"),
     pathRewrite: { "^/webterm": "" },
-    // Inject auth for HTTP requests (initial page load, assets)
-    headers: { Authorization: ttydAuthHeader },
     on: {
-      // Inject auth for WebSocket upgrade — critical fix for iOS iframe blank screen.
-      // Without this, ttyd returns 401 on the WS handshake and the terminal is empty.
-      proxyReqWs: (proxyReq) => {
-        proxyReq.setHeader("Authorization", ttydAuthHeader);
-      },
       error: (err, _req, res) => {
         logger.warn({ err }, "ttyd proxy error");
         const r = res as express.Response;
