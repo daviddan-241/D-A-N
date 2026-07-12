@@ -1,0 +1,1 @@
+- [D.A.N. bore tunnel real-world quirks](dan-bore-tunnel.md) — this repo is a Render-only Docker/SSH devbox; on Replit only the dashboard/API run, SSH/bore never will.
