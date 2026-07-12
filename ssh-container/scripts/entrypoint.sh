@@ -241,9 +241,20 @@ log "sshd configuration OK."
 # ─────────────────────────────────────────────────────────────────────────────
 INSTALL_FLAG="${HOME_DIR}/.dan_extras_installed"
 if [[ "${AUTO_INSTALL_EXTRAS}" == "yes" && ! -f "${INSTALL_FLAG}" ]]; then
-  log "AUTO_INSTALL_EXTRAS=yes — running first-boot tool install (background) ..."
-  /auto-install.sh 2>&1 >> "${LOG_DIR}/auto-install.log" &
-  echo "Auto-install started in background. Check: tail -f ${LOG_DIR}/auto-install.log"
+  # ── Memory guard: free-tier has 512 MB total. Delay auto-install so bore,
+  # sshd, Node.js and ttyd all start first, then check there is enough headroom.
+  (
+    sleep 30  # let all core services start and bore acquire a port
+    FREE_MB=$(awk '/^MemAvailable/ { printf "%d", $2/1024 }' /proc/meminfo 2>/dev/null || echo 999)
+    if [[ "${FREE_MB}" -lt 60 ]]; then
+      echo "[AUTO-INSTALL] Only ${FREE_MB} MB RAM free — skipping auto-install to avoid OOM."         >> "${LOG_DIR}/auto-install.log"
+    else
+      echo "[AUTO-INSTALL] ${FREE_MB} MB RAM free — starting lightweight setup."         >> "${LOG_DIR}/auto-install.log"
+      /auto-install.sh >> "${LOG_DIR}/auto-install.log" 2>&1
+    fi
+  ) &
+  log "AUTO_INSTALL_EXTRAS=yes — first-boot setup queued (starts in 30s after bore/sshd settle) ..."
+  log "Follow: tail -f ${LOG_DIR}/auto-install.log"
 else
   log "Skipping extra tool install (set AUTO_INSTALL_EXTRAS=yes to enable on first boot)"
 fi

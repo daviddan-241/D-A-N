@@ -211,15 +211,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# ── Chromium (headless) ───────────────────────────────────────────────────────
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    chromium-browser \
-    chromium-chromedriver \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  || (apt-get install -y --no-install-recommends chromium chromium-driver \
-      && apt-get clean && rm -rf /var/lib/apt/lists/*) \
-  || true
+# Chromium: install via SSH if needed.
+# sudo apt-get install -y chromium-browser
 
 # ── Go installation ───────────────────────────────────────────────────────────
 ARG GO_VERSION=1.22.4
@@ -275,29 +268,16 @@ RUN for pkg in \
       black \
       httpie \
       pipx \
-      aider-chat \
     ; do \
       pip3 install --no-cache-dir --break-system-packages "$pkg" \
         || echo "WARN: pip package '$pkg' failed to install, skipping"; \
     done
 
-# ── Ensure aider is on PATH ───────────────────────────────────────────────────
-RUN pip3 install --no-cache-dir --break-system-packages aider-chat 2>/dev/null || true \
-  && ln -sf "$(python3 -c 'import site; print(site.getsitepackages()[0])')/bin/aider" \
-       /usr/local/bin/aider 2>/dev/null || true
+# aider: install via SSH (pip3 install --user aider-chat). Too heavy for build.
 
-# ── Metasploit Framework (baked into the image at build time) ────────────────
-# Previously this ran from auto-install.sh on first boot, which took 5-10 min
-# and had to redo the work on every Render restart (free tier has no real
-# persistent disk, so the "install once" flag never survives a redeploy).
-# Installing here means msfconsole is present the instant the container
-# starts — no waiting after connecting from a-Shell Mini.
-RUN curl -fsSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb \
-      > /tmp/msfinstall \
-  && chmod 755 /tmp/msfinstall \
-  && /tmp/msfinstall \
-  && rm -f /tmp/msfinstall \
-  && msfconsole -v || echo "WARN: Metasploit build-time install failed — will not be auto-available"
+# Metasploit: too heavy for build-time install on Render free tier.
+# Install via SSH session: curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb | bash
+# Or: sudo apt-get install -y metasploit-framework
 
 # ── Sherlock (OSINT username search — baked in) ───────────────────────────────
 RUN git clone --depth=1 https://github.com/sherlock-project/sherlock.git /opt/sherlock \
@@ -317,12 +297,8 @@ RUN git clone --depth=1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap 
 RUN (command -v theHarvester &>/dev/null || pip3 install --no-cache-dir --break-system-packages theHarvester) \
   || echo "WARN: theHarvester install failed"
 
-# ── Playwright + Chromium — real headless browser automation, baked in ───────
-# Installed at build time (not first boot) so `browser <url>` etc. work
-# immediately on connect instead of requiring a multi-minute background job.
-RUN pip3 install --no-cache-dir --break-system-packages playwright \
-  && python3 -m playwright install --with-deps chromium \
-  || echo "WARN: Playwright/Chromium build-time install failed — browser automation unavailable"
+# Playwright + Chromium: install via SSH if needed (too slow for free-tier builds).
+# pip3 install playwright && python3 -m playwright install --with-deps chromium
 
 # ── Ollama — local uncensored AI runtime (binary baked in, models pulled at boot) ─
 # Baking the binary prevents the auto-install.sh failure; models are still

@@ -1,0 +1,50 @@
+2026-07-11T13:14:04.164529833Z 
+2026-07-11T13:14:04.164558534Z #73 [final 53/61] COPY ssh-container/scripts/bore-watchdog.sh /scripts/bore-watchdog.sh
+2026-07-11T13:14:04.164564444Z #73 DONE 0.0s
+2026-07-11T13:14:04.164568724Z 
+2026-07-11T13:14:04.164574384Z #74 [final 54/61] RUN chmod +x /scripts/dan-agents.sh /scripts/dotfiles-sync.sh /scripts/agent-memory.sh /scripts/bore-watchdog.sh   && ln -sf /scripts/dan-agents.sh    /usr/local/bin/dan-agents   && ln -sf /scripts/dotfiles-sync.sh /usr/local/bin/dotfiles-sync   && ln -sf /scripts/agent-memory.sh  /usr/local/bin/dan-memory
+2026-07-11T13:14:04.164579294Z #74 DONE 0.1s
+2026-07-11T13:14:04.309655371Z 
+2026-07-11T13:14:04.309706792Z #75 [final 55/61] COPY ssh-container/scripts/entrypoint.sh    /entrypoint.sh
+2026-07-11T13:14:04.309718612Z #75 DONE 0.0s
+2026-07-11T13:14:04.309722862Z 
+2026-07-11T13:14:04.309726982Z #76 [final 56/61] COPY ssh-container/scripts/healthcheck.sh   /healthcheck.sh
+2026-07-11T13:14:04.309730972Z #76 DONE 0.0s
+2026-07-11T13:14:04.309734703Z 
+2026-07-11T13:14:04.309738623Z #77 [final 57/61] COPY ssh-container/scripts/firewall-init.sh /firewall-init.sh
+2026-07-11T13:14:04.309742533Z #77 DONE 0.0s
+2026-07-11T13:14:04.425627728Z 
+2026-07-11T13:14:04.425653919Z #78 [final 58/61] RUN chmod +x /entrypoint.sh /healthcheck.sh /firewall-init.sh
+2026-07-11T13:14:04.425658889Z #78 DONE 0.1s
+2026-07-11T13:14:04.542225759Z 
+2026-07-11T13:14:04.542246519Z #79 [final 59/61] WORKDIR /app
+2026-07-11T13:14:04.542251219Z #79 DONE 0.0s
+2026-07-11T13:14:04.542255199Z 
+2026-07-11T13:14:04.542260109Z #80 [final 60/61] COPY --from=webbuild /workspace/artifacts/api-server/dist    ./dist
+2026-07-11T13:14:04.54226411Z #80 DONE 0.1s
+2026-07-11T13:14:04.748394464Z 
+2026-07-11T13:14:04.748421805Z #81 [final 61/61] COPY --from=webbuild /workspace/artifacts/dan-ui/dist/public ./public
+2026-07-11T13:14:04.748429665Z #81 DONE 0.0s
+2026-07-11T13:14:04.748435605Z 
+2026-07-11T13:14:04.748442435Z #82 exporting to image
+2026-07-11T13:14:04.748448575Z #82 exporting layers
+2026-07-11T13:14:54.226584062Z #82 exporting layers 49.6s done
+2026-07-11T13:14:54.393816762Z #82 pushing layers
+2026-07-11T13:14:54.393831772Z #82 ...
+2026-07-11T13:14:54.393835232Z 
+2026-07-11T13:14:54.393838743Z #83 exporting cache to registry
+2026-07-11T13:14:54.393843183Z #83 preparing build cache for export
+2026-07-11T13:15:22.268288542Z #83 ...
+2026-07-11T13:15:22.268313993Z 
+2026-07-11T13:15:22.268319293Z #82 exporting to image
+2026-07-11T13:15:22.268324323Z #82 pushing layers 28.0s done
+2026-07-11T13:15:22.941444613Z #82 DONE 78.3s
+2026-07-11T13:15:22.941462883Z 
+2026-07-11T13:15:22.941468873Z #83 exporting cache to registry
+2026-07-11T13:15:26.739920515Z #83 sending cache export
+2026-07-11T13:15:30.962965984Z #83 sending cache export 4.2s done
+2026-07-11T13:15:30.962994425Z #83 DONE 36.7s
+2026-07-11T13:15:36.618545719Z ==> Deploying...
+2026-07-11T13:15:36.688595342Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-07-11T13:21:22.166734632Z ==> Cause of failure could not be determined
+2026-07-11T13:21:22.174289247Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
