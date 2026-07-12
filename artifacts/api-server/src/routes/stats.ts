@@ -48,7 +48,7 @@ function countInstalledTools(): number {
       // not installed
     }
   }
-  _cachedToolCount = count > 5 ? count : 50; // fallback for non-container envs
+  _cachedToolCount = count; // real count — no artificial floor
   return _cachedToolCount;
 }
 
