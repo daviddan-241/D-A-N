@@ -86,6 +86,23 @@ if [[ -n "${DOTFILES_REPO}" ]]; then
     fi
   done
 
+  # ── Guard: keep the built-in D.A.N. prompt/aliases loading no matter what ──
+  # If the dotfiles repo ships its own .bashrc (common — it was likely
+  # auto-pushed from an earlier boot before bashrc_extra existed or was last
+  # updated), the symlink above replaces the Docker image's freshly-baked
+  # .bashrc wholesale, silently reverting prompt/alias fixes on every deploy
+  # even though the image itself was rebuilt correctly. bashrc_extra is
+  # always copied into $HOME independently of .bashrc (see Dockerfile), so
+  # just make sure whatever .bashrc ends up in place actually sources it.
+  if [[ -L "${HOME_DIR}/.bashrc" ]] && ! grep -qF '.bashrc_extra' "${HOME_DIR}/.bashrc" 2>/dev/null; then
+    {
+      echo ""
+      echo "# D.A.N.: always load built-in prompt/aliases, even over a synced dotfiles .bashrc"
+      echo '[ -f ~/.bashrc_extra ] && source ~/.bashrc_extra'
+    } >> "${HOME_DIR}/.bashrc"
+    log "dotfiles .bashrc didn't source .bashrc_extra — appended it so D.A.N.'s prompt/aliases still load"
+  fi
+
   # Restore SSH authorized_keys if stored in dotfiles
   if [[ -f "${DOTFILES_DIR}/.ssh/authorized_keys" ]]; then
     mkdir -p "${HOME_DIR}/.ssh"
