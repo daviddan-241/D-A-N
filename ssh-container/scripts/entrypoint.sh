@@ -335,128 +335,22 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 # 10. bore TCP tunnel — zero-config SSH fallback (no Cloudflare account needed)
 #     Set BORE_ENABLE=yes in Render dashboard to activate.
-#     Set BORE_SECRET=<any-string> for a consistent port across restarts.
+#
+#     NOTE: bore's entire lifecycle (spawn, port capture, auto-restart) is
+#     owned by the Node app's TunnelManager (artifacts/api-server/src/
+#     tunnel-manager.ts), started in step 14 below. It pipes bore's
+#     stdout/stderr directly in-process, so there's no log-file polling or
+#     regex timing race. Do NOT also spawn bore here: this used to launch a
+#     second, independent `bore local 22 --to bore.pub` process (plus a bash
+#     watchdog) a few seconds *before* the Node app started. bore.pub only
+#     tolerates one concurrent connection for the same local target, so the
+#     Node-managed bore this second process raced against exited with code 1
+#     every few seconds forever — the tunnel never came up even though this
+#     shell-spawned copy was fine. Only one owner is allowed; that's Node.
 # ─────────────────────────────────────────────────────────────────────────────
 if [[ "${BORE_ENABLE:-no}" == "yes" ]] && command -v bore &>/dev/null; then
-  # This whole section launches/health-checks background processes (bore,
-  # torsocks, the watchdog) with patterns like `kill -0 $PID && VAR=val` and
-  # bare `[[ ... ]] && VAR=val`. Under `set -e`, a transient nonzero from any
-  # of these (e.g. the bore process having already died by the time we check
-  # it) was observed taking down the *entire* container on Render — sshd,
-  # ttyd and the Node app never got a chance to start. None of these checks
-  # are meant to be fatal, so disable errexit for just this section.
-  set +e
-  # bore.pub is a PUBLIC server — passing --secret causes immediate HMAC
-  # rejection and bore exits with code 1. Only use --secret with a private
-  # bore server (set BORE_SERVER=your.host).
-  BORE_SERVER="${BORE_SERVER:-bore.pub}"
-  BORE_SECRET="${BORE_SECRET:-}"
-  BORE_CMD_BASE="local 22 --to ${BORE_SERVER}"
-  # Only add --secret when NOT using the public bore.pub server
-  [[ -n "${BORE_SECRET}" && "${BORE_SERVER}" != "bore.pub" ]] && \
-    BORE_CMD_BASE="${BORE_CMD_BASE} --secret ${BORE_SECRET}"
-
-  # bore-cli's tracing output writes the assigned port as `remote_port=NNNN`
-  # (no space before "port"), as `listening at bore.pub:NNNN`, or with a
-  # loose `port NNNN` — try all three so a formatting change in bore/tracing
-  # doesn't silently break port detection and leave the dashboard showing
-  # "see log" forever.
-  extract_bore_port() {
-    # Multi-pattern extraction — bore CLI output format varies by version.
-    # Each grep uses || true so set -e never kills the script on empty output.
-    local log="${LOG_DIR}/bore.log"
-    local p
-    # Pattern 1: bore.pub:PORT  (most bore versions)
-    p=$(grep -oE 'bore[.]pub:[0-9]+' "${log}" 2>/dev/null | awk -F: 'END{print $NF}')
-    [[ -n "${p}" ]] && echo "${p}" && return 0
-    # Pattern 2: remote_port=PORT
-    p=$(grep -oE 'remote_port=[0-9]+' "${log}" 2>/dev/null | awk -F= 'END{print $NF}')
-    [[ -n "${p}" ]] && echo "${p}" && return 0
-    # Pattern 3: Listening at HOST:PORT
-    p=$(grep -oE 'Listening at [^ ]+:[0-9]+' "${log}" 2>/dev/null | awk -F: 'END{print $NF}')
-    [[ -n "${p}" ]] && echo "${p}" && return 0
-    # Pattern 4: port=PORT or port:PORT (fallback)
-    p=$(grep -oE 'port[ =:][0-9]{4,5}' "${log}" 2>/dev/null | awk '{print $NF}' | tr -d ':=' | tail -1)
-    [[ -n "${p}" ]] && echo "${p}" && return 0
-    return 1
-  }
-
-  # ── Try bore through Tor first (anonymous), fall back to direct ────────────
-  # bore.pub and many public relays actively refuse or immediately drop
-  # connections that arrive from Tor exit nodes as anti-abuse policy. When
-  # that happens the torsocks-wrapped process dies within seconds, forever,
-  # and the watchdog restart-loops without ever getting a real port. SSH's
-  # own transport is already end-to-end encrypted, so falling back to a
-  # direct (non-Tor) bore connection loses only bore.pub's ability to see the
-  # container's IP, not the security of the SSH session itself.
-  # If a previous boot/restart already learned that bore.pub refuses this
-  # container's Tor exit node, don't retry Tor again — go straight to direct.
-  LAST_MODE_FILE="${LOG_DIR}/.bore-last-mode"
-  FORCE_DIRECT=0
-  [[ -f "${LAST_MODE_FILE}" && "$(cat "${LAST_MODE_FILE}" 2>/dev/null)" == "direct" ]] && FORCE_DIRECT=1
-
-  BORE_PID=""
-  BORE_MODE=""
-  if [[ "${FORCE_DIRECT}" -eq 0 ]] && command -v torsocks &>/dev/null; then
-    log "Starting bore TCP tunnel via Tor (torsocks) ..."
-    torsocks bore ${BORE_CMD_BASE} >>"${LOG_DIR}/bore.log" 2>&1 &
-    BORE_PID=$!
-    sleep 4
-    if kill -0 "${BORE_PID}" 2>/dev/null && [[ -n "$(extract_bore_port)" ]]; then
-      BORE_MODE="tor"
-    else
-      warn "  bore via Tor failed to come up (bore.pub likely blocks Tor exit nodes) — retrying direct"
-      kill "${BORE_PID}" 2>/dev/null || true
-      wait "${BORE_PID}" 2>/dev/null || true
-      BORE_PID=""
-    fi
-  fi
-  if [[ -z "${BORE_PID}" ]]; then
-    log "Starting bore TCP tunnel directly (no Tor) ..."
-    bore ${BORE_CMD_BASE} >>"${LOG_DIR}/bore.log" 2>&1 &
-    BORE_PID=$!
-    sleep 3
-    kill -0 "${BORE_PID}" 2>/dev/null && BORE_MODE="direct"
-  fi
-
-  if [[ -n "${BORE_MODE}" ]]; then
-    # Poll up to 10 more seconds for the port to appear in the log — bore
-    # sometimes logs it a moment after the process is confirmed alive.
-    BORE_PORT=""
-    for _i in $(seq 1 10); do
-      BORE_PORT=$(extract_bore_port)
-      [[ -n "${BORE_PORT}" ]] && break
-      sleep 1
-    done
-    # Only record the mode and write the connect file when we have a real port
-    # number — never write "see log" or a placeholder, because the dashboard and
-    # the watchdog both read this file to show the live command to the user.
-    if [[ -n "${BORE_PORT}" ]]; then
-      echo "${BORE_MODE}" > "${LAST_MODE_FILE}" 2>/dev/null || true
-      log "bore tunnel running (PID ${BORE_PID}, mode: ${BORE_MODE}) — port: ${BORE_PORT}"
-      log "  SSH: ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub"
-      log "  a-shell: SSH to bore.pub port ${BORE_PORT}"
-      log "  Logs: tail -f ${LOG_DIR}/bore.log"
-      echo "ssh -p ${BORE_PORT} ${DEV_USER}@bore.pub" > "/home/${DEV_USER}/.dan_ssh_connect"
-      chown "${DEV_USER}:${DEV_USER}" "/home/${DEV_USER}/.dan_ssh_connect" 2>/dev/null || true
-    else
-      log "bore tunnel process running (PID ${BORE_PID}, mode: ${BORE_MODE}) — port not yet in log"
-      log "  The watchdog will write ~/.dan_ssh_connect once the port appears."
-      log "  Dashboard will pick it up within ~15 s. Logs: tail -f ${LOG_DIR}/bore.log"
-      # Do NOT write the connect file with a placeholder — leave it absent so
-      # the dashboard shows "starting…" instead of a wrong command.
-    fi
-  else
-    warn "bore tunnel failed — check ${LOG_DIR}/bore.log"
-  fi
-
-  # Watchdog: bore.pub connections can drop over time — auto-respawn if it dies.
-  log "Starting bore watchdog (auto-restarts tunnel if it drops) ..."
-  DEV_USER="${DEV_USER}" LOG_DIR="${LOG_DIR}" BORE_SECRET="${BORE_SECRET}" \
-    /scripts/bore-watchdog.sh >>"${LOG_DIR}/bore-watchdog.log" 2>&1 &
-  WATCHDOG_PID=$!
-  log "bore watchdog running (PID ${WATCHDOG_PID})"
-  set -e
+  log "BORE_ENABLE=yes — bore tunnel will be started by the Node app's TunnelManager (not here)."
+  log "  SSH: ssh -p <PORT> ${DEV_USER}@bore.pub  (check: cat ~/.dan_ssh_connect once live)"
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
