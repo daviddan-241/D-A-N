@@ -13,7 +13,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RefreshCw, Settings2, Terminal as TermIcon, ArrowRight,
-         WifiOff, Loader, Keyboard, ChevronDown, Send } from 'lucide-react';
+         WifiOff, Loader, Keyboard, ChevronDown, Send, ClipboardPaste, Check } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 const SAME_ORIGIN_TERMINAL = '/webterm/';
@@ -344,8 +344,25 @@ export function Terminal() {
   const [connected, setConnected]   = useState(false);
   const [showKeyBar, setShowKeyBar] = useLocalStorage<boolean>('dan_keybar', false);
   const [showControls, setShowControls] = useState(true);
+  const [pasted, setPasted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+  const pasteFromClipboard = useCallback(async () => {
+    setShowControls(true);
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text) return;
+      await sendText(base, text);
+      setPasted(true);
+      setTimeout(() => setPasted(false), 1200);
+    } catch {
+      // Clipboard permission denied/unavailable — open the key bar's Type
+      // tab so the user can paste into a normal <input> instead, which iOS
+      // always supports via long-press, even when the Clipboard API is blocked.
+      setShowKeyBar(true);
+    }
+  }, [base, setShowKeyBar]);
 
   // Auto-hide controls after 3 s of inactivity
   useEffect(() => {
@@ -466,6 +483,17 @@ export function Terminal() {
             ) : (
               <span className="w-2 h-2 rounded-full bg-destructive mx-1.5" />
             )}
+
+            {/* Paste from clipboard — sends copied text straight into the shell */}
+            <button
+              onPointerDown={(e) => { e.preventDefault(); pasteFromClipboard(); }}
+              className={`p-1.5 rounded-xl transition-colors ${
+                pasted ? 'text-success' : 'text-white/50 hover:text-white/80'
+              }`}
+              title="Paste from clipboard"
+            >
+              {pasted ? <Check className="w-3.5 h-3.5" /> : <ClipboardPaste className="w-3.5 h-3.5" />}
+            </button>
 
             {/* Keyboard toggle */}
             <button
