@@ -21,10 +21,26 @@ err()  { echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] [ERROR] $*" | tee -a "${LOG_FI
 mkdir -p "${LOG_DIR}"
 chmod 750 "${LOG_DIR}"
 
-# ── Custom hostname (shows up in the shell prompt as dave@${DAN_HOSTNAME}) ────
+# ── Refresh apt package lists ──────────────────────────────────────────────────
+# The Docker build removes /var/lib/apt/lists/* after every install step to
+# keep the image small, so the lists are empty in the running container.
+# Without this, "apt install foo" fails with "Unable to locate package" until
+# the user manually runs "sudo apt update" first. Refresh in the background
+# so it doesn't add latency to boot — by the time the user's shell opens
+# (several seconds later, after ttyd/sshd start), it's normally done.
+( apt-get update -qq >>"${LOG_DIR}/apt-update.log" 2>&1 || true ) &
+
+# ── Custom hostname (shows up in the shell prompt as ${DEV_USER}@${DAN_HOSTNAME}) ─
 # `hostname` itself often fails on unprivileged containers (Render doesn't
 # grant CAP_SYS_ADMIN), so this is best-effort — /etc/hosts is what actually
-# makes the name resolve locally, which is what the prompt needs.
+# makes the name resolve locally.
+#
+# The shell prompt (bashrc_extra) does NOT rely on bash's \h escape, because
+# \h reads the kernel hostname, which on Render is the raw pod ID (e.g.
+# "srv-xxxxx-hibernate-...") when the syscall above is denied — that's what
+# produced the garbled prompt. Instead we write DAN_HOSTNAME to a profile.d
+# file every login shell sources (ttyd, tmux, sshd all go through this),
+# so the prompt always shows the friendly name regardless of hostname perms.
 if command -v hostname &>/dev/null; then
   hostname "${DAN_HOSTNAME}" 2>/dev/null || true
 fi
@@ -32,6 +48,8 @@ echo "${DAN_HOSTNAME}" > /etc/hostname 2>/dev/null || true
 if ! grep -q "${DAN_HOSTNAME}" /etc/hosts 2>/dev/null; then
   echo "127.0.0.1 ${DAN_HOSTNAME}" >> /etc/hosts 2>/dev/null || true
 fi
+echo "export DAN_HOSTNAME=\"${DAN_HOSTNAME}\"" > /etc/profile.d/99-dan-hostname.sh 2>/dev/null || true
+chmod 644 /etc/profile.d/99-dan-hostname.sh 2>/dev/null || true
 
 log "======================================================================"
 log " D.A.N. — Dynamic Access Node — starting"

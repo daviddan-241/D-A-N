@@ -1,0 +1,50 @@
+2026-07-12T15:22:56.61273727Z [2026-07-12T15:22:56Z] [INFO]  Starting ttyd web terminal on 127.0.0.1:7681 (internal) ...
+2026-07-12T15:22:56.814532202Z [2026-07-12T15:22:56Z] [INFO]    Persistent tmux session 'main' ready for devuser
+2026-07-12T15:22:57.818704595Z [2026-07-12T15:22:57Z] [INFO]  ttyd running (PID 205)
+2026-07-12T15:22:57.821612657Z [2026-07-12T15:22:57Z] [INFO]    Web terminal: https://<your-render-url>/webterm
+2026-07-12T15:22:57.823904777Z [2026-07-12T15:22:57Z] [INFO]    Session persists — navigate away and back to rejoin same shell
+2026-07-12T15:22:57.914531301Z [2026-07-12T15:22:57Z] [INFO]  BORE_ENABLE=yes — bore tunnel will be started by the Node app's TunnelManager (not here).
+2026-07-12T15:22:57.916691218Z [2026-07-12T15:22:57Z] [INFO]    SSH: ssh -p <PORT> devuser@bore.pub  (check: cat ~/.dan_ssh_connect once live)
+2026-07-12T15:22:58.012367251Z [2026-07-12T15:22:57Z] [INFO]  Starting GitHub persistence sync ...
+2026-07-12T15:22:58.014770402Z [2026-07-12T15:22:58Z] [INFO]  GitHub sync running — logs: tail -f /var/log/ssh-container/dotfiles.log
+2026-07-12T15:22:58.016768796Z [2026-07-12T15:22:58Z] [INFO]  Starting sshd (background) ...
+2026-07-12T15:23:00.312778104Z [2026-07-12T15:23:00Z] [INFO]  sshd running (daemon PID: 238)
+2026-07-12T15:23:00.413921015Z [2026-07-12T15:23:00Z] [INFO]  ======================================================================
+2026-07-12T15:23:00.513614415Z [2026-07-12T15:23:00Z] [INFO]   D.A.N. is live
+2026-07-12T15:23:00.515580867Z [2026-07-12T15:23:00Z] [INFO]  ======================================================================
+2026-07-12T15:23:00.517521869Z [2026-07-12T15:23:00Z] [INFO]   Web app:          https://<your-render-url>  (dashboard + web terminal)
+2026-07-12T15:23:00.612288753Z [2026-07-12T15:23:00Z] [INFO]   Web Terminal:      https://<your-render-url>/webterm  (auth: devuser / [WEB_TERMINAL_PASS])
+2026-07-12T15:23:00.614765926Z [2026-07-12T15:23:00Z] [INFO]   SSH (Cloudflare): ssh -o 'ProxyCommand cloudflared access ssh --hostname %h' devuser@<tunnel-host>
+2026-07-12T15:23:00.713156518Z [2026-07-12T15:23:00Z] [INFO]   SSH (bore):       ssh -p <PORT> devuser@bore.pub  (check: cat ~/.dan_ssh_connect)
+2026-07-12T15:23:00.714974047Z [2026-07-12T15:23:00Z] [INFO]   GitHub sync:      cat /var/log/ssh-container/dotfiles.log
+2026-07-12T15:23:00.813414649Z [2026-07-12T15:23:00Z] [INFO]   Logs dir:         /var/log/ssh-container/
+2026-07-12T15:23:00.912977887Z [2026-07-12T15:23:00Z] [INFO]  ======================================================================
+2026-07-12T15:23:00.916980473Z [2026-07-12T15:23:00Z] [INFO]  Starting D.A.N. app on :10000 ...
+2026-07-12T15:23:04.713543378Z {"level":30,"time":1783869784712,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","msg":"TunnelManager: initializing"}
+2026-07-12T15:23:05.212916846Z {"level":30,"time":1783869784920,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","bin":"bore","args":["local","22","--to","bore.pub"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T15:23:05.212935946Z {"level":30,"time":1783869785018,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","ttydPort":"7681","msg":"Web terminal proxy enabled at /webterm"}
+2026-07-12T15:23:05.212939286Z {"level":30,"time":1783869785019,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","publicDir":"/app/public","msg":"Serving bundled frontend"}
+2026-07-12T15:23:05.212942696Z {"level":30,"time":1783869785112,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","port":10000,"msg":"Server listening"}
+2026-07-12T15:23:05.818278369Z (node:292) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-07-12T15:23:05.81830832Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-07-12T15:23:05.913150415Z {"level":30,"time":1783869785912,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","req":{"id":1,"method":"HEAD","url":"/"},"res":{"statusCode":200},"responseTime":97,"msg":"request completed"}
+2026-07-12T15:23:07.275022142Z ==> Your service is live 🎉
+2026-07-12T15:23:07.373342451Z {"level":30,"time":1783869787373,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","req":{"id":2,"method":"GET","url":"/"},"res":{"statusCode":200},"responseTime":4,"msg":"request completed"}
+2026-07-12T15:23:07.402595381Z ==> 
+2026-07-12T15:23:07.404945873Z ==> ///////////////////////////////////////////////////////////
+2026-07-12T15:23:07.406964801Z ==> 
+2026-07-12T15:23:07.409110567Z ==> Available at your primary URL https://d-a-n-hwqd.onrender.com
+2026-07-12T15:23:07.411426237Z ==> 
+2026-07-12T15:23:07.413405671Z ==> ///////////////////////////////////////////////////////////
+2026-07-12T15:23:08.315437545Z {"level":40,"time":1783869788315,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T15:23:11.323074079Z {"level":30,"time":1783869791322,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","bin":"bore","args":["local","22","--to","bore.pub"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T15:23:14.409069242Z {"level":40,"time":1783869794408,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T15:23:18.925635252Z {"level":30,"time":1783869798923,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","bin":"bore","args":["local","22","--to","bore.pub"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T15:23:22.02389765Z {"level":40,"time":1783869802023,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T15:23:28.917464965Z {"level":30,"time":1783869808819,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","bin":"bore","args":["local","22","--to","bore.pub"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T15:23:32.015190701Z {"level":40,"time":1783869812014,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T15:23:42.146689266Z {"level":30,"time":1783869822146,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","bin":"bore","args":["local","22","--to","bore.pub"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T15:23:45.242511271Z {"level":40,"time":1783869825240,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","code":1,"msg":"TunnelManager: bore exited"}
+2026-07-12T15:23:47.900445164Z {"level":30,"time":1783869827900,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","req":{"id":3,"method":"HEAD","url":"/"},"res":{"statusCode":200},"responseTime":1,"msg":"request completed"}
+2026-07-12T15:24:00.439026402Z {"level":30,"time":1783869840438,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","bin":"bore","args":["local","22","--to","bore.pub"],"msg":"TunnelManager: spawning bore"}
+2026-07-12T15:24:03.523915801Z {"level":40,"time":1783869843523,"pid":292,"hostname":"srv-d97cvpgk1i2s73dd88p0-hibernate-5c5bc675b-w7zx6","code":1,"msg":"TunnelManager: bore exited"}

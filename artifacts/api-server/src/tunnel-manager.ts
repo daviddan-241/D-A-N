@@ -148,8 +148,17 @@ function spawnBore(useTor: boolean): void {
   _proc = child;
   _state.pid = child.pid ?? null;
 
+  // Keep the last bit of bore's own output so that when it exits we can log
+  // *why* — previously only the bare exit code was logged (to the pino/JSON
+  // logger that Render actually captures), while the real error text only
+  // ever went to bore.log on disk, which nobody was tailing. That made every
+  // failure look identical ("TunnelManager: bore exited", code 1) with no
+  // way to tell a bad --secret from a network/DNS failure from anything else.
+  let lastOutput = "";
+
   const onData = (chunk: Buffer) => {
     const text = chunk.toString();
+    lastOutput = (lastOutput + text).slice(-2000);
     // Also write to log file for human debugging: tail -f bore.log
     try {
       fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -188,7 +197,10 @@ function spawnBore(useTor: boolean): void {
       clearTimeout(torTimeout);
       torTimeout = null;
     }
-    logger.warn({ code }, "TunnelManager: bore exited");
+    logger.warn(
+      { code, lastOutput: lastOutput.trim().slice(-500) },
+      "TunnelManager: bore exited",
+    );
     if (_proc === child) {
       _proc = null;
       _state.port = null;

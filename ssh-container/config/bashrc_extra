@@ -2,10 +2,20 @@
 # D.A.N. — Dynamic Access Node  — shell configuration
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ── Friendly hostname for the prompt ───────────────────────────────────────────
+# Written by entrypoint.sh. Source directly (not just via /etc/profile) because
+# ttyd/tmux spawn non-login shells, which skip /etc/profile.d entirely.
+[[ -f /etc/profile.d/99-dan-hostname.sh ]] && source /etc/profile.d/99-dan-hostname.sh
+
 # ── D.A.N. prompt — user@host:path$  (git branch/status appended when in a repo) ──
-parse_git_branch() { git branch 2>/dev/null | grep '^*' | sed 's/* //'; }
+# Uses \u (real logged-in user, not a hardcoded name) and $DAN_HOSTNAME
+# (a friendly name entrypoint.sh writes to /etc/profile.d/99-dan-hostname.sh)
+# instead of bash's \h escape — \h reads the kernel hostname, which on
+# Render is the raw pod ID when the container lacks permission to set it,
+# producing a garbled prompt like "user@srv-xxxx-hibernate-...".
+parse_git_branch() { git branch 2>/dev/null | grep '^\*' | sed 's/^\* //'; }
 parse_git_dirty()  { [[ -n "$(git status --short 2>/dev/null)" ]] && echo "*"; }
-export PS1='\[\e[1;32m\]dave@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[33m\]$( b=$(parse_git_branch); [ -n "$b" ] && echo " (${b}$(parse_git_dirty))")\[\e[0m\]\$ '
+export PS1='\[\e[1;32m\]\u@${DAN_HOSTNAME:-dan-devbox}\[\e[0m\]:\[\e[1;34m\]\w\[\e[33m\]$(b=$(parse_git_branch); [ -n "${b// }" ] && echo " (${b}$(parse_git_dirty))")\[\e[0m\]\$ '
 
 # ── PATH ──────────────────────────────────────────────────────────────────────
 export PATH="${HOME}/.local/bin:${HOME}/bin:${HOME}/go/bin:/usr/local/go/bin:/usr/local/bin:${PATH}"
