@@ -7,15 +7,15 @@
 # ttyd/tmux spawn non-login shells, which skip /etc/profile.d entirely.
 [[ -f /etc/profile.d/99-dan-hostname.sh ]] && source /etc/profile.d/99-dan-hostname.sh
 
-# ── D.A.N. prompt — user@host:path$  (git branch/status appended when in a repo) ──
-# Uses \u (real logged-in user, not a hardcoded name) and $DAN_HOSTNAME
-# (a friendly name entrypoint.sh writes to /etc/profile.d/99-dan-hostname.sh)
-# instead of bash's \h escape — \h reads the kernel hostname, which on
-# Render is the raw pod ID when the container lacks permission to set it,
-# producing a garbled prompt like "user@srv-xxxx-hibernate-...".
-parse_git_branch() { git branch 2>/dev/null | grep '^\*' | sed 's/^\* //'; }
-parse_git_dirty()  { [[ -n "$(git status --short 2>/dev/null)" ]] && echo "*"; }
-export PS1='\[\e[1;32m\]\u@${DAN_HOSTNAME:-dan-devbox}\[\e[0m\]:\[\e[1;34m\]\w\[\e[33m\]$(b=$(parse_git_branch); [ -n "${b// }" ] && echo " (${b}$(parse_git_dirty))")\[\e[0m\]\$ '
+# ── D.A.N. prompt — a-Shell style: [dirname]$ ─────────────────────────────────
+# Matches a-shell mini's own local prompt exactly: just the current folder
+# name in brackets, no user@host, no color, no git-branch decoration. Dropped
+# the old "user@$DAN_HOSTNAME:path (branch)" prompt on request — it was more
+# information, but a-shell's plain "[Documents]$" is what should be replicated
+# here for a simple, predictable, identical feel across both shells.
+# \W is bash's built-in "basename of $PWD" escape (shows "~" at home) — no
+# custom function needed, so this can't drift or break across bash versions.
+export PS1='[\W]\$ '
 
 # ── PATH ──────────────────────────────────────────────────────────────────────
 export PATH="${HOME}/.local/bin:${HOME}/bin:${HOME}/go/bin:/usr/local/go/bin:/usr/local/bin:${PATH}"
