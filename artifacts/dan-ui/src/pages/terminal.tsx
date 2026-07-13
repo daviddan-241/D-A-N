@@ -13,9 +13,32 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RefreshCw, Settings2, Terminal as TermIcon, ArrowRight,
-         WifiOff, Loader, Keyboard, ChevronDown, Send, ClipboardPaste, Check,
-         ArrowUp, ArrowDown, ArrowLeft, CornerDownLeft, X as XIcon } from 'lucide-react';
+         WifiOff, Loader, Keyboard, Send, ClipboardPaste, Check,
+         ArrowRightToLine, ChevronUp, RotateCcw, Copy, MoveHorizontal, MoveVertical } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+
+// Tracks the on-screen keyboard's height via the VisualViewport API so a
+// floating toolbar can sit flush just above it — mirrors how iOS's own
+// input-accessory bar (the one a-Shell uses) behaves natively.
+function useKeyboardInset(): number {
+  const [inset, setInset] = useState(0);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const gap = window.innerHeight - vv.height - vv.offsetTop;
+      setInset(gap > 40 ? gap : 0); // ignore tiny chrome/URL-bar jitter
+    };
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
+  }, []);
+  return inset;
+}
 
 const SAME_ORIGIN_TERMINAL = '/webterm/';
 
@@ -345,6 +368,7 @@ export function Terminal() {
   const [connected, setConnected]   = useState(false);
   const [showKeyBar, setShowKeyBar] = useLocalStorage<boolean>('dan_keybar', false);
   const [pasted, setPasted] = useState(false);
+  const keyboardInset = useKeyboardInset();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -532,41 +556,90 @@ export function Terminal() {
         )}
       </AnimatePresence>
 
-      {/* ── Always-on quick bar — a-Shell-style icon row, stays put right above
-          the native iOS keyboard so you never have to leave it just to hit
-          Tab/Esc/Ctrl+C/arrows/paste. Independent of the full key bar above. ── */}
+      {/* ── a-Shell-style floating key row — a light, floating capsule that
+          tracks the on-screen keyboard and sits right above it, exactly like
+          a-Shell's own input-accessory bar. Always on, never needs a toggle. ── */}
       {availability === 'available' && !showKeyBar && (
-        <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-center gap-1 px-2 py-1.5 pb-safe bg-[#141418]/95 backdrop-blur-md border-t border-white/8">
-          <QuickBtn icon={<span className="font-mono text-[13px] leading-none">↹</span>} title="Tab" onPress={() => sendKey(base, 'tab')} />
-          <QuickBtn icon={<XIcon className="w-4 h-4" />} title="Esc" onPress={() => sendKey(base, 'escape')} />
-          <QuickBtn icon={<span className="font-mono text-[11px] font-bold leading-none">^C</span>} title="Ctrl+C" onPress={() => sendKey(base, 'ctrl+c')} />
-          <div className="w-px h-5 bg-white/10" />
-          <QuickBtn icon={<ArrowLeft className="w-4 h-4" />} title="Left" onPress={() => sendKey(base, 'left')} />
-          <QuickBtn icon={<ArrowUp className="w-4 h-4" />} title="Up" onPress={() => sendKey(base, 'up')} />
-          <QuickBtn icon={<ArrowDown className="w-4 h-4" />} title="Down" onPress={() => sendKey(base, 'down')} />
-          <QuickBtn icon={<ArrowRight className="w-4 h-4" />} title="Right" onPress={() => sendKey(base, 'right')} />
-          <div className="w-px h-5 bg-white/10" />
-          <QuickBtn icon={pasted ? <Check className="w-4 h-4 text-success" /> : <ClipboardPaste className="w-4 h-4" />} title="Paste" onPress={pasteFromClipboard} />
-          <QuickBtn icon={<CornerDownLeft className="w-4 h-4" />} title="Enter" onPress={() => sendKey(base, 'enter')} />
-          <div className="w-px h-5 bg-white/10" />
-          <QuickBtn icon={<Keyboard className="w-4 h-4" />} title="More keys" onPress={() => setShowKeyBar(true)} />
-        </div>
+        <AShellBar base={base} pasted={pasted} onPaste={pasteFromClipboard} keyboardInset={keyboardInset} />
       )}
     </div>
   );
 }
 
-// ── Quick bar icon button ────────────────────────────────────────────────────────
-function QuickBtn({ icon, title, onPress }: { icon: React.ReactNode; title: string; onPress: () => void }) {
+// ── a-Shell-style floating key row ───────────────────────────────────────────────
+interface AShellBarProps { base: string; pasted: boolean; onPaste: () => void; keyboardInset: number }
+function AShellBar({ base, pasted, onPaste, keyboardInset }: AShellBarProps) {
+  return (
+    <div
+      className="absolute left-0 right-0 z-30 flex justify-center px-3 transition-[bottom] duration-150"
+      style={{ bottom: keyboardInset + 8 }}
+    >
+      <div className="flex items-center gap-0.5 bg-[#e8e8ea]/95 backdrop-blur-xl rounded-full shadow-[0_2px_14px_rgba(0,0,0,0.35)] px-1.5 py-1.5">
+        <AShellKey title="Tab" onPress={() => sendKey(base, 'tab')}>
+          <ArrowRightToLine className="w-[19px] h-[19px]" />
+        </AShellKey>
+        <AShellKey title="Ctrl" onPress={() => sendKey(base, 'ctrl+c')}>
+          <div className="w-6 h-6 rounded-[6px] border-[1.5px] border-[#3a3a3c] flex items-center justify-center">
+            <ChevronUp className="w-3.5 h-3.5" strokeWidth={2.5} />
+          </div>
+        </AShellKey>
+        <AShellKey title="Esc" onPress={() => sendKey(base, 'escape')}>
+          <RotateCcw className="w-[18px] h-[18px]" />
+        </AShellKey>
+        <AShellKey title="Paste" onPress={onPaste}>
+          {pasted ? <Check className="w-[19px] h-[19px] text-emerald-600" /> : <Copy className="w-[18px] h-[18px]" />}
+        </AShellKey>
+        <AShellKey title="Left" subTitle="Right" onPress={() => sendKey(base, 'left')} onPressAlt={() => sendKey(base, 'right')}>
+          <MoveHorizontal className="w-[19px] h-[19px]" />
+        </AShellKey>
+        <AShellKey title="Up" subTitle="Down" onPress={() => sendKey(base, 'up')} onPressAlt={() => sendKey(base, 'down')}>
+          <MoveVertical className="w-[19px] h-[19px]" />
+        </AShellKey>
+      </div>
+    </div>
+  );
+}
+
+// A single a-Shell-style key. When onPressAlt is given, the button is split
+// into a left half / right half (e.g. one icon standing in for both
+// Left+Right or Up+Down), matching how a-Shell packs two directions behind
+// one glyph.
+interface AShellKeyProps {
+  title: string;
+  subTitle?: string;
+  onPress: () => void;
+  onPressAlt?: () => void;
+  children: React.ReactNode;
+}
+function AShellKey({ title, subTitle, onPress, onPressAlt, children }: AShellKeyProps) {
+  if (onPressAlt) {
+    return (
+      <div className="relative flex-shrink-0 w-11 h-10 flex items-center justify-center text-[#1c1c1e] active:opacity-40" title={`${title} / ${subTitle}`}>
+        <button
+          type="button"
+          onPointerDown={(e) => { e.preventDefault(); onPress(); }}
+          aria-label={title}
+          className="absolute inset-y-0 left-0 w-1/2 active:bg-black/10 rounded-l-xl"
+        />
+        <button
+          type="button"
+          onPointerDown={(e) => { e.preventDefault(); onPressAlt(); }}
+          aria-label={subTitle}
+          className="absolute inset-y-0 right-0 w-1/2 active:bg-black/10 rounded-r-xl"
+        />
+        <span className="pointer-events-none">{children}</span>
+      </div>
+    );
+  }
   return (
     <button
       type="button"
       onPointerDown={(e) => { e.preventDefault(); onPress(); }}
       title={title}
       aria-label={title}
-      className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl text-white/70 hover:text-white active:bg-white/10 active:scale-90 transition-all"
+      className="flex-shrink-0 flex items-center justify-center w-11 h-10 rounded-xl text-[#1c1c1e] active:bg-black/10 active:scale-90 transition-all"
     >
-      {icon}
+      {children}
     </button>
   );
 }
