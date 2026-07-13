@@ -13,7 +13,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RefreshCw, Settings2, Terminal as TermIcon, ArrowRight,
-         WifiOff, Loader, Keyboard, ChevronDown, Send, ClipboardPaste, Check } from 'lucide-react';
+         WifiOff, Loader, Keyboard, ChevronDown, Send, ClipboardPaste, Check,
+         ArrowUp, ArrowDown, ArrowLeft, CornerDownLeft, X as XIcon } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 const SAME_ORIGIN_TERMINAL = '/webterm/';
@@ -343,13 +344,11 @@ export function Terminal() {
   const [unavailableReason, setUnavailableReason] = useState('');
   const [connected, setConnected]   = useState(false);
   const [showKeyBar, setShowKeyBar] = useLocalStorage<boolean>('dan_keybar', false);
-  const [showControls, setShowControls] = useState(true);
   const [pasted, setPasted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   const pasteFromClipboard = useCallback(async () => {
-    setShowControls(true);
     try {
       const text = await navigator.clipboard.readText();
       if (!text) return;
@@ -364,12 +363,14 @@ export function Terminal() {
     }
   }, [base, setShowKeyBar]);
 
-  // Auto-hide controls after 3 s of inactivity
-  useEffect(() => {
-    if (!showControls) return;
-    const t = setTimeout(() => setShowControls(false), 3000);
-    return () => clearTimeout(t);
-  }, [showControls]);
+  // NOTE: the control pill and quick-bar below used to auto-hide after 3s of
+  // inactivity, tracked by an onPointerDown handler on the wrapper div. That
+  // never worked in practice: the ttyd iframe is a separate document/origin,
+  // so taps *inside* it (i.e. virtually all taps, since the iframe is
+  // full-bleed) never bubble up to this page's event handlers. The controls
+  // would vanish 3s after load and never come back — the user was left with
+  // only iOS's bare default keyboard accessory bar. Controls are now always
+  // rendered, full stop.
 
   // Ping terminal availability
   useEffect(() => {
@@ -414,7 +415,6 @@ export function Terminal() {
     <div
       className="relative flex flex-col bg-[#0a0a0f]"
       style={{ height: 'calc(100dvh - calc(56px + max(env(safe-area-inset-bottom,0px),8px)))' }}
-      onPointerDown={() => setShowControls(true)}
     >
       {/* ── Full-bleed iframe ── */}
       {availability === 'available' && (
@@ -462,9 +462,9 @@ export function Terminal() {
         </motion.div>
       )}
 
-      {/* ── Floating control pill ── */}
+      {/* ── Floating control pill — always visible, never auto-hides ── */}
       <AnimatePresence>
-        {showControls && (
+        {(
           <motion.div
             key="pill"
             initial={{ opacity: 0, y: -8 }}
@@ -525,12 +525,48 @@ export function Terminal() {
         )}
       </AnimatePresence>
 
-      {/* ── iOS Key bar (slides up from bottom) ── */}
+      {/* ── Full key bar (Ctrl/Alt combos, Type tab, quick cmds) — opened via the pill ── */}
       <AnimatePresence>
         {availability === 'available' && showKeyBar && (
           <KeyBar key="keybar" base={base} onClose={() => setShowKeyBar(false)} />
         )}
       </AnimatePresence>
+
+      {/* ── Always-on quick bar — a-Shell-style icon row, stays put right above
+          the native iOS keyboard so you never have to leave it just to hit
+          Tab/Esc/Ctrl+C/arrows/paste. Independent of the full key bar above. ── */}
+      {availability === 'available' && !showKeyBar && (
+        <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-center gap-1 px-2 py-1.5 pb-safe bg-[#141418]/95 backdrop-blur-md border-t border-white/8">
+          <QuickBtn icon={<span className="font-mono text-[13px] leading-none">↹</span>} title="Tab" onPress={() => sendKey(base, 'tab')} />
+          <QuickBtn icon={<XIcon className="w-4 h-4" />} title="Esc" onPress={() => sendKey(base, 'escape')} />
+          <QuickBtn icon={<span className="font-mono text-[11px] font-bold leading-none">^C</span>} title="Ctrl+C" onPress={() => sendKey(base, 'ctrl+c')} />
+          <div className="w-px h-5 bg-white/10" />
+          <QuickBtn icon={<ArrowLeft className="w-4 h-4" />} title="Left" onPress={() => sendKey(base, 'left')} />
+          <QuickBtn icon={<ArrowUp className="w-4 h-4" />} title="Up" onPress={() => sendKey(base, 'up')} />
+          <QuickBtn icon={<ArrowDown className="w-4 h-4" />} title="Down" onPress={() => sendKey(base, 'down')} />
+          <QuickBtn icon={<ArrowRight className="w-4 h-4" />} title="Right" onPress={() => sendKey(base, 'right')} />
+          <div className="w-px h-5 bg-white/10" />
+          <QuickBtn icon={pasted ? <Check className="w-4 h-4 text-success" /> : <ClipboardPaste className="w-4 h-4" />} title="Paste" onPress={pasteFromClipboard} />
+          <QuickBtn icon={<CornerDownLeft className="w-4 h-4" />} title="Enter" onPress={() => sendKey(base, 'enter')} />
+          <div className="w-px h-5 bg-white/10" />
+          <QuickBtn icon={<Keyboard className="w-4 h-4" />} title="More keys" onPress={() => setShowKeyBar(true)} />
+        </div>
+      )}
     </div>
+  );
+}
+
+// ── Quick bar icon button ────────────────────────────────────────────────────────
+function QuickBtn({ icon, title, onPress }: { icon: React.ReactNode; title: string; onPress: () => void }) {
+  return (
+    <button
+      type="button"
+      onPointerDown={(e) => { e.preventDefault(); onPress(); }}
+      title={title}
+      aria-label={title}
+      className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl text-white/70 hover:text-white active:bg-white/10 active:scale-90 transition-all"
+    >
+      {icon}
+    </button>
   );
 }
