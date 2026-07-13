@@ -15,7 +15,13 @@
 # here for a simple, predictable, identical feel across both shells.
 # \W is bash's built-in "basename of $PWD" escape (shows "~" at home) — no
 # custom function needed, so this can't drift or break across bash versions.
-export PS1='[\W]\$ '
+# Classic Kali Linux two-line boxed prompt, e.g.:
+# ┌──(dave㉿kali)-[~]
+# └─$
+# "dave" and "kali" are fixed labels here (not the real Linux user/hostname,
+# which stay whatever the container assigns) so the prompt always looks the
+# same regardless of the ugly srv-xxxxx Render hostname underneath.
+export PS1='\[\033[01;34m\]┌──\[\033[01;32m\](\[\033[01;36m\]dave㉿kali\[\033[01;32m\])-\[\033[01;34m\][\[\033[01;37m\]\w\[\033[01;34m\]]\n\[\033[01;34m\]└─\[\033[01;37m\]$\[\033[00m\] '
 
 # ── PATH ──────────────────────────────────────────────────────────────────────
 export PATH="${HOME}/.local/bin:${HOME}/bin:${HOME}/go/bin:/usr/local/go/bin:/usr/local/bin:${PATH}"
